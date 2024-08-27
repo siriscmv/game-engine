@@ -3,7 +3,7 @@
 #include "Renderer.h"
 
 
-enum class GameState {PLAY, EXIT};   // A state variable to manage a simple state machine
+enum class GameState {PLAY, EXIT};   // A state enum class to manage a simple state machine
 
 // Class, functions, variables signatures of the Game Engine class. This class delegates work to 
 // other subsystem classes and their functions. Responsible for managing the game loop.
