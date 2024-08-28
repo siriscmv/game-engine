@@ -1,5 +1,9 @@
 #include "GameEngine.h"
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 // Constructor. Creates subsytems objects with parameters passed in by the user.
 GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeight) {

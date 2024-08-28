@@ -1,5 +1,9 @@
 #include "Renderer.h"
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 // Constructor for the Renderer class.Initializes class variables.
 Renderer::Renderer() {	

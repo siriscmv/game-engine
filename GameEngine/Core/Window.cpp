@@ -1,5 +1,9 @@
 #include "Window.h"
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 // Constructor for the Window class. Initializes class variables.
 Window::Window(const char* windowTitle, int windowWidth, int windowHeight) {
