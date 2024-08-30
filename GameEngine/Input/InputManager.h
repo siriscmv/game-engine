@@ -18,7 +18,7 @@ public:
     // Process currently pressed keys and call the associated callback functions
     void process() const;
     // Bind a <name, callback> pair to a key
-    void bind(SDL_Scancode scancode, const std::string& name, std::function<void()>);
+    void bind(SDL_Scancode scancode, const std::string& name, std::function<void()> callback);
     // Unbind a callback by name for a specific key
     void unbind(SDL_Scancode scancode, const std::string& name);
 
