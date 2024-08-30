@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef __APPLE__
-#include <SDL2/SDL_Scancode.h>
+#include <SDL2/SDL_scancode.h>
 #else
-#include <SDL/SDL_Scancode.h>
+#include <SDL/SDL_scancode.h>
 #endif
 #include "unordered_map"
 #include <string>
