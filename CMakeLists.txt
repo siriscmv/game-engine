@@ -17,6 +17,8 @@ add_executable(GameEngine
     GameEngine/main.cpp
     GameEngine/Core/GameEngine.cpp
     GameEngine/Core/Renderer.cpp
-    GameEngine/Core/Window.cpp)
+    GameEngine/Core/Window.cpp
+        GameEngine/Input/InputManager.h
+        GameEngine/Input/InputManager.cpp)
 
 target_link_libraries(GameEngine ${SDL2_LIBRARIES})
