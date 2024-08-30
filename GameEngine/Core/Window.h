@@ -1,4 +1,8 @@
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 // Class, functions, varible signatures of the Window class. This class manages window creation.
 class Window {

@@ -364,3 +364,10 @@ FodyWeavers.xsd
 
 # Ignore the Game folder
 /Game/
+
+# Cmake files
+
+build
+cmake-build-debug
+
+.DS_Store

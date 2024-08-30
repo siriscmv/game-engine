@@ -1,4 +1,8 @@
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 // Class, functions, varible signatures of the Rendere class. This class manages the renderer.
 class Renderer {
