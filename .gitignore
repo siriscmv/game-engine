@@ -371,3 +371,6 @@ build
 cmake-build-debug
 
 .DS_Store
+
+# JetBrain IDE cache directories
+.idea/
