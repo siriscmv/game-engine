@@ -1,9 +1,13 @@
 #pragma once
-#include <SDL_keycode.h>
 
-#include "functional"
-#include "SDL_scancode.h"
+#ifdef __APPLE__
+#include <SDL2/SDL_Scancode.h>
+#else
+#include <SDL/SDL_Scancode.h>
+#endif
 #include "unordered_map"
+#include <string>
+#include <functional>
 
 // This class handles Input (key presses) and provides methods to handle them.
 class InputManager {

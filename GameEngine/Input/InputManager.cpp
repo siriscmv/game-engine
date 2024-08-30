@@ -4,6 +4,8 @@
 #include <SDL/SDL.h>
 #endif
 #include "InputManager.h"
+#include <string>
+#include <stdexcept>
 
 InputManager::InputManager() = default;
 
