@@ -13,7 +13,8 @@ int main(int argc, char** argv) {
 		gameEngine.setGameState(GameState::EXIT);
 	};
 
-	gameEngine.getInputManager()->bind(SDL_SCANCODE_ESCAPE, "quit", exitCallback);
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_ESCAPE, "esc_exit", exitCallback);
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_Q, "q_exit", exitCallback);
 
 	// Running the game loop
 	gameEngine.run();
