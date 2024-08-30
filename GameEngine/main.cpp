@@ -3,7 +3,7 @@
 int main(int argc, char** argv) {
 	GameEngine gameEngine("CSC 581 Game Engine", 1920, 1080);
 
-	// Initiliazing the engine
+	// Initializing the engine
 	if (!gameEngine.initialize()) {
 		return -1;
 	}
