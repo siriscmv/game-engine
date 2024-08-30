@@ -1,4 +1,5 @@
 #pragma once
+#include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
 
@@ -15,11 +16,16 @@ public:
 	bool initialize();
 	void run();
 	void shutdown();
+
+	InputManager * getInputManager();
+	GameState getGameState();
+	void setGameState(GameState state);
 	
 
 private:
 	Window* _window;
 	Renderer* _renderer;	
-	GameState _gameState;	
+	GameState _gameState;
+	InputManager* _inputManager;
 };
 

@@ -9,7 +9,8 @@
 GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeight) {
 	_window = new Window(windowTitle, windowWidth, windowHeight);
 	_renderer = new Renderer();
-	_gameState = GameState::PLAY;	
+	_gameState = GameState::PLAY;
+	_inputManager = new InputManager();
 }
 
 GameEngine::~GameEngine() {
@@ -33,16 +34,14 @@ void GameEngine::run() {
 	SDL_Event currentEvent;
 
 	while (_gameState == GameState::PLAY) {
+		while (SDL_PollEvent(&currentEvent)) {}
+
 		_renderer->clear();
 		_renderer->present();
 
-		while (SDL_PollEvent(&currentEvent)) {
-			switch (currentEvent.type) {
-				case SDL_QUIT:
-					_gameState = GameState::EXIT;
-					break;
-				}
-		}
+		_inputManager->process();
+
+		SDL_Delay(16);
 	}
 }
 
@@ -51,4 +50,15 @@ void GameEngine::shutdown() {
 	_renderer->shutdown();
 	_window->shutdown();
 	SDL_Quit();
+}
+
+InputManager* GameEngine::getInputManager() {
+	return _inputManager;
+}
+GameState GameEngine::getGameState() {
+	return _gameState;
+}
+
+void GameEngine::setGameState(GameState state) {
+	_gameState = state;
 }

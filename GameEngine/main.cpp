@@ -8,6 +8,13 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
+	// Define bindings for key presses
+	const std::function<void()> exitCallback = [&gameEngine]() {
+		gameEngine.setGameState(GameState::EXIT);
+	};
+
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_ESCAPE, "quit", exitCallback);
+
 	// Running the game loop
 	gameEngine.run();
 

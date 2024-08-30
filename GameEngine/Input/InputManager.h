@@ -12,9 +12,9 @@ public:
     ~InputManager();
 
     // Process currently pressed keys and call the associated callback functions
-    void run() const;
+    void process() const;
     // Bind a <name, callback> pair to a key
-    void bind(SDL_Scancode scancode, const std::string& name, void (*callback)());
+    void bind(SDL_Scancode scancode, const std::string& name, std::function<void()>);
     // Unbind a callback by name for a specific key
     void unbind(SDL_Scancode scancode, const std::string& name);
 
