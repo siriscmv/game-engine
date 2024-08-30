@@ -34,7 +34,8 @@ void GameEngine::run() {
 	SDL_Event currentEvent;
 
 	while (_gameState == GameState::PLAY) {
-		while (SDL_PollEvent(&currentEvent)) {}
+		// Force an event queue update, otherwise events will not be placed in the queue
+		SDL_PumpEvents();
 
 		_renderer->clear();
 		_renderer->present();
