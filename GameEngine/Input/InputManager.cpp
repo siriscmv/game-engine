@@ -38,9 +38,9 @@ void InputManager::process() const {
         // If the corresponding key is pressed
         if (binding.first <= size && keys[binding.first] == 1) {
             // Iterate through all callbacks associated with that key
-            for (auto & action: binding.second) {
+            for (auto & callback: binding.second) {
                 // Execute them
-                action.second();
+                callback.second();
             }
         }
     }
