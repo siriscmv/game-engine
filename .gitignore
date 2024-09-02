@@ -374,3 +374,6 @@ cmake-build-debug
 
 # JetBrain IDE cache directories
 .idea/
+.vscode/c_cpp_properties.json
+.vscode/settings.json
+.gitignore
