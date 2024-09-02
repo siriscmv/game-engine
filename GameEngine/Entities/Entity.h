@@ -55,8 +55,10 @@ public:
     void setSize(Size size);
     void setPosition(Position position);
     void setShapeType(ShapeType shapeType);
-    void setVelocity(Velocity velocity);
-    void setAcceleration(Acceleration acceleration);
+    void setVelocityX(float velocityX);
+    void setVelocityY(float velocityY);
+    void setAccelerationX(float accelerationX);
+    void setAccelerationY(float accelerationY);
     void setCircleRadius(float radius);
     void setTriangleBaseLength(float baseLength);
     void setTriangleHeight(float height);
@@ -66,8 +68,10 @@ public:
     Size getSize() const;
     Position getPosition() const;    
     ShapeType getShapeType() const;
-    Velocity getVelocity() const;
-    Acceleration getAcceleration() const;
+    float getVelocityX() const;
+    float getVelocityY() const;
+    float getAccelerationX() const;
+    float getAccelerationY() const;
     float getCircleRadius() const;
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;

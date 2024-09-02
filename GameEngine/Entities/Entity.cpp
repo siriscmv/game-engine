@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include "Renderer.h"
 #include <SDL/SDL.h>
+#include  <iostream>
 
 // Constructor for Rectangles
 Entity::Entity(Position position, Size size, SDL_Color color) {
@@ -43,8 +44,10 @@ Entity::~Entity() {
 void Entity::setPosition(Position position) { _position = position; }
 void Entity::setSize(Size size) { _size = size; }
 void Entity::setShapeType(ShapeType shape) { _shape = shape; }
-void Entity::setVelocity(Velocity velocity) { _velocity = velocity; }
-void Entity::setAcceleration(Acceleration acceleration) { _acceleration = acceleration; }
+void Entity::setVelocityX(float velocityX) { _velocity.x = velocityX; }
+void Entity::setVelocityY(float velocityY) { _velocity.y = velocityY; }
+void Entity::setAccelerationX(float accelerationX) { _acceleration.x = accelerationX; }
+void Entity::setAccelerationY(float accelerationY) { _acceleration.y = accelerationY; }
 void Entity::setCircleRadius(float radius) { _circleRadius = radius; }
 void Entity::setTriangleBaseLength(float baseLength) { _triangleBaseLength = baseLength; }
 void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
@@ -54,15 +57,18 @@ void Entity::setColor(SDL_Color color) { _color = color; }
 Position Entity::getPosition() const { return _position; }
 Size Entity::getSize() const { return _size; }
 ShapeType Entity::getShapeType() const { return _shape; }
-Velocity Entity::getVelocity() const { return _velocity; }
-Acceleration Entity::getAcceleration() const { return _acceleration; }
+float Entity::getVelocityX() const { return _velocity.x; }
+float Entity::getVelocityY() const { return _velocity.y; }
+float Entity::getAccelerationX() const { return _acceleration.x; }
+float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
 
 
 
-void Entity::drawRectangle(SDL_Renderer *renderer) {
+void Entity::drawRectangle(SDL_Renderer *renderer) {    
+    // Print the current position and size of the rectangle    
     SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);

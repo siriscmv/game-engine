@@ -1,18 +1,43 @@
 #include "GameEngine.h"
+#include "Entity.h"
 
 int main(int argc, char** argv) {
-	GameEngine gameEngine("CSC 581 Game Engine", 1920, 1080);
+	GameEngine gameEngine("CSC 581 Game Engine");
+
+	Entity rect(Position(500, 500), Size(100, 100));
+	
+
+	// Create an array of entities
+	std::vector<Entity*> entities;
+	entities.push_back(&rect);	
 
 	// Initializing the engine
-	if (!gameEngine.initialize()) {
+	if (!gameEngine.initialize(entities)) {
 		return -1;
 	}
+
+	gameEngine.getPhysicsSystem()->applyPhysics(rect, 9.8f, Velocity(10, 10), Acceleration(1, 1));
 
 	// Define bindings for key presses
 	const std::function<void()> exitCallback = [&gameEngine]() {
 		gameEngine.setGameState(GameState::EXIT);
-	};
+	};	
+	
+	
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_LEFT, "move_left", [&rect]() { rect.setVelocityX(-50.f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_RIGHT, "move_right", [&rect]() { rect.setVelocityX(50.0f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_UP, "move_up", [&rect]() { rect.setVelocityY(-50.0f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_DOWN, "move_down", [&rect]() { rect.setVelocityY(50.0f); });
 
+	
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_LEFT, "stop_left", [&rect]() { rect.setVelocityX(0.0f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_RIGHT, "stop_right", [&rect]() { rect.setVelocityX(0.0f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_UP, "stop_up", [&rect]() { rect.setVelocityY(0.0f); });
+	gameEngine.getInputManager()->bind(SDL_SCANCODE_DOWN, "stop_down", [&rect]() { rect.setVelocityY(0.0f); });
+
+
+
+	// Key binds for exiting the game engine
 	gameEngine.getInputManager()->bind(SDL_SCANCODE_ESCAPE, "esc_exit", exitCallback);
 	gameEngine.getInputManager()->bind(SDL_SCANCODE_Q, "q_exit", exitCallback);
 
