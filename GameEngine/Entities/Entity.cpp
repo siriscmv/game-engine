@@ -47,6 +47,7 @@ Entity::~Entity() {
 // Setters
 void Entity::setPosition(Position position) { _position = position; }
 void Entity::setSize(Size size) { _size = size; }
+void Entity::setEntityType(EntityType entityType) { _entityType = entityType; }
 void Entity::setShapeType(ShapeType shape) { _shape = shape; }
 void Entity::setVelocityX(float velocityX) { _velocity.x = velocityX; }
 void Entity::setVelocityY(float velocityY) { _velocity.y = velocityY; }
@@ -60,6 +61,7 @@ void Entity::setColor(SDL_Color color) { _color = color; }
 // Getters
 Position Entity::getPosition() const { return _position; }
 Size Entity::getSize() const { return _size; }
+EntityType Entity::getEntityType() const { return _entityType; }
 ShapeType Entity::getShapeType() const { return _shape; }
 float Entity::getVelocityX() const { return _velocity.x; }
 float Entity::getVelocityY() const { return _velocity.y; }

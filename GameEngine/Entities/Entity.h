@@ -18,6 +18,13 @@ enum class ShapeType {
     TEXTURE
 };
 
+// An enum class that denotes the type of entity
+enum class EntityType {
+    DEFAULT, // Is affected by collisions
+    FIXED, // Is unaffected by collisions
+    ELASTIC // A collision causes a reversal in movement direction
+};
+
 // structure to hold position 
 struct Position {
     float x;
@@ -59,6 +66,7 @@ public:
     // Setters
     void setSize(Size size);
     void setPosition(Position position);
+    void setEntityType(EntityType entityType);
     void setShapeType(ShapeType shapeType);
     void setVelocityX(float velocityX);
     void setVelocityY(float velocityY);
@@ -71,7 +79,8 @@ public:
 
     // Getters
     Size getSize() const;
-    Position getPosition() const;    
+    Position getPosition() const;
+    EntityType getEntityType() const;
     ShapeType getShapeType() const;
     float getVelocityX() const;
     float getVelocityY() const;
@@ -89,6 +98,7 @@ public:
 private:
     Position _position = {};
     Size _size = {};
+    EntityType _entityType = EntityType::DEFAULT;
     ShapeType _shape = ShapeType::NONE;
     Velocity _velocity = {};
     Acceleration _acceleration = {};
