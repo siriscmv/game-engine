@@ -1,132 +1,149 @@
 #include "Entity.h"
 #include "Renderer.h"
+#include <SDL/SDL.h>
 
-Entity::Entity(const char *texturePath, int x, int y, int width, int height, float vel, float accel)
-{
-    this->texturePath = texturePath;
-    xPosition = x;
-    yPosition = y;
-    this->width = width;
-    this->height = height;
-    velocity = vel;
-    acceleration = accel;
+// Constructor for Rectangles
+Entity::Entity(Position position, Size size, SDL_Color color) {
+    setPosition(position);
+    setSize(size);
+    setShapeType(ShapeType::RECTANGLE);
+    setColor(color);
 }
 
-Entity::~Entity()
-{
-    if (texture)
-    {
-        SDL_DestroyTexture(texture);
-    }
+// Contructor for Circles
+Entity::Entity(Position position, float radius, SDL_Color color) {
+    setPosition(position);
+    setCircleRadius(radius);
+    setShapeType(ShapeType::CIRCLE);
+    setColor(color);
 }
 
-void Entity::setSize(int width, int height)
-{
-    this->width = width;
-    this->height = height;
+// Constructor for triangles
+Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
+    setPosition(position);
+    setTriangleBaseLength(baseLength);
+    setTriangleHeight(height);
+    setShapeType(ShapeType::TRIANGLE);
+    setColor(color);
 }
 
-void Entity::setPosition(int x, int y)
-{
-    xPosition = x;
-    yPosition = y;
+// Constructor for textured entities
+Entity::Entity(const char *texturePath, Position position, Size size) {
+    _texturePath = texturePath;
+    setPosition(position);
+    setSize(size);
+    setShapeType(ShapeType::TEXTURE);
 }
 
-void Entity::setVelocity(float vel)
-{
-    velocity = vel;
+Entity::~Entity() {
+    shutdown();
 }
 
-void Entity::setAcceleration(float acc)
-{
-    acceleration = acc;
-}
+// Setters
+void Entity::setPosition(Position position) { _position = position; }
+void Entity::setSize(Size size) { _size = size; }
+void Entity::setShapeType(ShapeType shape) { _shape = shape; }
+void Entity::setVelocity(Velocity velocity) { _velocity = velocity; }
+void Entity::setAcceleration(Acceleration acceleration) { _acceleration = acceleration; }
+void Entity::setCircleRadius(float radius) { _circleRadius = radius; }
+void Entity::setTriangleBaseLength(float baseLength) { _triangleBaseLength = baseLength; }
+void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
+void Entity::setColor(SDL_Color color) { _color = color; }
 
-int Entity::getWidth()
-{
-    return width;
-}
+// Getters
+Position Entity::getPosition() const { return _position; }
+Size Entity::getSize() const { return _size; }
+ShapeType Entity::getShapeType() const { return _shape; }
+Velocity Entity::getVelocity() const { return _velocity; }
+Acceleration Entity::getAcceleration() const { return _acceleration; }
+float Entity::getCircleRadius() const { return _circleRadius; }
+float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
+float Entity::getTriangleHeight() const { return _triangleHeight; }
 
-int Entity::getHeight()
-{
-    return height;
-}
 
-int Entity::getXPosition()
-{
-    return xPosition;
-}
 
-int Entity::getYPosition()
-{
-    return yPosition;
-}
-
-float Entity::getVelocity()
-{
-    return velocity;
-}
-
-float Entity::getAcceleration()
-{
-    return acceleration;
-}
-
-void drawRect(SDL_Renderer *renderer, std::pair<int, int> position, std::pair<int, int> size, SDL_Color color)
-{
-    SDL_Rect rect = {position.first, position.second, size.first, size.second};
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+void Entity::drawRectangle(SDL_Renderer *renderer) {
+    SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
+    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);
 }
 
-void drawCircle(SDL_Renderer *renderer, std::pair<int, int> position, int radius, SDL_Color color)
-{
+void Entity::drawCircle(SDL_Renderer *renderer) {
 
     // using the SDL_SetRenderDrawColor function to set the color of the circle
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     // looping through the circle and drawing the points
-    for (int w = 0; w < radius * 2; w++)
-    {
-        for (int h = 0; h < radius * 2; h++)
-        {
-            int dx = radius - w; // horizontal offset
-            int dy = radius - h; // vertical offset
-            if ((dx * dx + dy * dy) <= (radius * radius))
-            {
-                SDL_RenderDrawPoint(renderer, position.first + dx, position.second + dy);
+    for (int w = 0; w < _circleRadius * 2; w++)     {
+        for (int h = 0; h < _circleRadius * 2; h++)         {
+            int dx = _circleRadius - w; // horizontal offset
+            int dy = _circleRadius - h; // vertical offset
+            if ((dx * dx + dy * dy) <= (_circleRadius * _circleRadius))             {
+                SDL_RenderDrawPoint(renderer, _position.x + dx, _position.y + dy);
             }
         }
     }
 }
 
-void drawTriangle(SDL_Renderer *renderer, std::pair<int, int> position, int base, int height, SDL_Color color)
-{
+void Entity::drawTriangle(SDL_Renderer *renderer) {
     // using the SDL_SetRenderDrawColor function to set the color of the triangle
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     // creating an array of points to draw the triangle
     SDL_Point points[3] = {
-        {position.first, position.second},
-        {position.first + base, position.second},
-        {position.first + base / 2, position.second - height}};
+        {_position.x, _position.y},
+        {_position.x + _triangleBaseLength, _position.y},
+        {_position.x + _triangleBaseLength / 2, _position.y - _triangleHeight}};
     // using the SDL_RenderDrawLines function to draw the triangle
     SDL_RenderDrawLines(renderer, points, 3);
 }
-bool Entity::loadTexture(SDL_Renderer *renderer)
-{
+
+// Loads a texture 
+bool Entity::loadTexture(SDL_Renderer *renderer) {
     // load the surface from the texture path
-    SDL_Surface *surface = SDL_LoadBMP(texturePath);
-    if (!surface)
-    {
+    SDL_Surface *surface = SDL_LoadBMP(_texturePath);
+    if (!surface) {
         return false;
     }
     // transform the surface into a texture, more efficient for rendering
-    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    _texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
-    return texture != nullptr;
+    return _texture != nullptr;
 }
 
-void Entity::render(SDL_Renderer *renderer)
-{
-    SDL_Rect dstRect = {xPosition, yPosition, width, height};
-    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
+// Renders the entity onto the screen
+void Entity::render(SDL_Renderer *renderer) {   
+
+    switch (_shape) {
+        case ShapeType::TEXTURE: 
+            if (_texture != nullptr) {
+                SDL_Rect dstRect = { _position.x, _position.y, _size.width, _size.height };
+                SDL_RenderCopy(renderer, _texture, nullptr, &dstRect);
+            }
+            else {
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, 
+                    "Failed to render entity: Texture is null at position (%f, %f)\n", _position.x, _position.y);
+            }
+            break;
+        
+        case ShapeType::RECTANGLE:
+            drawRectangle(renderer);
+            break;
+        
+        case ShapeType::CIRCLE:
+            drawCircle(renderer);
+            break;
+        
+        case ShapeType::TRIANGLE:
+            drawTriangle(renderer);
+            break;
+        default:
+            break;
+    }
+}
+
+// Cleans up class variables
+void Entity::shutdown() {
+    if (_texture) {
+        SDL_DestroyTexture(_texture);
+        _texture = nullptr;
+    }
 }

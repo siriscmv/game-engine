@@ -2,43 +2,97 @@
 
 #include "Renderer.h"
 #include <utility>
+#include <SDL/SDL.h>
 
-class Entity
-{
-public:
-    // Constructor that takes path to a texture, x and y position, width and height of the entity, and velocity
-    Entity(const char *texturePath, int x, int y, int width, int height, float vel, float acc);
+// An enum class to manage the shape of the entity
+enum class ShapeType {
+    NONE,
+    RECTANGLE,
+    TRIANGLE,
+    CIRCLE,
+    TEXTURE
+};
+
+// structure to hold position 
+struct Position {
+    float x;
+    float y;
+    Position(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
+};
+
+// Structure to hold size 
+struct Size {
+    float width;
+    float height;
+    Size(float width = 0.0f, float height = 0.0f) : width(width), height(height) {}
+};
+
+// Structure to hold velocity
+struct Velocity {
+    float x;
+    float y;
+    Velocity(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
+};
+
+// Structure to hold acceleration
+struct Acceleration {
+    float x;
+    float y;
+    Acceleration(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
+};
+
+// Entity class. Represents an object drawn on the screen.
+class Entity {
+public:    
+    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 });                          // Rectangles
+    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 });                       // Circles
+    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 });     // Triangles
+    Entity(const char *texturePath, Position position, Size size);                                       // Textured entities
 
     ~Entity();
 
-    void setSize(int width, int height);
-    void setPosition(int x, int y);
-    void setVelocity(float vel);
-    void setAcceleration(float acc);
-    int getWidth() {}
-    int getHeight() {}
-    int getXPosition() {}
-    int getYPosition() {}
-    float getVelocity() {}
-    float getAcceleration() {}
-    bool loadTexture(SDL_Renderer *renderer); // load texture into entity
-    void render(SDL_Renderer *renderer);      // render entity
+    // Setters
+    void setSize(Size size);
+    void setPosition(Position position);
+    void setShapeType(ShapeType shapeType);
+    void setVelocity(Velocity velocity);
+    void setAcceleration(Acceleration acceleration);
+    void setCircleRadius(float radius);
+    void setTriangleBaseLength(float baseLength);
+    void setTriangleHeight(float height);
+    void setColor(SDL_Color color);
 
-    // render a rectangle onto the window
-    void drawRect(SDL_Renderer *renderer, std::pair<int, int> position, std::pair<int, int> size, SDL_Color color);
-    // render a circle onto the window
-    void drawCircle(SDL_Renderer *renderer, std::pair<int, int> position, int radius, SDL_Color color);
-    // render a triangle onto the window
-    void drawTriangle(SDL_Renderer *renderer, std::pair<int, int> position, int base, int height, SDL_Color color);
+    // Getters
+    Size getSize() const;
+    Position getPosition() const;    
+    ShapeType getShapeType() const;
+    Velocity getVelocity() const;
+    Acceleration getAcceleration() const;
+    float getCircleRadius() const;
+    float getTriangleBaseLength() const;
+    float getTriangleHeight() const;
+
+
+    bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
+    void render(SDL_Renderer *renderer);                  // Render entity 
+    void shutdown();
 
 private:
-    int width;  // Width in pixels
-    int height; // Height in pixels
-    int xPosition;
-    int yPosition;
-    float velocity;
-    float acceleration;
+    Position _position = {};
+    Size _size = {};
+    ShapeType _shape = ShapeType::NONE;
+    Velocity _velocity = {};
+    Acceleration _acceleration = {};
+    SDL_Color _color;
 
-    const char *texturePath; // Path of the texture file
-    SDL_Texture *texture;    // Texture of the entity
+    float _circleRadius = 0.0f;
+    float _triangleBaseLength = 0.0f;
+    float _triangleHeight = 0.0f;
+
+    const char* _texturePath = nullptr;                  // Path of the texture file
+    SDL_Texture* _texture = nullptr;                     // Texture of the entity
+
+    void drawRectangle(SDL_Renderer* renderer);
+    void drawCircle(SDL_Renderer* renderer);
+    void drawTriangle(SDL_Renderer* renderer);
 };
