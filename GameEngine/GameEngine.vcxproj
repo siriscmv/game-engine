@@ -140,8 +140,6 @@
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
-    <ClCompile Include="Entities\MovingEntity.cpp" />
-    <ClCompile Include="Entities\StaticEntity.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Physics\PhysicsSystem.cpp" />
@@ -154,8 +152,6 @@
     <ClInclude Include="Core\Renderer.h" />
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="Entities\Entity.h" />
-    <ClInclude Include="Entities\MovingEntity.h" />
-    <ClInclude Include="Entities\StaticEntity.h" />
     <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="Physics\PhysicsSystem.h" />
   </ItemGroup>

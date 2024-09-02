@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
+#include "PhysicsSystem.h"
 
 
 enum class GameState {PLAY, EXIT};   // A state enum class to manage a simple state machine
@@ -10,22 +11,25 @@ enum class GameState {PLAY, EXIT};   // A state enum class to manage a simple st
 // other subsystem classes and their functions. Responsible for managing the game loop.
 class GameEngine {
 public:
-	GameEngine(const char* windowTitle, int windowWidth, int windowHeight);
+	GameEngine(const char* windowTitle, int windowWidth = 1920, int windowHeight = 1080);
 	~GameEngine();
 
-	bool initialize();
+	bool initialize(std::vector<Entity*>& entities);
 	void run();
 	void shutdown();
 
 	InputManager * getInputManager();
 	GameState getGameState();
 	void setGameState(GameState state);
-	
+	PhysicsSystem* getPhysicsSystem();	
 
 private:
 	Window* _window;
 	Renderer* _renderer;	
 	GameState _gameState;
 	InputManager* _inputManager;
+	PhysicsSystem* _physicsSystem;
+	std::vector<Entity*> _entities;
+	int _entityCount;
 };
 
