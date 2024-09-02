@@ -1,6 +1,10 @@
 #include "Entity.h"
 #include "Renderer.h"
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 #include  <iostream>
 
 // Constructor for Rectangles
