@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
+#include <vector>
 #endif
 
 // Constructor. Creates subsytems objects with parameters passed in by the user.
@@ -11,6 +12,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
+	_physicsSystem = &PhysicsSystem::getInstance();
 }
 
 GameEngine::~GameEngine() {
@@ -19,28 +21,39 @@ GameEngine::~GameEngine() {
 }
 
 // Initializes the game engine subsystems.
-bool GameEngine::initialize() {
+bool GameEngine::initialize(std::vector<Entity*>& entities) {
+	_entities = entities;	
+
 	if (!_window->initialize()) {
 		return false;
 	}
 	if (!_renderer->initialize(_window->getSDLWindow())) {
 		return false;
 	}
+	if (!_physicsSystem->initialize()) {
+		return false;
+	}
 	return true;
 }
 
 // Game loop. Runs while the state is 'PLAY'.
-void GameEngine::run() {
-	SDL_Event currentEvent;
+void GameEngine::run() {	
 
 	while (_gameState == GameState::PLAY) {
 		// Force an event queue update, otherwise events will not be placed in the queue
 		SDL_PumpEvents();
 
 		_renderer->clear();
-		_renderer->present();
 
-		_inputManager->process();
+		_physicsSystem->run(0.1f);
+
+		// Rendering all entities
+		for (Entity* entity : _entities) {
+			entity->render(_renderer->getSDLRenderer());
+		}
+
+		_renderer->present();
+		_inputManager->process();		
 
 		SDL_Delay(16);
 	}
@@ -50,6 +63,12 @@ void GameEngine::run() {
 void GameEngine::shutdown() {
 	_renderer->shutdown();
 	_window->shutdown();
+
+	for (Entity* entity : _entities) {
+		entity->shutdown();
+	}
+
+	_physicsSystem->shutdown();
 	SDL_Quit();
 }
 
@@ -62,4 +81,8 @@ GameState GameEngine::getGameState() {
 
 void GameEngine::setGameState(GameState state) {
 	_gameState = state;
+}
+
+PhysicsSystem* GameEngine::getPhysicsSystem() {
+	return _physicsSystem;
 }
