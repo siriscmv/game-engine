@@ -2,7 +2,12 @@
 
 #include "Renderer.h"
 #include <utility>
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
+
 
 // An enum class to manage the shape of the entity
 enum class ShapeType {
