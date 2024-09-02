@@ -1,6 +1,7 @@
 #include "GameEngine.h"
 #include "Entity.h"
 
+// Use this file to experiment with the Engine
 int main(int argc, char** argv) {
 	GameEngine gameEngine("CSC 581 Game Engine");
 
