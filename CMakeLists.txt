@@ -26,6 +26,7 @@ add_executable(GameEngine
         GameEngine/Input/InputManager.h
         GameEngine/Input/InputManager.cpp
         GameEngine/Physics/PhysicsSystem.cpp
-        GameEngine/Entities/Entity.cpp)
+        GameEngine/Entities/Entity.cpp
+        GameEngine/Collision/CollisionSystem.cpp)
 
 target_link_libraries(GameEngine ${SDL2_LIBRARIES})

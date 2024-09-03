@@ -1,4 +1,6 @@
 #pragma once
+
+#include "CollisionSystem.h"
 #include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
@@ -31,6 +33,8 @@ private:
 	GameState _gameState;	
 	InputManager* _inputManager;
 	PhysicsSystem* _physicsSystem;
-	std::vector<Entity*> _entities;	
+	CollisionSystem* _collisionSystem;
+	std::vector<Entity*> _entities;
+	int _entityCount;
 };
 
