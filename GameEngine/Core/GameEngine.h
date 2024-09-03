@@ -25,10 +25,12 @@ public:
 	void setGameState(GameState state);
 	PhysicsSystem* getPhysicsSystem();	
 
+	void toggleScalingMode();	
+
 private:
 	Window* _window;
 	Renderer* _renderer;	
-	GameState _gameState;
+	GameState _gameState;	
 	InputManager* _inputManager;
 	PhysicsSystem* _physicsSystem;
 	CollisionSystem* _collisionSystem;

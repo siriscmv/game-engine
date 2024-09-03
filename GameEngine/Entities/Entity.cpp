@@ -5,12 +5,12 @@
 #else
 #include <SDL/SDL.h>
 #endif
-#include  <iostream>
 
 // Constructor for Rectangles
 Entity::Entity(Position position, Size size, SDL_Color color) {
     setPosition(position);
     setSize(size);
+    setOriginalSize(size);
     setShapeType(ShapeType::RECTANGLE);
     setColor(color);
 }
@@ -19,6 +19,7 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
 Entity::Entity(Position position, float radius, SDL_Color color) {
     setPosition(position);
     setCircleRadius(radius);
+    setOriginalCircleRadius(radius);
     setShapeType(ShapeType::CIRCLE);
     setColor(color);
 }
@@ -27,7 +28,9 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
 Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
     setPosition(position);
     setTriangleBaseLength(baseLength);
+    setOriginalTriangleBaseLength(baseLength);
     setTriangleHeight(height);
+    setOriginalTriangleHeight(height);
     setShapeType(ShapeType::TRIANGLE);
     setColor(color);
 }
@@ -47,6 +50,7 @@ Entity::~Entity() {
 // Setters
 void Entity::setPosition(Position position) { _position = position; }
 void Entity::setSize(Size size) { _size = size; }
+void Entity::setOriginalSize(Size size) { _originalSize = size; }
 void Entity::setEntityType(EntityType entityType) { _entityType = entityType; }
 void Entity::setShapeType(ShapeType shape) { _shape = shape; }
 void Entity::setVelocityX(float velocityX) { _velocity.x = velocityX; }
@@ -54,8 +58,11 @@ void Entity::setVelocityY(float velocityY) { _velocity.y = velocityY; }
 void Entity::setAccelerationX(float accelerationX) { _acceleration.x = accelerationX; }
 void Entity::setAccelerationY(float accelerationY) { _acceleration.y = accelerationY; }
 void Entity::setCircleRadius(float radius) { _circleRadius = radius; }
+void Entity::setOriginalCircleRadius(float radius) { _originalCircleRadius = radius; }
 void Entity::setTriangleBaseLength(float baseLength) { _triangleBaseLength = baseLength; }
+void Entity::setOriginalTriangleBaseLength(float baseLength) { _originalTriangleBaseLength = baseLength; }
 void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
+void Entity::setOriginalTriangleHeight(float height) { _originalTriangleHeight = height; }
 void Entity::setColor(SDL_Color color) { _color = color; }
 
 // Getters
@@ -74,7 +81,6 @@ float Entity::getTriangleHeight() const { return _triangleHeight; }
 
 
 void Entity::drawRectangle(SDL_Renderer *renderer) {    
-    // Print the current position and size of the rectangle    
     SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);
@@ -121,9 +127,29 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
     return _texture != nullptr;
 }
 
-// Renders the entity onto the screen
-void Entity::render(SDL_Renderer *renderer) {   
+// Scales the entity based on the scale factors passed into the function
+void Entity::applyScaling(float scaleX, float scaleY) {
+    switch (_shape) {
+    case ShapeType::RECTANGLE:
+    case ShapeType::TEXTURE:        
+        _size.width = _originalSize.width * scaleX;
+        _size.height = _originalSize.height * scaleY;
+        break;
+    case ShapeType::CIRCLE:        
+        _circleRadius = _originalCircleRadius * std::min(scaleX, scaleY);  // Use the smaller scale factor to maintain shape
+        break;
 
+    case ShapeType::TRIANGLE:        
+        _triangleBaseLength = _originalTriangleBaseLength * scaleX;
+        _triangleHeight = _originalTriangleHeight * scaleY;
+        break;
+    default:
+        break;
+    }
+}
+
+// Renders the entity onto the screen
+void Entity::render(SDL_Renderer *renderer) {
     switch (_shape) {
         case ShapeType::TEXTURE: 
             if (_texture != nullptr) {
@@ -134,8 +160,7 @@ void Entity::render(SDL_Renderer *renderer) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, 
                     "Failed to render entity: Texture is null at position (%f, %f)\n", _position.x, _position.y);
             }
-            break;
-        
+            break;        
         case ShapeType::RECTANGLE:
             drawRectangle(renderer);
             break;
