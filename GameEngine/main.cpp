@@ -6,11 +6,13 @@ int main(int argc, char** argv) {
 	GameEngine gameEngine("CSC 581 Game Engine");
 
 	Entity rect(Position(500, 500), Size(100, 100));
-	
+	Entity platform(Position(0, 800), Size(1080, 20));
+	platform.setEntityType(EntityType::FIXED);
 
 	// Create an array of entities
 	std::vector<Entity*> entities;
-	entities.push_back(&rect);	
+	entities.push_back(&rect);
+	entities.push_back(&platform);
 
 	// Initializing the engine
 	if (!gameEngine.initialize(entities)) {
@@ -31,13 +33,6 @@ int main(int argc, char** argv) {
 	gameEngine.getInputManager()->bind(SDL_SCANCODE_DOWN, "move_down", [&rect]() { rect.setVelocityY(50.0f); });
 
 	
-	gameEngine.getInputManager()->bind(SDL_SCANCODE_LEFT, "stop_left", [&rect]() { rect.setVelocityX(0.0f); });
-	gameEngine.getInputManager()->bind(SDL_SCANCODE_RIGHT, "stop_right", [&rect]() { rect.setVelocityX(0.0f); });
-	gameEngine.getInputManager()->bind(SDL_SCANCODE_UP, "stop_up", [&rect]() { rect.setVelocityY(0.0f); });
-	gameEngine.getInputManager()->bind(SDL_SCANCODE_DOWN, "stop_down", [&rect]() { rect.setVelocityY(0.0f); });
-
-
-
 	// Key binds for exiting the game engine
 	gameEngine.getInputManager()->bind(SDL_SCANCODE_ESCAPE, "esc_exit", exitCallback);
 	gameEngine.getInputManager()->bind(SDL_SCANCODE_Q, "q_exit", exitCallback);

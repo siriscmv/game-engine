@@ -13,6 +13,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
 	_physicsSystem = &PhysicsSystem::getInstance();
+	_collisionSystem = &CollisionSystem::getInstance();
 }
 
 GameEngine::~GameEngine() {
@@ -46,6 +47,8 @@ void GameEngine::run() {
 		_renderer->clear();
 
 		_physicsSystem->run(0.1f);
+
+		_collisionSystem->run(_entities);
 
 		// Rendering all entities
 		for (Entity* entity : _entities) {
