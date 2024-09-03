@@ -42,20 +42,20 @@ void GameEngine::run() {
 	while (_gameState == GameState::PLAY) {
 		// Force an event queue update, otherwise events will not be placed in the queue
 		SDL_PumpEvents();
-
 		_renderer->clear();
-
-		_physicsSystem->run(0.1f);
-
-		// Rendering all entities
+		
+		auto [scaleX, scaleY] = _window->getScaleFactors();
 		for (Entity* entity : _entities) {
-			entity->render(_renderer->getSDLRenderer());
+			entity->applyScaling(scaleX, scaleY);
+			entity->render(_renderer->getSDLRenderer());             // Rendering all entities
 		}
+
+		_physicsSystem->run(0.1f);                                   // Running the physics engine
 
 		_renderer->present();
 		_inputManager->process();		
 
-		SDL_Delay(16);
+		SDL_Delay(16);                                                // Setting 60hz refresh rate
 	}
 }
 
@@ -70,6 +70,11 @@ void GameEngine::shutdown() {
 
 	_physicsSystem->shutdown();
 	SDL_Quit();
+}
+
+// Toggles the scaling mode variable. Delegates to Window class
+void GameEngine::toggleScalingMode() {
+	_window->toggleScalingMode();
 }
 
 InputManager* GameEngine::getInputManager() {

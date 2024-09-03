@@ -1,11 +1,12 @@
 #include "PhysicsSystem.h"
-#include "iostream"
 
+// Initializes class variables
 bool PhysicsSystem::initialize() {	
 	_entities.clear();	
 	return true;
 }
 
+// Sets velocity, acceleration (including gravity) for the Entity that passed into this function
 void PhysicsSystem::applyPhysics(Entity& entity, float gravity, Velocity velocity, Acceleration acceleration) {
 	entity.setVelocityX(velocity.x);
 	entity.setVelocityY(velocity.y);
@@ -18,26 +19,22 @@ void PhysicsSystem::applyPhysics(Entity& entity, float gravity, Velocity velocit
 	}
 }
 
-void PhysicsSystem::run(float deltaTime) {
-	
-	for (Entity* entity : _entities) {		
-		
+// Similates the physics system. All entities included in the _entities array will experience physics.
+void PhysicsSystem::run(float deltaTime) {	
+	for (Entity* entity : _entities) {				
 		// Updating velocity with acceleration (v = u + at)
 		entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
-		entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
-		
-		
+		entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);		
 
 		// Updating position with velocity (s = s0 + vt)
 		entity->setPosition(Position(
 			entity->getPosition().x + entity->getVelocityX() * deltaTime,
 			entity->getPosition().y + entity->getVelocityY() * deltaTime
 		));
-	}
-
-	
+	}	
 }
 
+// Clears up the entities variable
 void PhysicsSystem::shutdown() {
 	_entities.clear();
 }

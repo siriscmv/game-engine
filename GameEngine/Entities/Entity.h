@@ -58,6 +58,7 @@ public:
 
     // Setters
     void setSize(Size size);
+    void setOriginalSize(Size size);
     void setPosition(Position position);
     void setShapeType(ShapeType shapeType);
     void setVelocityX(float velocityX);
@@ -65,8 +66,11 @@ public:
     void setAccelerationX(float accelerationX);
     void setAccelerationY(float accelerationY);
     void setCircleRadius(float radius);
+    void setOriginalCircleRadius(float radius);
     void setTriangleBaseLength(float baseLength);
+    void setOriginalTriangleBaseLength(float baseLength);
     void setTriangleHeight(float height);
+    void setOriginalTriangleHeight(float height);
     void setColor(SDL_Color color);
 
     // Getters
@@ -84,6 +88,7 @@ public:
 
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
     void render(SDL_Renderer *renderer);                  // Render entity 
+    void applyScaling(float scaleX, float scaleY);        
     void shutdown();
 
 private:
@@ -97,6 +102,12 @@ private:
     float _circleRadius = 0.0f;
     float _triangleBaseLength = 0.0f;
     float _triangleHeight = 0.0f;
+
+    // Variables to hold original sizes (used in screen scaling)
+    Size _originalSize = {};
+    float _originalCircleRadius = 0.0f;  
+    float _originalTriangleBaseLength = 0.0f;  
+    float _originalTriangleHeight = 0.0f;  
 
     const char* _texturePath = nullptr;                  // Path of the texture file
     SDL_Texture* _texture = nullptr;                     // Texture of the entity

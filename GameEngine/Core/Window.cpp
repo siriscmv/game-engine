@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #else
 #include <SDL/SDL.h>
+#include <utility>
 #endif
 
 // Constructor for the Window class. Initializes class variables.
@@ -10,6 +11,7 @@ Window::Window(const char* windowTitle, int windowWidth, int windowHeight) {
 	_windowTitle = windowTitle;
 	_windowWidth = windowWidth;
 	_windowHeight = windowHeight;
+	_scalingMode = ScalingMode::CONSTANT;
 	_window = nullptr;	
 }
 
@@ -38,6 +40,30 @@ bool Window::initialize() {
 	}
 
 	return true;
+}
+
+// Toggles the scaling mode variable
+void Window::toggleScalingMode() {
+	if (_scalingMode == ScalingMode::CONSTANT)
+		_scalingMode = ScalingMode::PROPORTIONAL;
+	else
+		_scalingMode = ScalingMode::CONSTANT;
+}
+
+// Returns the scaling factors based on current screen size and scaling mode
+std::pair<float, float> Window::getScaleFactors() const {
+	int windowWidth, windowHeight;
+	SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
+
+	float scaleX = 1.0f;
+	float scaleY = 1.0f;
+
+	if (_scalingMode == ScalingMode::PROPORTIONAL) {
+		scaleX = static_cast<float>(windowWidth) / _windowWidth;
+		scaleY = static_cast<float>(windowHeight) / _windowHeight;
+	}
+	
+	return { scaleX, scaleY };
 }
 
 // Destroys the window and sets the class variable to null pointer.
