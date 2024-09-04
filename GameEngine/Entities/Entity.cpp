@@ -138,24 +138,20 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 
 // Scales the entity based on the scale factors passed into the function
 void Entity::applyScaling(float scaleX, float scaleY) {
+    _position.x = _originalPosition.x * scaleX;
+    _position.y = _originalPosition.y * scaleY;
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
         _size.width = _originalSize.width * scaleX;
         _size.height = _originalSize.height * scaleY;
-        _position.x = _originalPosition.x * scaleX;
-        _position.y = _originalPosition.y * scaleY;
         break;
     case ShapeType::CIRCLE:        
-        _circleRadius = _originalCircleRadius * std::min(scaleX, scaleY);  // Use the smaller scale factor to maintain shape
-        _position.x = _originalPosition.x * scaleX;
-        _position.y = _originalPosition.y * scaleY;
+        _circleRadius = _originalCircleRadius * std::min(scaleX, scaleY);  // Use the smaller scale factor to maintain shape        
         break;
     case ShapeType::TRIANGLE:        
         _triangleBaseLength = _originalTriangleBaseLength * scaleX;
-        _triangleHeight = _originalTriangleHeight * scaleY;
-        _position.x = _originalPosition.x * scaleX;
-        _position.y = _originalPosition.y * scaleY;
+        _triangleHeight = _originalTriangleHeight * scaleY;        
         break;
     default:
         break;
