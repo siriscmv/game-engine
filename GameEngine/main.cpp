@@ -6,6 +6,7 @@ int main(int argc, char** argv) {
 	GameEngine gameEngine("CSC 581 Game Engine");
 
 	Entity rect(Position(500, 500), Size(100, 100));
+	Entity rect2(Position(650, 500), Size(100, 100));
 	Entity platform(Position(0, 800), Size(1080, 20));
 
 	platform.setEntityType(EntityType::FIXED);
@@ -13,6 +14,7 @@ int main(int argc, char** argv) {
 	// Create an array of entities
 	std::vector<Entity*> entities;
 	entities.push_back(&rect);
+	entities.push_back(&rect2);
 	entities.push_back(&platform);
 
 	// Initializing the engine
@@ -21,6 +23,7 @@ int main(int argc, char** argv) {
 	}
 
 	gameEngine.getPhysicsSystem()->applyPhysics(rect, 9);
+	gameEngine.getPhysicsSystem()->applyPhysics(rect2, 9);
 
 	// Define bindings for key presses
 	const std::function<void()> exitCallback = [&gameEngine]() {

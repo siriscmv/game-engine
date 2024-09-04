@@ -14,8 +14,13 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
         throw std::runtime_error("Unsupported entity types for collision detection");
     }
 
-    if (entityB->getEntityType() == EntityType::FIXED && entityA->getEntityType() != EntityType::FIXED) {
-        // Ensure that a fixed entity type is used as the first param
+    // Helper function to detect if an entity is not moving
+    const std::function<bool(const Entity&)> is_not_moving = [](const Entity& entity) {
+        return entity.getEntityType() == EntityType::FIXED || (entity.getVelocityX() == 0 && entity.getVelocityY() == 0);
+    };
+
+    if (is_not_moving(*entityB) && !is_not_moving(*entityA)) {
+        // Ensure that a fixed entity is used as the first param
         return hasCollision(entityB, entityA);
     }
 
@@ -28,7 +33,7 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
         return rect;
     };
 
-    if (entityA->getEntityType() == EntityType::FIXED) {
+    if (is_not_moving(*entityA)) {
         // If one of the entities is fixed, and the other entity has opposing movements, then it is not technically a collision.
         // In other words, the entities are moving away from a collision
 
