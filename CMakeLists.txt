@@ -19,7 +19,8 @@ include_directories(GameEngine/Physics)
 
 add_executable(GameEngine
     Game/main.cpp
-    GameEngine/main.cpp
+#    Uncomment the line below when testing the engine
+#    GameEngine/main.cpp
     GameEngine/Core/GameEngine.cpp
     GameEngine/Core/Renderer.cpp
     GameEngine/Core/Window.cpp

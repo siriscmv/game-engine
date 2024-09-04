@@ -23,7 +23,9 @@ public:
 	InputManager * getInputManager();
 	GameState getGameState();
 	void setGameState(GameState state);
-	PhysicsSystem* getPhysicsSystem();	
+	// A callback function that is triggered after each render cycle
+	void setOnCycle(const std::function<void()> &);
+	PhysicsSystem* getPhysicsSystem();
 
 	void toggleScalingMode();	
 
@@ -35,6 +37,7 @@ private:
 	PhysicsSystem* _physicsSystem;
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
+	std::function<void()> _onCycle;
 	int _entityCount;
 };
 
