@@ -28,9 +28,9 @@ void PhysicsSystem::run(float deltaTime, std::set<Entity*>& entitiesToIgnore) {
 			entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
 
 			// Updating position with velocity (s = s0 + vt)
-			entity->setPosition(Position(
-				entity->getPosition().x + entity->getVelocityX() * deltaTime,
-				entity->getPosition().y + entity->getVelocityY() * deltaTime
+			entity->setOriginalPosition(Position(
+				entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
+				entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
 			));
 		}
 	}	
