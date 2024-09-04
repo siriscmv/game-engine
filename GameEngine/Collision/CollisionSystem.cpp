@@ -54,8 +54,8 @@ std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities) {
             Entity* entityB = entities[j];
 
             if (getInstance().hasCollision(entityA, entityB)) {
-                applyPhysics(entityA);
-                applyPhysics(entityB);
+                handleCollision(entityA);
+                handleCollision(entityB);
 
                 collisions.insert(entityA);
                 collisions.insert(entityB);
@@ -67,7 +67,7 @@ std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities) {
     return collisions;
 }
 
-void CollisionSystem::applyPhysics(Entity *entity) {
+void CollisionSystem::handleCollision(Entity *entity) {
     switch (entity->getEntityType()) {
         case EntityType::DEFAULT:
             // Unrealistic, but keeping it this way for now

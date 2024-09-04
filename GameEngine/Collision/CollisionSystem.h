@@ -27,5 +27,5 @@ private:
     bool hasCollision(const Entity* entityA, const Entity* entityB);
 
     // Helper method to apply physics to 2 entities that are in collision
-    void applyPhysics(Entity *entity);
+    void handleCollision(Entity *entity);
 };
