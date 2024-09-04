@@ -12,6 +12,7 @@
 // Constructor for Rectangles
 Entity::Entity(Position position, Size size, SDL_Color color) {
     setPosition(position);
+    setOriginalPosition(position);
     setSize(size);
     setOriginalSize(size);
     setShapeType(ShapeType::RECTANGLE);
@@ -21,6 +22,7 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
 // Contructor for Circles
 Entity::Entity(Position position, float radius, SDL_Color color) {
     setPosition(position);
+    setOriginalPosition(position);
     setCircleRadius(radius);
     setOriginalCircleRadius(radius);
     setShapeType(ShapeType::CIRCLE);
@@ -30,6 +32,7 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
 // Constructor for triangles
 Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
     setPosition(position);
+    setOriginalPosition(position);
     setTriangleBaseLength(baseLength);
     setOriginalTriangleBaseLength(baseLength);
     setTriangleHeight(height);
@@ -42,6 +45,7 @@ Entity::Entity(Position position, float baseLength, float height, SDL_Color colo
 Entity::Entity(const char *texturePath, Position position, Size size) {
     _texturePath = texturePath;
     setPosition(position);
+    setOriginalPosition(position);
     setSize(size);
     setShapeType(ShapeType::TEXTURE);
 }
@@ -52,6 +56,7 @@ Entity::~Entity() {
 
 // Setters
 void Entity::setPosition(Position position) { _position = position; }
+void Entity::setOriginalPosition(Position position) { _originalPosition = position; }
 void Entity::setSize(Size size) { _size = size; }
 void Entity::setOriginalSize(Size size) { _originalSize = size; }
 void Entity::setEntityType(EntityType entityType) { _entityType = entityType; }
@@ -70,6 +75,7 @@ void Entity::setColor(SDL_Color color) { _color = color; }
 
 // Getters
 Position Entity::getPosition() const { return _position; }
+Position Entity::getOriginalPosition() const { return _originalPosition; }
 Size Entity::getSize() const { return _size; }
 EntityType Entity::getEntityType() const { return _entityType; }
 ShapeType Entity::getShapeType() const { return _shape; }
@@ -132,6 +138,8 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 
 // Scales the entity based on the scale factors passed into the function
 void Entity::applyScaling(float scaleX, float scaleY) {
+    _position.x = _originalPosition.x * scaleX;
+    _position.y = _originalPosition.y * scaleY;
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
@@ -139,12 +147,11 @@ void Entity::applyScaling(float scaleX, float scaleY) {
         _size.height = _originalSize.height * scaleY;
         break;
     case ShapeType::CIRCLE:        
-        _circleRadius = _originalCircleRadius * std::min(scaleX, scaleY);  // Use the smaller scale factor to maintain shape
+        _circleRadius = _originalCircleRadius * std::min(scaleX, scaleY);  // Use the smaller scale factor to maintain shape        
         break;
-
     case ShapeType::TRIANGLE:        
         _triangleBaseLength = _originalTriangleBaseLength * scaleX;
-        _triangleHeight = _originalTriangleHeight * scaleY;
+        _triangleHeight = _originalTriangleHeight * scaleY;        
         break;
     default:
         break;
