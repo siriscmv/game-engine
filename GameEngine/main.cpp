@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 
-	gameEngine.getPhysicsSystem()->applyPhysics(rect, 0);
+	gameEngine.getPhysicsSystem()->applyPhysics(rect, 9);
 
 	// Define bindings for key presses
 	const std::function<void()> exitCallback = [&gameEngine]() {
