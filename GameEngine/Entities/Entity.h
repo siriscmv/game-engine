@@ -67,6 +67,7 @@ public:
     void setSize(Size size);
     void setOriginalSize(Size size);
     void setPosition(Position position);
+    void setOriginalPosition(Position position);
     void setEntityType(EntityType entityType);
     void setShapeType(ShapeType shapeType);
     void setVelocityX(float velocityX);
@@ -84,6 +85,7 @@ public:
     // Getters
     Size getSize() const;
     Position getPosition() const;
+    Position getOriginalPosition() const;
     EntityType getEntityType() const;
     ShapeType getShapeType() const;
     float getVelocityX() const;
@@ -114,6 +116,7 @@ private:
     float _triangleHeight = 0.0f;
 
     // Variables to hold original sizes (used in screen scaling)
+    Position _originalPosition = {};
     Size _originalSize = {};
     float _originalCircleRadius = 0.0f;  
     float _originalTriangleBaseLength = 0.0f;  
