@@ -50,7 +50,7 @@ std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities) {
             Entity *entityA = entities[i];
             Entity* entityB = entities[j];
 
-            if (hasCollision(entityA, entityB)) {
+            if (getInstance().hasCollision(entityA, entityB)) {
                 applyPhysics(entityA);
                 applyPhysics(entityB);
 
