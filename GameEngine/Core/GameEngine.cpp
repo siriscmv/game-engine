@@ -14,6 +14,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_inputManager = new InputManager();
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
+	_onCycle = []() {};
 }
 
 GameEngine::~GameEngine() {
@@ -58,6 +59,7 @@ void GameEngine::run() {
 		}
 
 		_renderer->present();
+		_onCycle();
 
 		SDL_Delay(16);                                                // Setting 60hz refresh rate
 	}
@@ -95,3 +97,8 @@ void GameEngine::setGameState(GameState state) {
 PhysicsSystem* GameEngine::getPhysicsSystem() {
 	return _physicsSystem;
 }
+
+void GameEngine::setOnCycle(const std::function<void()> &cb) {
+	_onCycle = cb;
+}
+
