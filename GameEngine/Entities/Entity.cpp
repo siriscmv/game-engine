@@ -1,4 +1,7 @@
 #include "Entity.h"
+
+#include <algorithm>
+
 #include "Renderer.h"
 #ifdef __APPLE__
 #include <SDL2/SDL.h>

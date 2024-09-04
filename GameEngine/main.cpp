@@ -6,15 +6,13 @@ int main(int argc, char** argv) {
 	GameEngine gameEngine("CSC 581 Game Engine");
 
 	Entity rect(Position(500, 500), Size(100, 100));
-	Entity circle(Position(200, 200), 50.0f);
-	
 	Entity platform(Position(0, 800), Size(1080, 20));
+
 	platform.setEntityType(EntityType::FIXED);
 
 	// Create an array of entities
 	std::vector<Entity*> entities;
 	entities.push_back(&rect);
-  entities.push_back(&circle);	
 	entities.push_back(&platform);
 
 	// Initializing the engine

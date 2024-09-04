@@ -55,7 +55,7 @@ void GameEngine::run() {
 		}
 
 		_physicsSystem->run(0.1f);                                   // Running the physics engine
-    _collisionSystem->run(_entities);                            // Running the collision system
+		_collisionSystem->run(_entities);                            // Running the collision system
 
 		_renderer->present();
 		_inputManager->process();		

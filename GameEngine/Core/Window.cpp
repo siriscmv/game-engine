@@ -1,4 +1,6 @@
 #include "Window.h"
+
+#include <utility>
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
 #else
@@ -35,7 +37,7 @@ bool Window::initialize() {
 
 	// If window creation failed, logs error.
 	if (!_window) {
-		SDL_Log("Could not create window : % s", SDL_GetError());
+		SDL_Log("Could not create window : %s", SDL_GetError());
 		return false;
 	}
 
