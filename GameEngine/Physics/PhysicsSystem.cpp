@@ -20,17 +20,19 @@ void PhysicsSystem::applyPhysics(Entity& entity, float gravity, Velocity velocit
 }
 
 // Similates the physics system. All entities included in the _entities array will experience physics.
-void PhysicsSystem::run(float deltaTime) {	
-	for (Entity* entity : _entities) {				
-		// Updating velocity with acceleration (v = u + at)
-		entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
-		entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);		
+void PhysicsSystem::run(float deltaTime, std::set<Entity*>& entitiesToIgnore) {
+	for (Entity* entity : _entities) {
+		if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
+			// Updating velocity with acceleration (v = u + at)
+			entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
+			entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
 
-		// Updating position with velocity (s = s0 + vt)
-		entity->setPosition(Position(
-			entity->getPosition().x + entity->getVelocityX() * deltaTime,
-			entity->getPosition().y + entity->getVelocityY() * deltaTime
-		));
+			// Updating position with velocity (s = s0 + vt)
+			entity->setPosition(Position(
+				entity->getPosition().x + entity->getVelocityX() * deltaTime,
+				entity->getPosition().y + entity->getVelocityY() * deltaTime
+			));
+		}
 	}	
 }
 

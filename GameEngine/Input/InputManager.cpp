@@ -27,6 +27,8 @@ void InputManager::unbind(const SDL_Scancode scancode, const std::string& name) 
     bindings[scancode].erase(name);
 }
 
+Uint8 *prevKeys = nullptr;
+
 void InputManager::process() const {
     int size = 0;
     const Uint8 *keys = SDL_GetKeyboardState(&size);
@@ -37,8 +39,8 @@ void InputManager::process() const {
 
     // Iterate through the bindings
     for (auto & binding : bindings) {
-        // If the corresponding key is pressed
-        if (binding.first <= size && keys[binding.first] == 1) {
+        // If the corresponding key is pressed, and it was not pressed in the previous render cycle
+        if (binding.first <= size && keys[binding.first] == 1 && (prevKeys == nullptr || prevKeys[binding.first] == 0)) {
             // Iterate through all callbacks associated with that key
             for (auto & callback: binding.second) {
                 // Execute them
@@ -46,4 +48,8 @@ void InputManager::process() const {
             }
         }
     }
+
+    // Store the state of keys for comparison in the next render cycle
+    prevKeys = new Uint8[size];
+    std::memcpy(prevKeys, keys, size * sizeof(Uint8));
 }

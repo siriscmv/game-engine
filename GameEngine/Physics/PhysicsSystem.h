@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "Entity.h"
 #include <Vector>
 
@@ -23,7 +25,7 @@ public:
 		Acceleration acceleration = Acceleration());
 
 	// Simulates physics of the entire system
-	void run(float deltaTime);
+	void run(float deltaTime, std::set<Entity*>& entitiesToIgnore);
 
 	// Shuts the physics engine down
 	void shutdown();

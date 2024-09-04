@@ -13,6 +13,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
 	_physicsSystem = &PhysicsSystem::getInstance();
+	_collisionSystem = &CollisionSystem::getInstance();
 }
 
 GameEngine::~GameEngine() {
@@ -43,17 +44,20 @@ void GameEngine::run() {
 		// Force an event queue update, otherwise events will not be placed in the queue
 		SDL_PumpEvents();
 		_renderer->clear();
+		_inputManager->process();
+
+		std::set<Entity *> entitiesWithCollisions = _collisionSystem->run(_entities);                            // Running the collision system
+		_physicsSystem->run(0.1f, entitiesWithCollisions);                                   // Running the physics engine
 		
 		auto [scaleX, scaleY] = _window->getScaleFactors();
+
+		// Rendering all entities
 		for (Entity* entity : _entities) {
 			entity->applyScaling(scaleX, scaleY);
 			entity->render(_renderer->getSDLRenderer());             // Rendering all entities
 		}
 
-		_physicsSystem->run(0.1f);                                   // Running the physics engine
-
 		_renderer->present();
-		_inputManager->process();		
 
 		SDL_Delay(16);                                                // Setting 60hz refresh rate
 	}
