@@ -14,17 +14,36 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
         throw std::runtime_error("Unsupported entity types for collision detection");
     }
 
+    if (entityB->getEntityType() == EntityType::FIXED && entityA->getEntityType() != EntityType::FIXED) {
+        // Ensure that a fixed entity type is used as the first param
+        return hasCollision(entityB, entityA);
+    }
+
     // Helper function to convert a rectangle entity to a SDL_Rect
     const std::function<const SDL_Rect*(const Entity&)> to_rect = [](const Entity& entity) {
         SDL_Rect* rect = new SDL_Rect{entity.getPosition().x, entity.getPosition().y, entity.getSize().width, entity.getSize().height};
         return rect;
     };
 
+    if (entityA->getEntityType() == EntityType::FIXED) {
+        // If one of the entities is fixed, and the other entity has opposing movements, then it is not technically a collision.
+        // In other words, the entities are moving away from a collision
+
+        if (entityB->getAccelerationY() * entityB->getVelocityY() < 0) {
+            return false;
+        }
+
+        if (entityB->getAccelerationX() * entityB->getVelocityX() < 0) {
+            return false;
+        }
+    }
+
     return SDL_HasIntersection(to_rect(*entityA), to_rect(*entityB));
 }
 
-void CollisionSystem::run(const std::vector<Entity *>& entities) {
+std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities) {
     const auto n = entities.size();
+    std::set<Entity *> collisions;
 
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
@@ -34,10 +53,15 @@ void CollisionSystem::run(const std::vector<Entity *>& entities) {
             if (hasCollision(entityA, entityB)) {
                 applyPhysics(entityA);
                 applyPhysics(entityB);
+
+                collisions.insert(entityA);
+                collisions.insert(entityB);
             }
 
         }
     }
+
+    return collisions;
 }
 
 void CollisionSystem::applyPhysics(Entity *entity) {

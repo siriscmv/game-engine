@@ -54,8 +54,8 @@ void GameEngine::run() {
 			entity->render(_renderer->getSDLRenderer());             // Rendering all entities
 		}
 
-		_physicsSystem->run(0.1f);                                   // Running the physics engine
-		_collisionSystem->run(_entities);                            // Running the collision system
+		std::set<Entity *> entitiesWithCollisions = _collisionSystem->run(_entities);                            // Running the collision system
+		_physicsSystem->run(0.1f, entitiesWithCollisions);                                   // Running the physics engine
 
 		_renderer->present();
 		_inputManager->process();		

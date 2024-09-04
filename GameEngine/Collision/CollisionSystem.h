@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "Entity.h"
 
 // A singleton class that handles collisions between game entities
@@ -13,8 +15,8 @@ public:
     CollisionSystem(const CollisionSystem&) = delete;         // Preventing copying
     void operator=(const CollisionSystem) = delete;         // Preventing assignmenet
 
-    // Detect collisions between entities and apply physics
-    void run(const std::vector<Entity*>&);
+    // Detect collisions between entities and apply physics, also returns a set of entities for which a collision was detected
+    std::set<Entity*> run(const std::vector<Entity*>&);
 
 private:
     CollisionSystem() = default;
