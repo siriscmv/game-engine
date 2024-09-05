@@ -248,6 +248,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Game\game.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Collision\CollisionSystem.cpp" />
     <ClCompile Include="Core\GameEngine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -257,9 +260,6 @@
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
-    <ClCompile Include="Game\game.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGame|x64'">true</ExcludedFromBuild>

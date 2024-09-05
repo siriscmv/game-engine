@@ -39,7 +39,7 @@
     <ClCompile Include="Core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game\game.cpp">
+    <ClCompile Include="..\Game\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
