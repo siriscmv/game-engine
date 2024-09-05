@@ -363,7 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Ignore the Game folder
-/Game/
+*/Game/
 
 # Cmake files
 
@@ -376,4 +376,3 @@ cmake-build-debug
 .idea/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
-.gitignore
