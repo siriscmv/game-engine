@@ -362,8 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Ignore the Game folder
+# Ignore the Game folder and game cpp
 Game/
+game.cpp
 
 # Cmake files
 
