@@ -38,12 +38,15 @@ Ensure that the `SDL2.dll` file is present in the directories where the `.exe` f
   <summary>MacOS (Silicon)</summary>
 
 ## Requirements
-   - Install SDL2: `brew install sdl2`
-   - Install CMake: `brew install cmake`
+- Install SDL2: `brew install sdl2`
+- Install CMake: `brew install cmake`
    
 ## Building and running
-   - Note: Pre-built binary can be found at `./build/GameEngine` (running this still requires SDL2 to be installed)
-   - To compile and run the game: `cmake -S . -B build && cmake --build build && ./build/GameEngine`
+- Note: Pre-built binary can be found at `./build/GameEngine` (running this still requires SDL2 to be installed)
+- To compile and run the game: `cmake -S . -B build && cmake --build build && ./build/GameEngine`
+- In `CMakeLists.txt`, if `GameEngine/main.cpp` is included as an executable inside `add_executable()`, then the game engine itself will be executed
+- If you wish to run the actual game, include `Game/main.cpp` instead of `GameEngine/main.cpp`
+
 </details>
 
 ## Keybindings
