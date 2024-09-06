@@ -1,11 +1,14 @@
 # GameEngine
 
-## Requirements: Windows
+<details>
+  <summary>Windows</summary>
+
+## Requirements
 
 1. Visual Studio Community 2022
 2. SDL2 (included)
 
-## How to Run: Windows
+## How to Run
 
 ### Option 1: Run within Visual Studio
 
@@ -28,3 +31,23 @@
 
 **Note:**  
 Ensure that the `SDL2.dll` file is present in the directories where the `.exe` files are located. This file is already included; do not remove it.
+
+</details>
+
+<details>
+  <summary>MacOS (Silicon)</summary>
+
+## Requirements
+   - Install SDL2: `brew install sdl2`
+   - Install CMake: `brew install cmake`
+   
+## Building and running
+   - Note: Pre-built binary can be found at `./build/GameEngine` (running this still requires SDL2 to be installed)
+   - To compile and run the game: `cmake -S . -B build && cmake --build build && ./build/GameEngine`
+</details>
+
+## Keybindings
+
+- `s` - Toggle between Constant and Proportional scaling methods.
+- `Arrow keys` - Movement of controllable entities.
+- `esc` / `q` - Quit the game
