@@ -1,6 +1,6 @@
 # GameEngine
 
-- GitHub repository - [GameEngine](https://github.ncsu.edu/yrajapa/GameEngine])
+- GitHub repository - [GameEngine](https://github.ncsu.edu/yrajapa/GameEngine)
 
 <details>
   <summary>Windows</summary>
