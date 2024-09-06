@@ -63,6 +63,6 @@ We used following resources for development:
 
 - SDL2 Documentation: [SDL Wiki](https://wiki.libsdl.org/SDL2/FrontPage)
 - SDL Game Development Tutorial Series: [YouTube Playlist](https://www.youtube.com/watch?v=FxCC9Ces1Yg&list=PLSPw4ASQYyymu3PfG9gxywSPghnSMiOAW&index=2)
-- SDL2 with CMake: [StackOverflow Post] (https://stackoverflow.com/questions/28395833/using-sdl2-with-cmake)
+- SDL2 with CMake: [StackOverflow Post](https://stackoverflow.com/questions/28395833/using-sdl2-with-cmake)
 - Singleton Design Pattern: [StackOverflow Post](https://stackoverflow.com/questions/1008019/how-do-you-implement-the-singleton-design-pattern)
 
