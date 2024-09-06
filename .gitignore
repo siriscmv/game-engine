@@ -362,8 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Ignore the Game folder
-/Game/
+# Ignore the Game folder and game cpp
+Game/
+game.cpp
 
 # Cmake files
 
@@ -376,4 +377,3 @@ cmake-build-debug
 .idea/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
-.gitignore
