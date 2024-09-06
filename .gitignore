@@ -21,7 +21,6 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
 x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
@@ -362,8 +361,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Ignore the Game folder
-/Game/
+# Ignore the Game folder and game cpp
+Game/
+game.cpp
 
 # Cmake files
 
@@ -376,4 +376,20 @@ cmake-build-debug
 .idea/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
-.gitignore
+
+# Ignore all x64 folders 
+**/x64/
+
+# Unignore the x64 folder in the root 
+!x64/
+
+# Ignore everything inside x64/RunGame and x64/RunGameEngine
+x64/RunGame/*
+x64/RunGameEngine/*
+
+# Only the SDL2.dll file in those folders
+!x64/RunGame/SDL2.dll
+!x64/RunGameEngine/SDL2.dll
+
+# Keep ignoring other x64 folders
+GameEngine/x64/
