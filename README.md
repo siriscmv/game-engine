@@ -56,3 +56,12 @@ Ensure that the `SDL2.dll` file is present in the directories where the `.exe` f
 - `s` - Toggle between Constant and Proportional scaling methods.
 - `Arrow keys` - Movement of controllable entities.
 - `esc` / `q` - Quit the game
+
+## Attribution
+
+We used following resources for development:
+
+- SDL Documentation: [SDL Wiki](https://wiki.libsdl.org/SDL2/FrontPage)
+- SDL Game Development Tutorial Series: [YouTube Playlist](https://www.youtube.com/watch?v=FxCC9Ces1Yg&list=PLSPw4ASQYyymu3PfG9gxywSPghnSMiOAW&index=2)
+- Singleton Design Pattern: [StackOverflow Post](https://stackoverflow.com/questions/1008019/how-do-you-implement-the-singleton-design-pattern)
+
