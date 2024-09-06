@@ -129,10 +129,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RunGame|x64'">
     <IncludePath>$(SolutionDir)Dependencies/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies/lib/;$(LibraryPath)</LibraryPath>
+    <TargetName>Game</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">
     <IncludePath>$(SolutionDir)Dependencies/include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies/lib/;$(LibraryPath)</LibraryPath>
+    <TargetName>GameEngine</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
