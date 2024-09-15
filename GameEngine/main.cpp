@@ -3,5 +3,6 @@
 
 // Use this file to experiment with the Engine
 int main(int argc, char** argv) {
-	printf("The Game Engine has compiled successfully");
+	printf("The Game Engine has compiled successfully\n");
+	return 0;
 }
