@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
+#include "Globals.h"
 #include <utility>
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
@@ -8,50 +9,6 @@
 #include <SDL/SDL.h>
 #endif
 
-
-// An enum class to manage the shape of the entity
-enum class ShapeType {
-    NONE,
-    RECTANGLE,
-    TRIANGLE,
-    CIRCLE,
-    TEXTURE
-};
-
-// An enum class that denotes the type of entity
-enum class EntityType {
-    DEFAULT, // Is affected by collisions
-    FIXED, // Is unaffected by collisions
-    ELASTIC // A collision causes a reversal in movement direction
-};
-
-// structure to hold position 
-struct Position {
-    float x;
-    float y;
-    Position(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
-};
-
-// Structure to hold size 
-struct Size {
-    float width;
-    float height;
-    Size(float width = 0.0f, float height = 0.0f) : width(width), height(height) {}
-};
-
-// Structure to hold velocity
-struct Velocity {
-    float x;
-    float y;
-    Velocity(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
-};
-
-// Structure to hold acceleration
-struct Acceleration {
-    float x;
-    float y;
-    Acceleration(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
-};
 
 // Entity class. Represents an object drawn on the screen.
 class Entity {
@@ -63,7 +20,8 @@ public:
 
     ~Entity();
 
-    // Setters
+    // Setters    
+    void setEntityID(int id);
     void setSize(Size size);
     void setOriginalSize(Size size);
     void setPosition(Position position);
@@ -83,6 +41,7 @@ public:
     void setColor(SDL_Color color);
 
     // Getters
+    int getEntityID() const;
     Size getSize() const;
     Position getPosition() const;
     Position getOriginalPosition() const;
@@ -96,7 +55,7 @@ public:
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
 
-
+    void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
     void render(SDL_Renderer *renderer);                  // Render entity 
     void applyScaling(float scaleX, float scaleY);        
@@ -128,4 +87,7 @@ private:
     void drawRectangle(SDL_Renderer* renderer);
     void drawCircle(SDL_Renderer* renderer);
     void drawTriangle(SDL_Renderer* renderer);
+
+    int _entityID;                                       // Unique ID of the entity
+    static int _nextID;                                  // Variable to track next available ID
 };
