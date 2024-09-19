@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Entity.h"
-#include <ZMQ/zmq.hpp>
 #include <vector>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 class Client {
 public:

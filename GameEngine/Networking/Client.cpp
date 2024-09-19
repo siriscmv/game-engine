@@ -1,7 +1,11 @@
 #include "Client.h"
-#include <ZMQ/zmq.hpp>
 #include <iostream>
 #include <string>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 Client::Client() {    
 	_context = zmq::context_t(1);

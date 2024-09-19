@@ -3,7 +3,7 @@
 #include <set>
 
 #include "Entity.h"
-#include <Vector>
+#include <vector>
 
 // A singleton class that simulates a physics system. Currently handles 
 // gravity, horizontal movement, and vertical movement.

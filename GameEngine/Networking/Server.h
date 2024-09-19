@@ -1,10 +1,14 @@
 #pragma once
 
-#include <ZMQ/zmq.hpp>
 #include <Entity.h>
 #include <GameEngine.h>
 #include <vector>
 #include <map>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 class Server {
 public:
