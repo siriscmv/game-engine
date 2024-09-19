@@ -389,7 +389,9 @@ x64/RunGameEngine/*
 
 # Only the SDL2.dll file in those folders
 !x64/RunGame/SDL2.dll
+!x64/RunGame/libzmq-v143-mt-gd-4_3_5.dll
 !x64/RunGameEngine/SDL2.dll
+!x64/RunGameEngine/libzmq-v143-mt-gd-4_3_5.dll
 
 # Keep ignoring other x64 folders
 GameEngine/x64/

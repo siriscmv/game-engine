@@ -9,8 +9,11 @@
 #include <SDL/SDL.h>
 #endif
 
+int Entity::_nextID = 0;
+
 // Constructor for Rectangles
 Entity::Entity(Position position, Size size, SDL_Color color) {
+    generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
     setSize(size);
@@ -21,6 +24,7 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
 
 // Contructor for Circles
 Entity::Entity(Position position, float radius, SDL_Color color) {
+    generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
     setCircleRadius(radius);
@@ -31,6 +35,7 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
 
 // Constructor for triangles
 Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
+    generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
     setTriangleBaseLength(baseLength);
@@ -43,6 +48,7 @@ Entity::Entity(Position position, float baseLength, float height, SDL_Color colo
 
 // Constructor for textured entities
 Entity::Entity(const char *texturePath, Position position, Size size) {
+    generateEntityID();
     _texturePath = texturePath;
     setPosition(position);
     setOriginalPosition(position);
@@ -55,6 +61,8 @@ Entity::~Entity() {
 }
 
 // Setters
+void Entity::generateEntityID() { _entityID = _nextID++; }
+void Entity::setEntityID(int id) { _entityID = id; }
 void Entity::setPosition(Position position) { _position = position; }
 void Entity::setOriginalPosition(Position position) { _originalPosition = position; }
 void Entity::setSize(Size size) { _size = size; }
@@ -74,6 +82,7 @@ void Entity::setOriginalTriangleHeight(float height) { _originalTriangleHeight =
 void Entity::setColor(SDL_Color color) { _color = color; }
 
 // Getters
+int Entity::getEntityID() const { return _entityID; }
 Position Entity::getPosition() const { return _position; }
 Position Entity::getOriginalPosition() const { return _originalPosition; }
 Size Entity::getSize() const { return _size; }
