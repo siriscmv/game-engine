@@ -21,25 +21,27 @@ include_directories(GameEngine/Input)
 include_directories(GameEngine/Physics)
 include_directories(GameEngine/Networking)
 
-add_executable(GameEngine
-    Game/main.cpp # For running the actual game
-#    GameEngine/main.cpp # For running the engine, with its test file
-
-        Dependencies/include/ZMQ/zmq.hpp
-        Dependencies/include/ZMQ/zmq.h
-        Dependencies/include/ZMQ/zmq_utils.h
+set(GAME_ENGINE_SOURCES
         GameEngine/Core/GameEngine.cpp
-    GameEngine/Core/Renderer.cpp
-    GameEngine/Core/Window.cpp
-        GameEngine/Input/InputManager.h
+        GameEngine/Core/Renderer.cpp
+        GameEngine/Core/Window.cpp
         GameEngine/Input/InputManager.cpp
         GameEngine/Physics/PhysicsSystem.cpp
         GameEngine/Entities/Entity.cpp
         GameEngine/Collision/CollisionSystem.cpp
-        GameEngine/Networking/Client.h
-        GameEngine/Networking/Server.h
         GameEngine/Networking/Client.cpp
-        GameEngine/Networking/Server.cpp)
+        GameEngine/Networking/Server.cpp
+)
+
+add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})
+
+add_executable(Game Game/main.cpp) # For running the actual game
+add_executable(GameEngine GameEngine/main.cpp) # For running the engine, with its test file
 
 target_link_libraries(GameEngine ${SDL2_LIBRARIES})
 target_link_libraries(GameEngine zmq)
+target_link_libraries(GameEngine GameEngineLib)
+
+target_link_libraries(Game ${SDL2_LIBRARIES})
+target_link_libraries(Game zmq)
+target_link_libraries(Game GameEngineLib)
