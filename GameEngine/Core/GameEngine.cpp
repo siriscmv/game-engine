@@ -1,6 +1,7 @@
 #include "GameEngine.h"
 
 #include <iostream>
+#include <thread>
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
 #else
@@ -101,6 +102,8 @@ void GameEngine::run() {
 				handleSinglePlayerMode();
 				break;			
 		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
 }
 

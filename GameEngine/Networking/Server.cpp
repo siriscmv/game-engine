@@ -141,16 +141,16 @@ void Server::processClientInput(int clientId, const std::string& buttonPress) {
         Entity* playerEntity = _clientMap[clientId];
         
         if (buttonPress == "left") {
-            playerEntity->setVelocityX(-0.005f);
+            playerEntity->setVelocityX(-50.0f);
         }
         else if (buttonPress == "right") {
-            playerEntity->setVelocityX(0.005f);
+            playerEntity->setVelocityX(50.0f);
         }
         else if (buttonPress == "up") {
-            playerEntity->setVelocityY(-0.005f);
+            playerEntity->setVelocityY(-50.0f);
         }
         else if (buttonPress == "down") {
-            playerEntity->setVelocityY(0.005f);
+            playerEntity->setVelocityY(50.0f);
         }
     }
 }
