@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
 #else
@@ -11,6 +13,7 @@ public:
 	~Renderer();
 
 	bool initialize(SDL_Window* window);
+	SDL_Renderer* getSDLRenderer();
 	void clear();
 	void present();
 	void shutdown();

@@ -1,44 +1,93 @@
 #pragma once
 
 #include "Renderer.h"
+#include "Globals.h"
 #include <utility>
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
+#include <SDL/SDL.h>
+#endif
 
-class Entity
-{
-public:
-    // Constructor that takes path to a texture, x and y position, width and height of the entity, and velocity
-    Entity(const char *texturePath, int x, int y, int width, int height, float vel, float acc);
+
+// Entity class. Represents an object drawn on the screen.
+class Entity {
+public:    
+    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 });                          // Rectangles
+    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 });                       // Circles
+    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 });     // Triangles
+    Entity(const char *texturePath, Position position, Size size);                                       // Textured entities
 
     ~Entity();
 
-    void setSize(int width, int height);
-    void setPosition(int x, int y);
-    void setVelocity(float vel);
-    void setAcceleration(float acc);
-    int getWidth() {}
-    int getHeight() {}
-    int getXPosition() {}
-    int getYPosition() {}
-    float getVelocity() {}
-    float getAcceleration() {}
-    bool loadTexture(SDL_Renderer *renderer); // load texture into entity
-    void render(SDL_Renderer *renderer);      // render entity
+    // Setters    
+    void setEntityID(int id);
+    void setSize(Size size);
+    void setOriginalSize(Size size);
+    void setPosition(Position position);
+    void setOriginalPosition(Position position);
+    void setEntityType(EntityType entityType);
+    void setShapeType(ShapeType shapeType);
+    void setVelocityX(float velocityX);
+    void setVelocityY(float velocityY);
+    void setAccelerationX(float accelerationX);
+    void setAccelerationY(float accelerationY);
+    void setCircleRadius(float radius);
+    void setOriginalCircleRadius(float radius);
+    void setTriangleBaseLength(float baseLength);
+    void setOriginalTriangleBaseLength(float baseLength);
+    void setTriangleHeight(float height);
+    void setOriginalTriangleHeight(float height);
+    void setColor(SDL_Color color);
 
-    // render a rectangle onto the window
-    void drawRect(SDL_Renderer *renderer, std::pair<int, int> position, std::pair<int, int> size, SDL_Color color);
-    // render a circle onto the window
-    void drawCircle(SDL_Renderer *renderer, std::pair<int, int> position, int radius, SDL_Color color);
-    // render a triangle onto the window
-    void drawTriangle(SDL_Renderer *renderer, std::pair<int, int> position, int base, int height, SDL_Color color);
+    // Getters
+    int getEntityID() const;
+    Size getSize() const;
+    Position getPosition() const;
+    Position getOriginalPosition() const;
+    EntityType getEntityType() const;
+    ShapeType getShapeType() const;
+    float getVelocityX() const;
+    float getVelocityY() const;
+    float getAccelerationX() const;
+    float getAccelerationY() const;
+    float getCircleRadius() const;
+    float getTriangleBaseLength() const;
+    float getTriangleHeight() const;
+
+    void generateEntityID();
+    bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
+    void render(SDL_Renderer *renderer);                  // Render entity 
+    void applyScaling(float scaleX, float scaleY);        
+    void shutdown();
 
 private:
-    int width;  // Width in pixels
-    int height; // Height in pixels
-    int xPosition;
-    int yPosition;
-    float velocity;
-    float acceleration;
+    Position _position = {};
+    Size _size = {};
+    EntityType _entityType = EntityType::DEFAULT;
+    ShapeType _shape = ShapeType::NONE;
+    Velocity _velocity = {};
+    Acceleration _acceleration = {};
+    SDL_Color _color;
 
-    const char *texturePath; // Path of the texture file
-    SDL_Texture *texture;    // Texture of the entity
+    float _circleRadius = 0.0f;
+    float _triangleBaseLength = 0.0f;
+    float _triangleHeight = 0.0f;
+
+    // Variables to hold original sizes (used in screen scaling)
+    Position _originalPosition = {};
+    Size _originalSize = {};
+    float _originalCircleRadius = 0.0f;  
+    float _originalTriangleBaseLength = 0.0f;  
+    float _originalTriangleHeight = 0.0f;  
+
+    const char* _texturePath = nullptr;                  // Path of the texture file
+    SDL_Texture* _texture = nullptr;                     // Texture of the entity
+
+    void drawRectangle(SDL_Renderer* renderer);
+    void drawCircle(SDL_Renderer* renderer);
+    void drawTriangle(SDL_Renderer* renderer);
+
+    int _entityID;                                       // Unique ID of the entity
+    static int _nextID;                                  // Variable to track next available ID
 };

@@ -29,6 +29,7 @@ bool Renderer::initialize(SDL_Window* window) {
 
 // Erases everything drawn in the screen
 void Renderer::clear() {
+	SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);
 	SDL_RenderClear(_renderer);
 }
 
@@ -43,4 +44,8 @@ void Renderer::shutdown() {
 		SDL_DestroyRenderer(_renderer);
 		_renderer = nullptr;
 	}
+}
+
+SDL_Renderer* Renderer::getSDLRenderer() {
+	return _renderer;
 }
