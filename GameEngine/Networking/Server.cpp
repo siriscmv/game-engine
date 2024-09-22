@@ -60,14 +60,17 @@ void Server::run() {
         }
         });
 
-    while (true) {
-        handleClientHandeshake();
-        listenToClientMessages();
-        updateClientEntities();    
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));              // 60hz tick rate
-    }
+    std::thread clientThread([this]() {
+        while (true) {
+            handleClientHandeshake();
+            listenToClientMessages();
+            updateClientEntities();
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));              // 60hz tick rate
+        }
+    });
 
     gameEngineThread.join();
+    clientThread.join();
 }
 
 // Returns the initial world info to clients who request it
