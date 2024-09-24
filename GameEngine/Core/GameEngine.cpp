@@ -117,9 +117,18 @@ void GameEngine::handleServerMode() {
 void GameEngine::handleClientMode() {
 	SDL_PumpEvents();                                          // Force an event queue update
 	_renderer->clear();
-	_inputManager->process();                                  // This will send button presses to server
 
-	_client->receiveUpdatesFromServer();
+	std::thread inputThread([this]() {
+		_inputManager->process();
+	});
+
+	std::thread callbackThread([this]() {
+		_onCycle();
+	});
+
+	std::thread communicationThread([this]() {
+		_client->receiveUpdatesFromServer();
+	});
 	
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
@@ -130,7 +139,10 @@ void GameEngine::handleClientMode() {
 	}
 
 	_renderer->present();
-	_onCycle();
+
+	inputThread.join();
+	callbackThread.join();
+	communicationThread.join();
 
 	SDL_Delay(16);                                                // Setting 60hz refresh rate
 }
@@ -142,10 +154,19 @@ void GameEngine::handlePeerToPeerMode() { return; }
 void GameEngine::handleSinglePlayerMode() {	
 	SDL_PumpEvents();                                             // Force an event queue update
 	_renderer->clear();
-	_inputManager->process();
 
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
-	_physicsSystem->run(0.1f, entitiesWithCollisions);                                  // Running the physics engine
+	std::thread inputThread([this]() {
+		_inputManager->process();
+	});
+
+	std::thread callbackThread([this]() {
+		_onCycle();
+	});
+
+	std::thread physicsThread([this]() {
+		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
+		_physicsSystem->run(0.1f, entitiesWithCollisions);
+	});
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
@@ -156,7 +177,10 @@ void GameEngine::handleSinglePlayerMode() {
 	}
 
 	_renderer->present();
-	_onCycle();
+
+	inputThread.join();
+	callbackThread.join();
+	physicsThread.join();
 
 	SDL_Delay(16);                                                // Setting 60hz refresh rate
 }
