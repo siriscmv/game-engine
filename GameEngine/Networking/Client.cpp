@@ -20,10 +20,7 @@ Client::~Client() {
 }
 
 // Initializes the client. Binds ports into pub-sub and req-rep models.
-void Client::initialize(int pubPort, int subPort, int reqPort) {
-
-    _publisher.set(zmq::sockopt::sndhwm, 1000);
-    _subscriber.set(zmq::sockopt::rcvhwm, 1000);
+void Client::initialize(int pubPort, int subPort, int reqPort) {    
 
     _publisher.connect("tcp://localhost:" + std::to_string(pubPort));   
     _subscriber.connect("tcp://localhost:" + std::to_string(subPort)); 

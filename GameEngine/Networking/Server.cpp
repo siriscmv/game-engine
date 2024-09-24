@@ -30,10 +30,7 @@ Server::~Server() {
 }
 
 // Initializes the server. Binds ports into pub-sub and req-rep models.
-void Server::initialize(int pubPort, int subPort, int reqPort) {
-
-    _publisher.set(zmq::sockopt::sndhwm, 1000);  
-    _subscriber.set(zmq::sockopt::rcvhwm, 1000); 
+void Server::initialize(int pubPort, int subPort, int reqPort) {   
 
     _publisher.bind("tcp://*:" + std::to_string(pubPort));
     _subscriber.bind("tcp://*:" + std::to_string(subPort));

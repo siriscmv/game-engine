@@ -101,9 +101,7 @@ void GameEngine::run() {
 			case Mode::SINGLE_PLAYER:
 				handleSinglePlayerMode();
 				break;			
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(16));
+		}		
 	}
 }
 
@@ -111,6 +109,7 @@ void GameEngine::run() {
 void GameEngine::handleServerMode() {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 	_physicsSystem->run(0.1f, entitiesWithCollisions);                                  // Running the physics engine
+	SDL_Delay(16);
 }
 
 // Handles the client's game engine logic in server-client multiplayer
