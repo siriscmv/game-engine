@@ -1,6 +1,6 @@
 #pragma once
 
-enum class GameState { PLAY, EXIT };                                     // A state enum class to manage a simple state machine
+enum class GameState { PLAY, EXIT, PAUSED };                                     // A state enum class to manage a simple state machine
 enum class Mode { SERVER, CLIENT, PEER, SINGLE_PLAYER };                 // Mode of the game engine (who does it serve)
 
 // An enum class to manage the shape of the entity

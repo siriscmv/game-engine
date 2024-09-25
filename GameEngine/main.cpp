@@ -25,9 +25,16 @@ int main(int argc, char** argv) {
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, playerEntities);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerOne, 0);
+	server.sendGlobalTime();
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerTwo, 0);	
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerThree, 0);
-	server.getGameEngine()->getPhysicsSystem()->applyPhysics(platform, 0);	
+	server.getGameEngine()->getPhysicsSystem()->applyPhysics(platform, 0);
+
+	//begin Timeline
+	Timeline globalTimeline;
+	Timeline localTimeline(&globalTimeline, 1);
+	Timeline localTimeline2(&globalTimeline, 1);
+	Timeline localTimeline3(&globalTimeline, 1);
 
 	// Initializing the server and simulating the game world in the server
 	server.initialize();

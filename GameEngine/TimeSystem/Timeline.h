@@ -23,14 +23,18 @@ private:
     int64_t last_time;               // lst calculated logical time
     int64_t last_real_time;          // al time used for calculation
 
-public:
-    // Constructor for timeline with anchor
-    Timeline(Timeline* anchor, int64_t tic, TimelineType type = TimelineType::Local);
+    Timeline* globalTimeline;
+    Timeline* currentLocalTimeline;
 
-    Timeline(Timeline* anchor, int64_t tic, TimelineType type = TimelineType::Local);
-    
-	// for a global timeline, assuming global timelines dont require an anchor
+
+public:
+    // Constructor for client timelines with anchor
+    Timeline(Timeline* anchor, int64_t tic, TimelineType type = TimelineType::Global);
+
+	// for the server's global timeline, assuming global timelines dont require an anchor
 	Timeline();
+
+    bool initialize(TimelineType type);
 
     ~Timeline();
 
@@ -57,4 +61,6 @@ public:
 
     // Get the current speed of time progression
     double getSpeed() const;
+
+    void createNewLocalTimeline();
 };

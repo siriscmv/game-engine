@@ -17,6 +17,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
+	_timeline = new Timeline();
 	if (mode == Mode::CLIENT) _client = new Client();
 }
 
@@ -32,13 +33,16 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 
 	try {
 		switch (_mode) {
-			// Server initialization: Requires only physics
+			// Server initialization: Requires only physics and global timeline
 			case Mode::SERVER:				
 				if (!_physicsSystem->initialize()) 
 					throw std::runtime_error("Failed to initialize Physics System for Server");
+				if (!_timeline->initialize(TimelineType::Global)) {
+					throw std::runtime_error("Failed to initialize Time line for Server");
+				}
 				
 				break;
-			// Client initialization: Requires window and renderer
+				// Client initialization: Requires window, renderer, its own global and local timeline
 			case Mode::CLIENT:
 				if (_client) {
 					_client->initialize();					
@@ -52,7 +56,11 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 				}
 				if (!_renderer->initialize(_window->getSDLWindow())) {
 					throw std::runtime_error("Failed to initialize Renderer for Client");
-				}			
+				}
+				if (!_timeline->initialize(TimelineType::Local)) {
+					throw std::runtime_error("Failed to initialize Time line for Server");
+				}
+
 				break;
 		
 			// TODO: write logic once peer to peer is done
@@ -68,6 +76,9 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 				}
 				if (!_physicsSystem->initialize()) {
 					throw std::runtime_error("Failed to initialize Physics System for Single Player/Peer");
+				}
+				if (!_timeline->initialize(TimelineType::Local)) {
+					throw std::runtime_error("Failed to initialize Time line for Single Player/Peer");
 				}
 				break;
 			default:
@@ -85,6 +96,7 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 // Game loop. Runs while the state is 'PLAY'.
 void GameEngine::run() {
 	while (_gameState == GameState::PLAY) {
+		// Calculate elapsed time
 		switch (_mode) {
 			case Mode::SERVER:
 				handleServerMode();
@@ -105,7 +117,7 @@ void GameEngine::run() {
 // Handles the server's game engine logic in server-client multiplayer
 void GameEngine::handleServerMode() {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
-	_physicsSystem->run(0.1f, entitiesWithCollisions);                                  // Running the physics engine
+	_physicsSystem->run(0.1f,entitiesWithCollisions);                                  // Running the physics engine
 }
 
 // Handles the client's game engine logic in server-client multiplayer
@@ -135,7 +147,6 @@ void GameEngine::handlePeerToPeerMode() { return; }
 	
 // Handles the singleplayer game engine logic.
 void GameEngine::handleSinglePlayerMode() {	
-	SDL_PumpEvents();                                             // Force an event queue update
 	_renderer->clear();
 	_inputManager->process();
 
@@ -161,6 +172,7 @@ void GameEngine::sendInputToServer(const std::string& buttonPress) {
 	_client->sendInputToServer(buttonPress);
 }
 
+
 // Quits the game engine. Destroys all objects
 void GameEngine::shutdown() {
 	_renderer->shutdown();
@@ -178,6 +190,7 @@ void GameEngine::shutdown() {
 void GameEngine::toggleScalingMode() {
 	_window->toggleScalingMode();
 }
+
 
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
