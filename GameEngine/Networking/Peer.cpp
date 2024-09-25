@@ -18,8 +18,8 @@ Peer::Peer() {
 Peer::~Peer() {
 	_publisher.close();
 
-    for (auto _subscriber: _subscribers) {
-        _subscriber->close();
+    for (auto &_subscriber: _subscribers) {
+        _subscriber.close();
     }
 }
 
@@ -45,7 +45,7 @@ bool Peer::handshakeWithServer() {
         _requester.send(request, zmq::send_flags::none);
 
         zmq::message_t reply;                                                     // Response
-        auto result = _requester.recv(reply, zmq::recv_flags::none);
+        const auto result = _requester.recv(reply, zmq::recv_flags::none);
 
         if (!result) {
             printf("Failed to receive response from server.\n");
@@ -56,7 +56,7 @@ bool Peer::handshakeWithServer() {
 
         std::vector<std::string> parts = split(response, *"|");
 
-        int peerId = atoi(parts[0].c_str());
+        const int peerId = atoi(parts[0].c_str());
         printf("Self PeerId: %d\n", peerId);
 
         _peerID = peerId;
@@ -67,16 +67,16 @@ bool Peer::handshakeWithServer() {
             auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
             socket.connect("tcp://localhost:" + parts[i]);
             socket.set(zmq::sockopt::subscribe, "entity_update");
-            _subscribers.push_back(&socket);
+            _subscribers.push_back(std::move(socket));
         }
 
         zmq::message_t req2("ENTITIES", 8);                                     // Request
-        _requester.send(request, zmq::send_flags::none);
+        _requester.send(req2, zmq::send_flags::none);
 
         zmq::message_t rep2;                                                     // Response
-        auto res2 = _requester.recv(reply, zmq::recv_flags::none);
+        auto res2 = _requester.recv(rep2, zmq::recv_flags::none);
 
-        if (!result) {
+        if (!res2) {
             printf("Failed to receive response from server.\n");
             return false;
         }
@@ -120,18 +120,20 @@ void Peer::broadcastUpdates() {
 }
 
 void Peer::receiveUpdates() {
-    for (auto _subscriber: _subscribers) {
+    for (auto &_subscriber: _subscribers) {
         zmq::message_t reply;
 
-        if (_subscriber->recv(reply, zmq::recv_flags::dontwait)) {
+        if (_subscriber.recv(reply, zmq::recv_flags::dontwait)) {
             std::string received_msg(static_cast<char*>(reply.data()), reply.size());
 
             if (received_msg.rfind("new_peer|", 0) == 0) {
-                int newPeerId = atoi((split(received_msg, *"|")[1]).c_str());
+                const int newPeerId = atoi((split(received_msg, *"|")[1]).c_str());
+                if (newPeerId == _peerID) continue;
+
                 auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
                 socket.connect("tcp://localhost:" + std::to_string(newPeerId));
                 socket.set(zmq::sockopt::subscribe, "entity_update");
-                _subscribers.push_back(&socket);
+                _subscribers.push_back(std::move(socket));
             } else if (received_msg.rfind("entity_update|", 0) == 0) {
                 std::vector<std::string> parts = split(received_msg, *"|");
 

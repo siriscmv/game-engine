@@ -13,7 +13,7 @@ public:
     Peer();
     ~Peer();
 
-    void initialize(int serverPort = 10000);
+    void initialize(int serverPort = 9999);
     bool handshakeWithServer();
     void receiveUpdates();
 
@@ -27,7 +27,7 @@ public:
 private:
     zmq::context_t _context;
     zmq::socket_t _publisher;
-    std::vector<zmq::socket_t*> _subscribers;
+    std::vector<zmq::socket_t> _subscribers;
     zmq::socket_t _requester;
 
     std::vector<Entity*> _entities;

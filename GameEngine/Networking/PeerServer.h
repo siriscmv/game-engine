@@ -10,7 +10,7 @@
 
 class PeerServer {
 public:
-    PeerServer();
+    PeerServer(const std::vector<Entity*>& entities);
     ~PeerServer();
 
     void initialize();

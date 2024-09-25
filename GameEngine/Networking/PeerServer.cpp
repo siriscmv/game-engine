@@ -10,13 +10,14 @@
 #include <ZMQ/zmq.hpp>
 #endif
 
-PeerServer::PeerServer() {
+PeerServer::PeerServer(const std::vector<Entity*>& entities) {
 	_context = zmq::context_t(1);
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
 	_responder = zmq::socket_t(_context, zmq::socket_type::rep);
+	_entities = entities;
 }
 
-constexpr int START_ID = 10000;
+constexpr int START_ID = 9999;
 int currentId = START_ID;
 
 PeerServer::~PeerServer() {
@@ -43,7 +44,7 @@ void PeerServer::run() {
 
 			message << peerId << "|";
 
-			for (int i = peerId-1; i >= START_ID; i--) {
+			for (int i = peerId-1; i > START_ID; i--) {
 				message << i << "|";
 			}
 
@@ -58,7 +59,7 @@ void PeerServer::run() {
 			for (auto _entity: _entities) {
 				message << Server::serializeEntity(*_entity) << "|";
 			}
-		} else {
+		} else if (!clientRequest.empty()) {
 			throw std::runtime_error("Invalid request");
 		}
 

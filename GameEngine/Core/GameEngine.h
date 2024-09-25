@@ -25,6 +25,9 @@ public:
 	InputManager * getInputManager();
 	GameState getGameState();
 	Client* getClient();
+
+	Peer *getPeer();
+
 	void setGameState(GameState state);
 	// A callback function that is triggered after each render cycle
 	void setOnCycle(const std::function<void()> &);

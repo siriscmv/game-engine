@@ -23,7 +23,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();
-	if (mode == Mode::PEER_SERVER) _peerServer = new PeerServer();
+	if (mode == Mode::PEER_SERVER) _peerServer = new PeerServer(_entities);
 }
 
 GameEngine::~GameEngine() {
@@ -44,9 +44,8 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 					throw std::runtime_error("Failed to initialize Physics System for Server");
 
 			case Mode::PEER_SERVER:
+				_peerServer->initialize();
 
-				break;
-				
 				break;
 			// Client initialization: Requires window and renderer
 			case Mode::CLIENT:
@@ -279,6 +278,7 @@ InputManager* GameEngine::getInputManager() { return _inputManager; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 Client* GameEngine::getClient() { return _client; }
+Peer* GameEngine::getPeer() { return _peer; }
 
 // Setters
 void GameEngine::setGameState(GameState state) { _gameState = state; }
