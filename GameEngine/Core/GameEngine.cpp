@@ -194,7 +194,7 @@ void GameEngine::handlePeerToPeerMode() {
 	std::copy_if(_entities.begin(), _entities.end(), std::back_inserter(filteredEntities), predicate);
 
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(filteredEntities);        // Running the collision system
-	_physicsSystem->run(0.1f, entitiesWithCollisions);
+	_physicsSystem->runForGivenEntities(0.1f,entitiesWithCollisions, filteredEntities);
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 

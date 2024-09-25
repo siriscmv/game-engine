@@ -36,7 +36,27 @@ void PhysicsSystem::run(float deltaTime, std::set<Entity*>& entitiesToIgnore) {
 	}	
 }
 
+void PhysicsSystem::runForGivenEntities(float deltaTime, std::set<Entity*>& entitiesToIgnore, const std::vector<Entity*>& entities) {
+	for (Entity* entity : entities) {
+		if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
+			// Updating velocity with acceleration (v = u + at)
+			entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
+			entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
+
+			// Updating position with velocity (s = s0 + vt)
+			entity->setOriginalPosition(Position(
+				entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
+				entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
+			));
+		}
+	}
+}
+
 // Clears up the entities variable
 void PhysicsSystem::shutdown() {
 	_entities.clear();
+}
+
+void PhysicsSystem::setEntities(const std::vector<Entity*>& entities) {
+	_entities = entities;
 }
