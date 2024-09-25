@@ -20,6 +20,8 @@ public:
 
 	GameEngine* getGameEngine() const;
 
+	static std::string serializeEntity(const Entity& entity);
+
 private:
 	std::vector<Entity*> _worldEntities;
 	std::vector<Entity*> _playerEntities;                                // Initial spawn points of players
@@ -39,5 +41,4 @@ private:
 	void listenToClientMessages();
 	void processClientInput(int clientId, const std::string& buttonPress);
 	void updateClientEntities();
-	std::string serializeEntity(const Entity& entity);
 };

@@ -31,6 +31,8 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Collision/CollisionSystem.cpp
         GameEngine/Networking/Client.cpp
         GameEngine/Networking/Server.cpp
+        GameEngine/Networking/Peer.cpp
+        GameEngine/Networking/PeerServer.cpp
 )
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})

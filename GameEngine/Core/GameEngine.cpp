@@ -20,7 +20,10 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
+
 	if (mode == Mode::CLIENT) _client = new Client();
+	if (mode == Mode::PEER) _peer = new Peer();
+	if (mode == Mode::PEER_SERVER) _peerServer = new PeerServer();
 }
 
 GameEngine::~GameEngine() {
@@ -39,6 +42,10 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 			case Mode::SERVER:				
 				if (!_physicsSystem->initialize()) 
 					throw std::runtime_error("Failed to initialize Physics System for Server");
+
+			case Mode::PEER_SERVER:
+
+				break;
 				
 				break;
 			// Client initialization: Requires window and renderer
@@ -58,8 +65,20 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 				}			
 				break;
 		
-			// TODO: write logic once peer to peer is done
 			case Mode::PEER:
+				if (_peer) {
+					_peer->initialize();
+					if (!_peer->handshakeWithServer()) {
+						throw std::runtime_error("Failed to connect to the server");
+					}
+					_entities = _peer->getEntities();
+				}
+				if (!_window->initialize()) {
+					throw std::runtime_error("Failed to initialize Window for Peer");
+				}
+				if (!_renderer->initialize(_window->getSDLWindow())) {
+					throw std::runtime_error("Failed to initialize Renderer for Peer");
+				}
 				break;
 			// Single Player initialization: Requires all systems 
 			case Mode::SINGLE_PLAYER:			
@@ -92,6 +111,9 @@ void GameEngine::run() {
 			case Mode::SERVER:
 				handleServerMode();
 				break;
+			case Mode::PEER_SERVER:
+				handlePeerServerMode();
+				break;
 			case Mode::CLIENT:
 				handleClientMode();
 				break;
@@ -110,6 +132,10 @@ void GameEngine::handleServerMode() {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 	_physicsSystem->run(0.1f, entitiesWithCollisions);                                  // Running the physics engine
 	SDL_Delay(16);
+}
+
+void GameEngine::handlePeerServerMode() {
+	_peerServer->run();
 }
 
 // Handles the client's game engine logic in server-client multiplayer
@@ -146,8 +172,49 @@ void GameEngine::handleClientMode() {
 	SDL_Delay(16);                                                // Setting 60hz refresh rate
 }
 
-// TODO: Complete when peer to peer is done
-void GameEngine::handlePeerToPeerMode() { return; }
+void GameEngine::handlePeerToPeerMode() {
+	SDL_PumpEvents();                                          // Force an event queue update
+	_renderer->clear();
+
+	std::thread inputThread([this]() {
+		_inputManager->process();
+	});
+
+	std::thread callbackThread([this]() {
+		_onCycle();
+	});
+
+	std::thread communicationThread([this]() {
+		_peer->receiveUpdates();
+	});
+
+	// Run physics for own entities
+
+	auto predicate = [this](const Entity* entity) { return std::to_string(entity->getEntityID()).rfind(std::to_string(_peer->getPeerId()), 0) == 0; };
+	std::vector<Entity *> filteredEntities;
+	std::copy_if(_entities.begin(), _entities.end(), std::back_inserter(filteredEntities), predicate);
+
+	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(filteredEntities);        // Running the collision system
+	_physicsSystem->run(0.1f, entitiesWithCollisions);
+
+	auto [scaleX, scaleY] = _window->getScaleFactors();
+
+	// Rendering all entities
+	for (Entity* entity : _entities) {
+		entity->applyScaling(scaleX, scaleY);
+		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
+	}
+
+	_renderer->present();
+
+	_peer->broadcastUpdates();
+
+	inputThread.join();
+	callbackThread.join();
+	communicationThread.join();
+
+	SDL_Delay(16);                                                // Setting 60hz refresh rate
+}
 	
 // Handles the singleplayer game engine logic.
 void GameEngine::handleSinglePlayerMode() {	

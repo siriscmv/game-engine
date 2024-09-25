@@ -1,12 +1,13 @@
 #pragma once
 
+#include "PeerServer.h"
+#include "Peer.h"
 #include "CollisionSystem.h"
 #include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "Globals.h"
-#include <string>
 #include "Client.h"
 
 
@@ -44,8 +45,13 @@ private:
 	std::function<void()> _onCycle;
 
 	Client* _client = nullptr;
+	Peer* _peer = nullptr;
+	PeerServer* _peerServer = nullptr;
 	
 	void handleServerMode();
+
+	void handlePeerServerMode();
+
 	void handleClientMode();
 	void handlePeerToPeerMode();
 	void handleSinglePlayerMode();

@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
 
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, playerEntities);
-	//FIXME: @cyril
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerOne, 9);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerTwo, 9);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerThree, 9);
