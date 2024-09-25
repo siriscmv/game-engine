@@ -15,6 +15,10 @@ int main(int argc, char** argv) {
 	playerTwo.setEntityID(10002);
 	playerThree.setEntityID(10003);
 
+	playerOne.setAccelerationY(10.0f);
+	playerTwo.setAccelerationY(10.0f);
+	playerThree.setAccelerationY(10.0f);
+
 	// Game world 
 	Entity platform(Position(0, 600), Size(1920, 50));
 	platform.setEntityType(EntityType::FIXED);

@@ -10,9 +10,10 @@
 #endif
 
 Peer::Peer() {
-	_context = zmq::context_t(1);
-	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
-    _requester = zmq::socket_t(_context, zmq::socket_type:: req);
+    _context = zmq::context_t(1);
+    _publisher = zmq::socket_t(_context, zmq::socket_type::pub);
+    _requester = zmq::socket_t(_context, zmq::socket_type::req);
+    _peerID = -1;
 }
 
 Peer::~Peer() {
@@ -61,12 +62,12 @@ bool Peer::handshakeWithServer() {
 
         _peerID = peerId;
 
-        _publisher.connect("tcp://localhost:" + std::to_string(peerId));
+        _publisher.bind("tcp://*:" + std::to_string(peerId));
 
         for (int i = 1; i < parts.size(); i++) {
             auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
             socket.connect("tcp://localhost:" + parts[i]);
-            socket.set(zmq::sockopt::subscribe, "entity_update");
+            socket.set(zmq::sockopt::subscribe, "");
             _subscribers.push_back(std::move(socket));
         }
 
@@ -106,7 +107,7 @@ void Peer::broadcastUpdates() {
     std::ostringstream messageStream;
     messageStream << "entity_update|" << _peerID << "|";
 
-    for (const auto _entity: _entities) {
+    for (auto _entity: _entities) {
         if (std::to_string(_entity->getEntityID()).rfind(std::to_string(_peerID), 0) == 0) {
             messageStream << _entity->getEntityID() << "," << _entity->getPosition().x << "," << _entity->getPosition().y << "|";
         }
@@ -132,7 +133,7 @@ void Peer::receiveUpdates() {
 
                 auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
                 socket.connect("tcp://localhost:" + std::to_string(newPeerId));
-                socket.set(zmq::sockopt::subscribe, "entity_update");
+                socket.set(zmq::sockopt::subscribe, "");
                 _subscribers.push_back(std::move(socket));
             } else if (received_msg.rfind("entity_update|", 0) == 0) {
                 std::vector<std::string> parts = split(received_msg, *"|");

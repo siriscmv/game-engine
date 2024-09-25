@@ -174,6 +174,9 @@ Entity* Client::deserializeEntity(const std::string& json) {
         Entity* entity = new Entity(Position(x, y), Size(width, height));
         entity->setEntityID(id);
 
+        //FIXME: @cyril Ugly hack
+        entity->setAccelerationY(9);
+
         printf("Deserialized entity ID: %d, Position: (%f, %f)\n", id, x, y);
 
         return entity;

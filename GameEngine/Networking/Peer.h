@@ -30,7 +30,7 @@ private:
     std::vector<zmq::socket_t> _subscribers;
     zmq::socket_t _requester;
 
-    std::vector<Entity*> _entities;
+    std::vector<Entity *> _entities;
 
     int _peerID;
 };
