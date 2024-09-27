@@ -1,10 +1,14 @@
 #pragma once
 
-#include <ZMQ/zmq.hpp>
 #include <Entity.h>
 #include <GameEngine.h>
 #include <vector>
 #include <map>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 class Server {
 public:
@@ -15,6 +19,8 @@ public:
 	void run();
 
 	GameEngine* getGameEngine() const;
+
+	static std::string serializeEntity(const Entity& entity);
 
 private:
 	std::vector<Entity*> _worldEntities;
@@ -35,5 +41,4 @@ private:
 	void listenToClientMessages();
 	void processClientInput(int clientId, const std::string& buttonPress);
 	void updateClientEntities();
-	std::string serializeEntity(const Entity& entity);
 };

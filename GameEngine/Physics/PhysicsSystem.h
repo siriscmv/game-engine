@@ -3,7 +3,7 @@
 #include <set>
 
 #include "Entity.h"
-#include <Vector>
+#include <vector>
 
 // A singleton class that simulates a physics system. Currently handles 
 // gravity, horizontal movement, and vertical movement.
@@ -27,8 +27,12 @@ public:
 	// Simulates physics of the entire system
 	void run(float deltaTime, std::set<Entity*>& entitiesToIgnore);
 
+	void runForGivenEntities(float deltaTime, std::set<Entity*>& entitiesToIgnore, const std::vector<Entity *> &entities);
+
 	// Shuts the physics engine down
 	void shutdown();
+
+	void setEntities(const std::vector<Entity *> &entities);
 
 private:
 	PhysicsSystem() = default;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <set>
-#include <Vector>
+#include <vector>
 #include "Entity.h"
 
 // A singleton class that handles collisions between game entities

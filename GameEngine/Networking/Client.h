@@ -1,8 +1,12 @@
 #pragma once
 
 #include "Entity.h"
-#include <ZMQ/zmq.hpp>
 #include <vector>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 class Client {
 public:
@@ -14,7 +18,7 @@ public:
     void sendInputToServer(const std::string& buttonPress);
     void receiveUpdatesFromServer();
 
-    Entity* deserializeEntity(const std::string& json);
+    static Entity* deserializeEntity(const std::string& json);
 
     void setClientID(int id);
     std::vector<Entity*> getEntities() const;

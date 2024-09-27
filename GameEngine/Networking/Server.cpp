@@ -30,10 +30,7 @@ Server::~Server() {
 }
 
 // Initializes the server. Binds ports into pub-sub and req-rep models.
-void Server::initialize(int pubPort, int subPort, int reqPort) {
-
-    _publisher.set(zmq::sockopt::sndhwm, 1000);  
-    _subscriber.set(zmq::sockopt::rcvhwm, 1000); 
+void Server::initialize(int pubPort, int subPort, int reqPort) {   
 
     _publisher.bind("tcp://*:" + std::to_string(pubPort));
     _subscriber.bind("tcp://*:" + std::to_string(subPort));
@@ -60,14 +57,17 @@ void Server::run() {
         }
         });
 
-    while (true) {
-        handleClientHandeshake();
-        listenToClientMessages();
-        updateClientEntities();    
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));              // 60hz tick rate
-    }
+    std::thread clientThread([this]() {
+        while (true) {
+            handleClientHandeshake();
+            listenToClientMessages();
+            updateClientEntities();
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));              // 60hz tick rate
+        }
+    });
 
     gameEngineThread.join();
+    clientThread.join();
 }
 
 // Returns the initial world info to clients who request it
@@ -141,16 +141,16 @@ void Server::processClientInput(int clientId, const std::string& buttonPress) {
         Entity* playerEntity = _clientMap[clientId];
         
         if (buttonPress == "left") {
-            playerEntity->setVelocityX(-0.005f);
+            playerEntity->setVelocityX(-50.0f);
         }
         else if (buttonPress == "right") {
-            playerEntity->setVelocityX(0.005f);
+            playerEntity->setVelocityX(50.0f);
         }
         else if (buttonPress == "up") {
-            playerEntity->setVelocityY(-0.005f);
+            playerEntity->setVelocityY(-50.0f);
         }
         else if (buttonPress == "down") {
-            playerEntity->setVelocityY(0.005f);
+            playerEntity->setVelocityY(50.0f);
         }
     }
 }

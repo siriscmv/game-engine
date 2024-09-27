@@ -1,17 +1,22 @@
 #include "GameEngine.h"
 #include "Entity.h"
 #include "Server.h"
+#include "PeerServer.h"
 
 // Use this file to experiment with the Engine
 int main(int argc, char** argv) {
 	
 	// Player spawns
-	Entity playerOne(Position(50, 450), Size(50, 50));
-	Entity playerTwo(Position(100, 550), Size(50, 50));
-	Entity playerThree(Position(200, 750), Size(50, 50));
+	Entity playerOne(Position(50, 250), Size(50, 50));
+	Entity playerTwo(Position(200, 350), Size(50, 50));
+	Entity playerThree(Position(400, 550), Size(50, 50));	
+
+	playerOne.setAccelerationY(10.0f);
+	playerTwo.setAccelerationY(10.0f);
+	playerThree.setAccelerationY(10.0f);
 
 	// Game world 
-	Entity platform(Position(0, 1030), Size(1920, 50));
+	Entity platform(Position(0, 600), Size(1920, 50));
 	platform.setEntityType(EntityType::FIXED);
 
 	std::vector<Entity*> playerEntities;
@@ -22,23 +27,12 @@ int main(int argc, char** argv) {
 	std::vector<Entity*> worldEntities;
 	worldEntities.push_back(&platform);
 
-	// Creating the server with the world entities and player entities.
-	Server server(worldEntities, playerEntities);
-	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerOne, 0);
-	server.sendGlobalTime();
-	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerTwo, 0);	
-	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerThree, 0);
-	server.getGameEngine()->getPhysicsSystem()->applyPhysics(platform, 0);
+	PeerServer peerServer(worldEntities, playerEntities);
+	peerServer.initialize();
 
-	//begin Timeline
-	Timeline globalTimeline;
-	Timeline localTimeline(&globalTimeline, 1);
-	Timeline localTimeline2(&globalTimeline, 1);
-	Timeline localTimeline3(&globalTimeline, 1);
-
-	// Initializing the server and simulating the game world in the server
-	server.initialize();
-	server.run();
+	while (true) {
+		peerServer.run();
+	}
 
 	return 0;
 }

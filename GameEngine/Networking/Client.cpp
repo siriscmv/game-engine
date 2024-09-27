@@ -1,7 +1,11 @@
 #include "Client.h"
-#include <ZMQ/zmq.hpp>
 #include <iostream>
 #include <string>
+#ifdef __APPLE__
+#include <zmq.hpp>
+#else
+#include <ZMQ/zmq.hpp>
+#endif
 
 Client::Client() {    
 	_context = zmq::context_t(1);
@@ -16,10 +20,7 @@ Client::~Client() {
 }
 
 // Initializes the client. Binds ports into pub-sub and req-rep models.
-void Client::initialize(int pubPort, int subPort, int reqPort) {
-
-    _publisher.set(zmq::sockopt::sndhwm, 1000);
-    _subscriber.set(zmq::sockopt::rcvhwm, 1000);
+void Client::initialize(int pubPort, int subPort, int reqPort) {    
 
     _publisher.connect("tcp://localhost:" + std::to_string(pubPort));   
     _subscriber.connect("tcp://localhost:" + std::to_string(subPort)); 
@@ -172,6 +173,9 @@ Entity* Client::deserializeEntity(const std::string& json) {
         // Create the entity
         Entity* entity = new Entity(Position(x, y), Size(width, height));
         entity->setEntityID(id);
+
+        //FIXME: @cyril Ugly hack
+        entity->setAccelerationY(9);
 
         printf("Deserialized entity ID: %d, Position: (%f, %f)\n", id, x, y);
 

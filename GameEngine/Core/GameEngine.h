@@ -1,12 +1,13 @@
 #pragma once
 
+#include "PeerServer.h"
+#include "Peer.h"
 #include "CollisionSystem.h"
 #include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "Globals.h"
-#include <string>
 #include "Client.h"
 #include "../TimeSystem/Timeline.h"
 
@@ -25,6 +26,9 @@ public:
 	InputManager * getInputManager();
 	GameState getGameState();
 	Client* getClient();
+
+	Peer *getPeer();
+
 	void setGameState(GameState state);
 	// A callback function that is triggered after each render cycle
 	void setOnCycle(const std::function<void()> &);
@@ -46,8 +50,13 @@ private:
 	Timeline* _timeline;
 
 	Client* _client = nullptr;
+	Peer* _peer = nullptr;
+	PeerServer* _peerServer = nullptr;
 	
 	void handleServerMode();
+
+	void handlePeerServerMode();
+
 	void handleClientMode();
 	void handlePeerToPeerMode();
 	void handleSinglePlayerMode();
