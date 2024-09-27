@@ -22,8 +22,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 
 	if (mode == Mode::CLIENT) _client = new Client();
-	if (mode == Mode::PEER) _peer = new Peer();
-	if (mode == Mode::PEER_SERVER) _peerServer = new PeerServer(_entities);
+	if (mode == Mode::PEER) _peer = new Peer();	
 }
 
 GameEngine::~GameEngine() {
@@ -172,37 +171,38 @@ void GameEngine::handleClientMode() {
 }
 
 void GameEngine::handlePeerToPeerMode() {
-	SDL_PumpEvents();                                          // Force an event queue update
+	SDL_PumpEvents();
 	_renderer->clear();
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
-	});
+		});
 
 	std::thread callbackThread([this]() {
 		_onCycle();
-	});
+		});
 
 	std::thread communicationThread([this]() {
-		_peer->receiveUpdates();
-		_entities = _peer->getEntities();
-	});
+		_peer->receiveUpdates();		
+		});
 
-	// Run physics for own entities
-
-	auto predicate = [this](const Entity* entity) { return std::to_string(entity->getEntityID()).rfind(std::to_string(_peer->getPeerId()), 0) == 0; };
-	std::vector<Entity *> filteredEntities;
+	// Run physics for own entity
+	int assignedEntityID = _peer->_entityID; 
+	auto predicate = [assignedEntityID](const Entity* entity) {
+		return entity->getEntityID() == assignedEntityID;
+		};
+	std::vector<Entity*> filteredEntities;
 	std::copy_if(_entities.begin(), _entities.end(), std::back_inserter(filteredEntities), predicate);
 
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
-	_physicsSystem->runForGivenEntities(0.1f,entitiesWithCollisions, filteredEntities);
+	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);
+	_physicsSystem->runForGivenEntities(0.1f, entitiesWithCollisions, filteredEntities);
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
 		entity->applyScaling(scaleX, scaleY);
-		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
+		entity->render(_renderer->getSDLRenderer());
 	}
 
 	_renderer->present();
@@ -213,7 +213,7 @@ void GameEngine::handlePeerToPeerMode() {
 	callbackThread.join();
 	communicationThread.join();
 
-	SDL_Delay(16);                                                // Setting 60hz refresh rate
+	SDL_Delay(16);
 }
 	
 // Handles the singleplayer game engine logic.

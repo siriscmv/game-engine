@@ -269,6 +269,8 @@
     <ClCompile Include="Networking\Client.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Networking\Peer.cpp" />
+    <ClCompile Include="Networking\PeerServer.cpp" />
     <ClCompile Include="Networking\Server.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -289,6 +291,8 @@
     <ClInclude Include="Networking\Client.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Networking\Peer.h" />
+    <ClInclude Include="Networking\PeerServer.h" />
     <ClInclude Include="Networking\Server.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunGameEngine|x64'">false</ExcludedFromBuild>
     </ClInclude>

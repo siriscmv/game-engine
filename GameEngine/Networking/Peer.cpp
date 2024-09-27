@@ -12,23 +12,29 @@
 Peer::Peer() {
     _context = zmq::context_t(1);
     _publisher = zmq::socket_t(_context, zmq::socket_type::pub);
+    _subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _requester = zmq::socket_t(_context, zmq::socket_type::req);
     _peerID = -1;
+    _entityID = -1;
 }
 
 Peer::~Peer() {
-	_publisher.close();
-
-    for (auto &_subscriber: _subscribers) {
-        _subscriber.close();
-    }
+    _publisher.close();
+    _subscriber.close();
+    _requester.close();
 }
 
-void Peer::initialize(int serverPort) {
-    _requester.connect("tcp://localhost:" + std::to_string(serverPort));
+void Peer::initialize(int reqPort, int serverPubPort) {
+    _requester.connect("tcp://localhost:" + std::to_string(reqPort));
+    _subscriber.connect("tcp://localhost:" + std::to_string(serverPubPort));
+    _subscriber.set(zmq::sockopt::subscribe, "");
+
+    std::cout << "Peer initialized." << std::endl;
+    std::cout << "REQ socket connected to port: " << reqPort << std::endl;
+    std::cout << "Subscribed to server's PUB socket on port: " << serverPubPort << std::endl;
 }
 
-std::vector<std::string> split(const std::string& str, char delim) {
+std::vector<std::string> Peer::split(const std::string& str, char delim) {
     std::vector<std::string> result;
     std::stringstream ss(str);
     std::string item;
@@ -40,54 +46,71 @@ std::vector<std::string> split(const std::string& str, char delim) {
     return result;
 }
 
+// Initial handshake with the peer server. Gets the peer ID, info about entities, and other peers.
 bool Peer::handshakeWithServer() {
     try {
-        zmq::message_t request("CONNECT", 7);                                     // Request
+        std::string connectRequest = "CONNECT";
+        zmq::message_t request(connectRequest.size());
+        memcpy(request.data(), connectRequest.c_str(), connectRequest.size());
         _requester.send(request, zmq::send_flags::none);
 
-        zmq::message_t reply;                                                     // Response
-        const auto result = _requester.recv(reply, zmq::recv_flags::none);
+        zmq::message_t reply;
+        auto result = _requester.recv(reply, zmq::recv_flags::none);
 
         if (!result) {
-            printf("Failed to receive response from server.\n");
+            std::cerr << "Failed to receive response from server." << std::endl;
             return false;
         }
 
         std::string response(static_cast<char*>(reply.data()), reply.size());
+        std::vector<std::string> parts = split(response, '|');
 
-        std::vector<std::string> parts = split(response, *"|");
-
-        const int peerId = atoi(parts[0].c_str());
-        printf("Self PeerId: %d\n", peerId);
-
-        _peerID = peerId;
-
-        _publisher.bind("tcp://*:" + std::to_string(peerId));
-
-        for (int i = 1; i < parts.size(); i++) {
-            auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
-            socket.connect("tcp://localhost:" + parts[i]);
-            socket.set(zmq::sockopt::subscribe, "");
-            _subscribers.push_back(std::move(socket));
-        }
-
-        zmq::message_t req2("ENTITIES", 8);                                     // Request
-        _requester.send(req2, zmq::send_flags::none);
-
-        zmq::message_t rep2;                                                     // Response
-        auto res2 = _requester.recv(rep2, zmq::recv_flags::none);
-
-        if (!res2) {
-            printf("Failed to receive response from server.\n");
+        if (parts.size() < 4) {
+            std::cerr << "Invalid response from server." << std::endl;
             return false;
         }
 
-        std::string resp2(static_cast<char*>(rep2.data()), rep2.size());
-        std::vector<std::string> parts2 = split(resp2, *"|");
+        // Get peer ID and assigned player entity ID
+        _peerID = std::stoi(parts[0]);
+        _entityID = std::stoi(parts[1]);
+        std::cout << "Assigned Peer ID: " << _peerID << ", Entity ID: " << _entityID << std::endl;
 
-        for (const auto& entityStr: parts2) {
+        // Parse the peerEntityMap
+        std::vector<std::string> peerEntityPairs = split(parts[2], ';');
+        for (const auto& pairStr : peerEntityPairs) {
+            if (pairStr.empty()) continue;
+            std::vector<std::string> pair = split(pairStr, ',');
+            if (pair.size() == 2) {
+                int peerID = std::stoi(pair[0]);
+                int entityID = std::stoi(pair[1]);
+                _peerEntityMap[peerID] = entityID;
+                if (peerID != _peerID) {
+                    _knownPeers.push_back(peerID);
+                }
+            }
+        }
+
+        // Subscribe to existing peers' publishers. Peers' publish port is equal to their peer ID
+        for (int peerID : _knownPeers) {
+            int peerPubPort = peerID;                         
+            _subscriber.connect("tcp://localhost:" + std::to_string(peerPubPort));
+            std::cout << "Subscribed to peer ID: " << peerID << " on port: " << peerPubPort << std::endl;
+        }
+
+        // Initialize publisher socket.
+        int pubPort = _peerID; 
+        _publisher.bind("tcp://*:" + std::to_string(pubPort));
+        std::cout << "PUB socket bound to port: " << pubPort << std::endl;
+
+        // Deserialize entities
+        std::string entitiesData = parts[3];
+        std::vector<std::string> entityLines = split(entitiesData, '\n');
+        for (const auto& entityStr : entityLines) {
+            if (entityStr.empty()) continue;
             Entity* entity = Client::deserializeEntity(entityStr);
-            _entities.push_back(entity);
+            if (entity) {
+                _entities.push_back(entity);
+            }
         }
 
         return true;
@@ -102,51 +125,71 @@ bool Peer::handshakeWithServer() {
     }
 }
 
-
+// Broadcasts player entity updates to other peers
 void Peer::broadcastUpdates() {
     std::ostringstream messageStream;
-    messageStream << "entity_update|" << _peerID << "|";
+    messageStream << "PEER_UPDATE|" << _peerID << "|" << _entityID;
 
-    for (auto _entity: _entities) {
-        if (std::to_string(_entity->getEntityID()).rfind(std::to_string(_peerID), 0) == 0) {
-            messageStream << _entity->getEntityID() << "," << _entity->getPosition().x << "," << _entity->getPosition().y << "|";
+    for (auto _entity : _entities) {
+        if (_entity->getEntityID() == _entityID) {
+            // Only broadcast the entity controlled by this peer
+            messageStream << "|" << _entity->getOriginalPosition().x << "," << _entity->getOriginalPosition().y;
+            break;
         }
     }
 
     std::string message = messageStream.str();
-
     zmq::message_t zmqMessage(message.size());
     memcpy(zmqMessage.data(), message.c_str(), message.size());
     _publisher.send(zmqMessage, zmq::send_flags::none);
 }
 
+// Receives player entity updates from other peers
 void Peer::receiveUpdates() {
-    for (auto &_subscriber: _subscribers) {
-        zmq::message_t reply;
+    zmq::message_t update;
 
-        if (_subscriber.recv(reply, zmq::recv_flags::dontwait)) {
-            std::string received_msg(static_cast<char*>(reply.data()), reply.size());
+    while (_subscriber.recv(update, zmq::recv_flags::dontwait)) {
+        std::string received_msg(static_cast<char*>(update.data()), update.size());
 
-            if (received_msg.rfind("new_peer|", 0) == 0) {
-                const int newPeerId = atoi((split(received_msg, *"|")[1]).c_str());
-                if (newPeerId == _peerID) continue;
+        if (received_msg.rfind("NEW_PEER|", 0) == 0) {
+            // Handle new peer joining
+            std::vector<std::string> parts = split(received_msg, '|');
+            if (parts.size() != 3) continue;
 
-                auto socket = zmq::socket_t(_context, zmq::socket_type::sub);
-                socket.connect("tcp://localhost:" + std::to_string(newPeerId));
-                socket.set(zmq::sockopt::subscribe, "");
-                _subscribers.push_back(std::move(socket));
-            } else if (received_msg.rfind("entity_update|", 0) == 0) {
-                std::vector<std::string> parts = split(received_msg, *"|");
+            int newPeerID = std::stoi(parts[1]);
+            int newEntityID = std::stoi(parts[2]);
 
-                for (int i = 2; i < parts.size(); i++) {
-                    std::vector<std::string> entityParts = split(parts[i], *",");
-                    auto predicate = [entityParts](const Entity* entity) { return entity->getEntityID() == atoi(entityParts[0].c_str()); };
-                    auto it = std::find_if(_entities.begin(), _entities.end(), predicate);
+            if (newPeerID != _peerID && _peerEntityMap.find(newPeerID) == _peerEntityMap.end()) {
+                _peerEntityMap[newPeerID] = newEntityID;
+                _knownPeers.push_back(newPeerID);
 
+                // Subscribe to the new peer's publisher
+                int newPeerPubPort = newPeerID; 
+                _subscriber.connect("tcp://localhost:" + std::to_string(newPeerPubPort));
+                std::cout << "Subscribed to new peer ID: " << newPeerID << " on port: " << newPeerPubPort << std::endl;
+            }
 
-                    if (it != _entities.end()) {
-                        (*it)->setPosition(Position(std::stof(entityParts[1]), std::stof(entityParts[2])));
-                    }
+        }
+        else if (received_msg.rfind("PEER_UPDATE|", 0) == 0) {
+            // Handle peer updates
+            std::vector<std::string> parts = split(received_msg, '|');
+            if (parts.size() < 4) continue;
+
+            int senderPeerID = std::stoi(parts[1]);
+            int senderEntityID = std::stoi(parts[2]);
+
+            if (senderPeerID == _peerID) continue; 
+
+            std::vector<std::string> positionParts = split(parts[3], ',');
+            if (positionParts.size() != 2) continue;
+
+            float posX = std::stof(positionParts[0]);
+            float posY = std::stof(positionParts[1]);
+
+            for (auto& entity : _entities) {
+                if (entity->getEntityID() == senderEntityID) {
+                    entity->setOriginalPosition(Position(posX, posY));
+                    break;
                 }
             }
         }
