@@ -9,11 +9,7 @@ int main(int argc, char** argv) {
 	// Player spawns
 	Entity playerOne(Position(50, 250), Size(50, 50));
 	Entity playerTwo(Position(200, 350), Size(50, 50));
-	Entity playerThree(Position(400, 550), Size(50, 50));
-
-	playerOne.setEntityID(10001);
-	playerTwo.setEntityID(10002);
-	playerThree.setEntityID(10003);
+	Entity playerThree(Position(400, 550), Size(50, 50));	
 
 	playerOne.setAccelerationY(10.0f);
 	playerTwo.setAccelerationY(10.0f);
@@ -23,13 +19,15 @@ int main(int argc, char** argv) {
 	Entity platform(Position(0, 600), Size(1920, 50));
 	platform.setEntityType(EntityType::FIXED);
 
-	std::vector<Entity*> entities;
-	entities.push_back(&playerOne);
-	entities.push_back(&playerTwo);
-	entities.push_back(&playerThree);
-	entities.push_back(&platform);
+	std::vector<Entity*> playerEntities;
+	playerEntities.push_back(&playerOne);
+	playerEntities.push_back(&playerTwo);
+	playerEntities.push_back(&playerThree);
 
-	PeerServer peerServer(entities);
+	std::vector<Entity*> worldEntities;
+	worldEntities.push_back(&platform);
+
+	PeerServer peerServer(worldEntities, playerEntities);
 	peerServer.initialize();
 
 	while (true) {

@@ -10,65 +10,113 @@
 #include <ZMQ/zmq.hpp>
 #endif
 
-PeerServer::PeerServer(const std::vector<Entity*>& entities) {
+PeerServer::PeerServer(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& playerEntities) {
 	_context = zmq::context_t(1);
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
 	_responder = zmq::socket_t(_context, zmq::socket_type::rep);
-	_entities = entities;
+    _worldEntities = worldEntities;
+    _availablePlayerEntities = playerEntities;
+    _allEntities = _worldEntities;
+    _allEntities.insert(_allEntities.end(), _availablePlayerEntities.begin(), _availablePlayerEntities.end());
+	_nextPeerID = 0;
 }
-
-constexpr int START_ID = 9999;
-int currentId = START_ID;
 
 PeerServer::~PeerServer() {
-	_publisher.close();
+    _publisher.close();
+    _responder.close();
 }
 
-void PeerServer::initialize() {
-	_responder.bind("tcp://*:" + std::to_string(currentId));
-	currentId += 1;
-	_publisher.connect("tcp://localhost:" + std::to_string(currentId));
-}
+void PeerServer::initialize(int repPort, int pubPort, int startingPeerID) {
+    _responder.bind("tcp://*:" + std::to_string(repPort));
+    _publisher.bind("tcp://*:" + std::to_string(pubPort));
+    _nextPeerID = startingPeerID;
 
+    std::cout << "PeerServer initialized." << std::endl;
+    std::cout << "REP socket bound to port: " << repPort << std::endl;
+    std::cout << "PUB socket bound to port: " << pubPort << std::endl;
+}
 
 void PeerServer::run() {
-	zmq::message_t request;
+    zmq::message_t request;
 
-	if (_responder.recv(request, zmq::recv_flags::dontwait)) {
-		std::string clientRequest(static_cast<char*>(request.data()), request.size());
-		std::ostringstream message;
+    if (_responder.recv(request, zmq::recv_flags::dontwait)) {
+        std::string clientRequest(static_cast<char*>(request.data()), request.size());
 
-		if (clientRequest == "CONNECT") {
-			currentId += 1;
-			const int peerId = currentId;
+        if (clientRequest == "CONNECT") {
+            int peerID = _nextPeerID++;
+            std::ostringstream responseStream;
 
-			message << peerId << "|";
+            if (!_availablePlayerEntities.empty()) {
+                // Assign a player entity to the peer
+                Entity* assignedEntity = _availablePlayerEntities.back();
+                _availablePlayerEntities.pop_back();
+                _peerEntityMap[peerID] = assignedEntity;
 
-			for (int i = peerId-1; i > START_ID; i--) {
-				message << i << "|";
-			}
+                // Build response: peerID|assignedEntityID|peerEntityMap|entityData
+                responseStream << peerID << "|" << assignedEntity->getEntityID() << "|";
 
-			std::ostringstream broadcastStream;
-			broadcastStream << "new_peer|" << peerId;
-			const std::string broadcastString = broadcastStream.str();
-			zmq::message_t broadcastMessage(broadcastString.size());
-			memcpy(broadcastMessage.data(), broadcastString.c_str(), broadcastString.size());
-			_publisher.send(broadcastMessage, zmq::send_flags::none);
+                // Include list of current peers and their assigned entities
+                bool first = true;
+                for (const auto& entry : _peerEntityMap) {
+                    if (!first) {
+                        responseStream << ";";
+                    }
+                    else {
+                        first = false;
+                    }
+                    responseStream << entry.first << "," << entry.second->getEntityID();
+                }
+                responseStream << "|";
 
-		} else if (clientRequest == "ENTITIES") {
-			for (auto _entity: _entities) {
-				message << Server::serializeEntity(*_entity) << "|";
-			}
-		} else if (!clientRequest.empty()) {
-			throw std::runtime_error("Invalid request");
-		}
+                // Serialize all entities
+                first = true;
+                for (const auto& entity : _allEntities) {
+                    if (!first) {
+                        responseStream << "\n";
+                    }
+                    else {
+                        first = false;
+                    }
+                    responseStream << Server::serializeEntity(*entity);
+                }
 
-		const std::string response = message.str();
-		zmq::message_t reply(response.size());
-		memcpy(reply.data(), response.c_str(), response.size());
-		_responder.send(reply, zmq::send_flags::none);
-	}
+                std::string response = responseStream.str();
+
+                // Send response to peer
+                zmq::message_t reply(response.size());
+                memcpy(reply.data(), response.c_str(), response.size());
+                _responder.send(reply, zmq::send_flags::none);
+
+                // Broadcast new peer to existing peers
+                std::ostringstream broadcastStream;
+                broadcastStream << "NEW_PEER|" << peerID << "|" << assignedEntity->getEntityID();
+                std::string broadcastMessage = broadcastStream.str();
+                zmq::message_t broadcast(broadcastMessage.size());
+                memcpy(broadcast.data(), broadcastMessage.c_str(), broadcastMessage.size());
+                _publisher.send(broadcast, zmq::send_flags::none);
+
+                std::cout << "Peer connected. Assigned Peer ID: " << peerID << ", Entity ID: " << assignedEntity->getEntityID() << std::endl;
+            }
+            else {
+                // Showing error message when a peer tries to join after all player entities are already assigned 
+                std::string response = "ERROR|No available player entities";
+                zmq::message_t reply(response.size());
+                memcpy(reply.data(), response.c_str(), response.size());
+                _responder.send(reply, zmq::send_flags::none);
+
+                std::cout << "Peer connection attempted, but no available player entities." << std::endl;
+            }
+        }
+        else {
+            std::cerr << "Invalid request: " << clientRequest << std::endl;
+            std::string errorResponse = "ERROR|Invalid request";
+            zmq::message_t reply(errorResponse.size());
+            memcpy(reply.data(), errorResponse.c_str(), errorResponse.size());
+            _responder.send(reply, zmq::send_flags::none);
+        }
+    }
 }
 
-
-std::vector<Entity*> PeerServer::getEntities() const { return _entities; }
+std::vector<Entity*> PeerServer::getEntities() const {
+    return _allEntities;
+}

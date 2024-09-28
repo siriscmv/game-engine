@@ -9,6 +9,7 @@
 #include "PhysicsSystem.h"
 #include "Globals.h"
 #include "Client.h"
+#include "../TimeSystem/Timeline.h"
 
 
 // Class, functions, variables signatures of the Game Engine class. This class delegates work to 
@@ -46,6 +47,7 @@ private:
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
 	std::function<void()> _onCycle;
+	Timeline* _timeline;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;

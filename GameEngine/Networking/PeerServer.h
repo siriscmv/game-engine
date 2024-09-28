@@ -2,6 +2,7 @@
 
 #include "Entity.h"
 #include <vector>
+#include <map>
 #ifdef __APPLE__
 #include <zmq.hpp>
 #else
@@ -10,17 +11,21 @@
 
 class PeerServer {
 public:
-    PeerServer(const std::vector<Entity*>& entities);
+    PeerServer(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& playerEntities);
     ~PeerServer();
 
-    void initialize();
+    void initialize(int repPort = 5555, int pubPort = 5556, int startingPeerID = 1000);
     void run();
-
     std::vector<Entity*> getEntities() const;
 
 private:
     zmq::context_t _context;
-    zmq::socket_t _publisher;
-    zmq::socket_t _responder;
-    std::vector<Entity*> _entities;
+    zmq::socket_t _publisher;                              // PUB socket for broadcasting new peer connections to peers
+    zmq::socket_t _responder;                              // REP socket for handling initial connection requests from peers
+    std::vector<Entity*> _worldEntities;
+    std::vector<Entity*> _availablePlayerEntities;
+    std::vector<Entity*> _allEntities;
+    std::map<int, Entity*> _peerEntityMap;                 // Map of peerID to assigned player entity
+
+    int _nextPeerID;
 };
