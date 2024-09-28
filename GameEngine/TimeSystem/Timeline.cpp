@@ -120,6 +120,10 @@ void Timeline::changeTic(int64_t new_tic) {
     }
 }
 
+int64_t Timeline::getTic() {
+	return tic;
+}
+
 bool Timeline::isPaused() const {
     return paused;
 }
@@ -133,7 +137,6 @@ void Timeline::setSpeed(double new_speed) {
 }
 
 double Timeline::getSpeed() const {
-    std::lock_guard<std::mutex> lock(m);
     return speed;
 }
 

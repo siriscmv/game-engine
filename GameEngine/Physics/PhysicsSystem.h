@@ -26,6 +26,8 @@ public:
 
 	// Simulates physics of the entire system
 	void run(float deltaTime, std::set<Entity*>& entitiesToIgnore);
+	void pause();
+	void resume();
 
 	void runForGivenEntities(float deltaTime, std::set<Entity*>& entitiesToIgnore, const std::vector<Entity *> &entities);
 
@@ -39,4 +41,5 @@ private:
 	~PhysicsSystem() = default;
 
 	std::vector<Entity*> _entities;
+	bool _isPaused = false;
 };
