@@ -20,6 +20,7 @@ include_directories(GameEngine/Entities)
 include_directories(GameEngine/Input)
 include_directories(GameEngine/Physics)
 include_directories(GameEngine/Networking)
+include_directories(GameEngine/TimeSystem)
 
 set(GAME_ENGINE_SOURCES
         GameEngine/Core/GameEngine.cpp
@@ -33,6 +34,7 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Networking/Server.cpp
         GameEngine/Networking/Peer.cpp
         GameEngine/Networking/PeerServer.cpp
+        GameEngine/TimeSystem/Timeline.cpp
 )
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})
