@@ -23,9 +23,11 @@ private:
     zmq::socket_t _publisher;                              // PUB socket for broadcasting new peer connections to peers
     zmq::socket_t _responder;                              // REP socket for handling initial connection requests from peers
     std::vector<Entity*> _worldEntities;
+    std::vector<Entity*> _playerEntities;
     std::vector<Entity*> _availablePlayerEntities;
     std::vector<Entity*> _allEntities;
     std::map<int, Entity*> _peerEntityMap;                 // Map of peerID to assigned player entity
 
     int _nextPeerID;
+    int _hostPeerID = -1;                                  // To keep track of the host peer (first peer that connects to server)
 };

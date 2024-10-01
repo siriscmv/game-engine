@@ -169,6 +169,16 @@ void Server::updateClientEntities() {
     _publisher.send(message, zmq::send_flags::none);    
 }
 
+// Converts entity type into a string
+std::string entityTypeToString(EntityType type) {
+    switch (type) {
+        case EntityType::DEFAULT: return "DEFAULT";
+        case EntityType::FIXED: return "FIXED";
+        case EntityType::ELASTIC: return "ELASTIC";
+        default: return "DEFAULT";
+    }
+}
+
 // Serializes an entity to a JSON string
 std::string Server::serializeEntity(const Entity& entity) {
     std::ostringstream json;
@@ -177,7 +187,12 @@ std::string Server::serializeEntity(const Entity& entity) {
     json << "\"x\": " << entity.getOriginalPosition().x << ",";
     json << "\"y\": " << entity.getOriginalPosition().y << ",";
     json << "\"width\": " << entity.getSize().width << ",";
-    json << "\"height\": " << entity.getSize().height;
+    json << "\"height\": " << entity.getSize().height << ",";
+    json << "\"type\": \"" << entityTypeToString(entity.getEntityType()) << "\",";
+    json << "\"velocityX\": " << entity.getVelocityX() << ",";
+    json << "\"velocityY\": " << entity.getVelocityY() << ",";
+    json << "\"accelerationX\": " << entity.getAccelerationX() << ",";
+    json << "\"accelerationY\": " << entity.getAccelerationY();
     json << "}";
     return json.str();
 }

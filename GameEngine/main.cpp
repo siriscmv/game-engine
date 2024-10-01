@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
 	// Player spawns
 	Entity playerOne(Position(50, 250), Size(50, 50));
 	Entity playerTwo(Position(200, 350), Size(50, 50));
-	Entity playerThree(Position(400, 550), Size(50, 50));	
+	Entity playerThree(Position(400, 550), Size(50, 55));	
 
 	playerOne.setAccelerationY(10.0f);
 	playerTwo.setAccelerationY(10.0f);
@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
 
 	// Game world 
 	Entity platform(Position(0, 600), Size(1920, 50));
+	Entity obstacle(Position(800, 300), Size(200, 200));
 	platform.setEntityType(EntityType::FIXED);
 
 	std::vector<Entity*> playerEntities;
@@ -26,6 +27,7 @@ int main(int argc, char** argv) {
 
 	std::vector<Entity*> worldEntities;
 	worldEntities.push_back(&platform);
+	worldEntities.push_back(&obstacle);
 
 	PeerServer peerServer(worldEntities, playerEntities);
 	peerServer.initialize();

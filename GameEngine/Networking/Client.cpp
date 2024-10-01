@@ -146,38 +146,70 @@ void Client::receiveUpdatesFromServer() {
     }
 }
 
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else return EntityType::DEFAULT; 
+}
+
 // Deserializes entity info from a JSON string and creates and Entity object with it
-Entity* Client::deserializeEntity(const std::string& json) {    
+Entity* Client::deserializeEntity(const std::string& json) {
     try {
-        // Find the positions of the required fields
+        // Find positions of the fields
         size_t idPos = json.find("\"id\": ");
         size_t xPos = json.find("\"x\": ");
         size_t yPos = json.find("\"y\": ");
         size_t widthPos = json.find("\"width\": ");
         size_t heightPos = json.find("\"height\": ");
+        size_t typePos = json.find("\"type\": \"");
+        size_t velocityXPos = json.find("\"velocityX\": ");
+        size_t velocityYPos = json.find("\"velocityY\": ");
+        size_t accelerationXPos = json.find("\"accelerationX\": ");
+        size_t accelerationYPos = json.find("\"accelerationY\": ");
 
         // Ensure all required fields exist
         if (idPos == std::string::npos || xPos == std::string::npos || yPos == std::string::npos ||
-            widthPos == std::string::npos || heightPos == std::string::npos) {
+            widthPos == std::string::npos || heightPos == std::string::npos || typePos == std::string::npos ||
+            velocityXPos == std::string::npos || velocityYPos == std::string::npos ||
+            accelerationXPos == std::string::npos || accelerationYPos == std::string::npos) {
             printf("Error: Invalid JSON format for entity.\n");
             return nullptr;
         }
 
-        // Extract and parse the values
+        // Extract values
         int id = std::stoi(json.substr(idPos + 6, json.find(",", idPos) - (idPos + 6)));
         float x = std::stof(json.substr(xPos + 5, json.find(",", xPos) - (xPos + 5)));
         float y = std::stof(json.substr(yPos + 5, json.find(",", yPos) - (yPos + 5)));
         float width = std::stof(json.substr(widthPos + 9, json.find(",", widthPos) - (widthPos + 9)));
-        float height = std::stof(json.substr(heightPos + 10, json.find("}", heightPos) - (heightPos + 10)));
+        float height = std::stof(json.substr(heightPos + 10, json.find(",", heightPos) - (heightPos + 10)));
+
+        // Extract entity type
+        size_t typeValueStart = typePos + 9; // Length of "\"type\": \"" is 9
+        size_t typeValueEnd = json.find("\"", typeValueStart);
+        std::string typeStr = json.substr(typeValueStart, typeValueEnd - typeValueStart);
+        EntityType entityType = stringToEntityType(typeStr);
+
+        // Extract velocity and acceleration
+        float velocityX = std::stof(json.substr(velocityXPos + 13, json.find(",", velocityXPos) - (velocityXPos + 13)));
+        float velocityY = std::stof(json.substr(velocityYPos + 13, json.find(",", velocityYPos) - (velocityYPos + 13)));
+        float accelerationX = std::stof(json.substr(accelerationXPos + 16, json.find(",", accelerationXPos) - (accelerationXPos + 16)));
+
+        // For accelerationY (last field), find the closing brace
+        size_t accelerationYEnd = json.find("}", accelerationYPos);
+        float accelerationY = std::stof(json.substr(accelerationYPos + 16, accelerationYEnd - (accelerationYPos + 16)));
 
         // Create the entity
         Entity* entity = new Entity(Position(x, y), Size(width, height));
         entity->setEntityID(id);
+        entity->setEntityType(entityType);
+        entity->setVelocityX(velocityX);
+        entity->setVelocityY(velocityY);
+        entity->setAccelerationX(accelerationX);
+        entity->setAccelerationY(accelerationY);
 
-        //FIXME: @cyril Ugly hack
-        entity->setAccelerationY(9);
-
-        printf("Deserialized entity ID: %d, Position: (%f, %f)\n", id, x, y);
+        printf("Deserialized entity ID: %d, Position: (%f, %f), Type: %s\n", id, x, y, typeStr.c_str());
 
         return entity;
     }

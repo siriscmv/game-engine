@@ -15,6 +15,7 @@ PeerServer::PeerServer(const std::vector<Entity*>& worldEntities, const std::vec
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
 	_responder = zmq::socket_t(_context, zmq::socket_type::rep);
     _worldEntities = worldEntities;
+    _playerEntities = playerEntities;
     _availablePlayerEntities = playerEntities;
     _allEntities = _worldEntities;
     _allEntities.insert(_allEntities.end(), _availablePlayerEntities.begin(), _availablePlayerEntities.end());
@@ -52,8 +53,14 @@ void PeerServer::run() {
                 _availablePlayerEntities.pop_back();
                 _peerEntityMap[peerID] = assignedEntity;
 
-                // Build response: peerID|assignedEntityID|peerEntityMap|entityData
-                responseStream << peerID << "|" << assignedEntity->getEntityID() << "|";
+                // Determine if this peer is the host
+                if (_hostPeerID == -1) {
+                    _hostPeerID = peerID;
+                }
+                bool isHost = (peerID == _hostPeerID);
+
+                // Build response: peerID|assignedEntityID|isHost|peerEntityMap|worldEntities|playerEntities
+                responseStream << peerID << "|" << assignedEntity->getEntityID() << "|" << (isHost ? 1 : 0) << "|";
 
                 // Include list of current peers and their assigned entities
                 bool first = true;
@@ -68,9 +75,22 @@ void PeerServer::run() {
                 }
                 responseStream << "|";
 
-                // Serialize all entities
+                // Serialize world entities
                 first = true;
-                for (const auto& entity : _allEntities) {
+                for (const auto& entity : _worldEntities) {
+                    if (!first) {
+                        responseStream << "\n";
+                    }
+                    else {
+                        first = false;
+                    }
+                    responseStream << Server::serializeEntity(*entity);
+                }
+                responseStream << "|";
+
+                // Serialize all player entities (including assigned one)
+                first = true;
+                for (const auto& entity : _playerEntities) {
                     if (!first) {
                         responseStream << "\n";
                     }

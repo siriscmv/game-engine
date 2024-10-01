@@ -206,10 +206,11 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	SDL_Delay(16);                                                // Setting 60hz refresh rate
 }
 
+// Handles the logic for peers in peer to peer mode
 void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 	SDL_PumpEvents();
 	_renderer->clear();
-    float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -220,19 +221,11 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 		});
 
 	std::thread communicationThread([this]() {
-		_peer->receiveUpdates();		
+		_peer->receiveUpdates();
 		});
 
-	// Run physics for own entity
-	int assignedEntityID = _peer->_entityID; 
-	auto predicate = [assignedEntityID](const Entity* entity) {
-		return entity->getEntityID() == assignedEntityID;
-		};
-	std::vector<Entity*> filteredEntities;
-	std::copy_if(_entities.begin(), _entities.end(), std::back_inserter(filteredEntities), predicate);
-
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);
-	_physicsSystem->runForGivenEntities(deltaTime, entitiesWithCollisions, filteredEntities);
+	_physicsSystem->runForGivenEntities(deltaTime, entitiesWithCollisions, _peer->getEntitiesToProcess());
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 

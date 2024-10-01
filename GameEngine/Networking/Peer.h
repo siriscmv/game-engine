@@ -23,7 +23,11 @@ public:
     void setPeerID(int id);
     std::vector<Entity*> getEntities() const;
 
-    int _entityID;                                        //  Player entity ID assigned to this peer
+    bool isHost() const;
+    int getPlayerEntityID() const;
+    std::vector<Entity*> getWorldEntities() const;
+    std::vector<Entity*> getPlayerEntities() const;
+    std::vector<Entity*> getEntitiesToProcess() const;
 
 private:
     zmq::context_t _context;
@@ -31,9 +35,13 @@ private:
     zmq::socket_t _subscriber;                            // SUB socket to receive entity updates from peers
     zmq::socket_t _requester;                             // REQ socket for the initial connection with the server
     int _peerID;
+    int _entityID;                                        //  Player entity ID assigned to this peer
+    bool _isHost = false;
  
+    std::vector<Entity*> _worldEntities;
+    std::vector<Entity*> _playerEntities;
     std::vector<Entity*> _entities;
-    std::map<int, int> _peerEntityMap; 
+    std::map<int, int> _peerEntityMap;                    // Map between known peers and their player entities
     std::vector<int> _knownPeers;                         // List of peer IDs that this peer is currently connected to
 
     std::vector<std::string> split(const std::string& str, char delim);
