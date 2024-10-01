@@ -26,6 +26,7 @@ public:
 	void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
 	RefreshRate getRefreshRate() const;
 	int getRefreshRateMs() const;
+	void setSimulationSpeed(double speed);
 
 private:
 	std::vector<Entity*> _worldEntities;

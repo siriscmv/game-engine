@@ -208,6 +208,11 @@ void Server::setRefreshRate(RefreshRate rate) {
     _engine->setServerRefreshRateMs(_refreshRateMs);
 }
 
+// Changes the game simulation speed
+void Server::setSimulationSpeed(double speed) {
+    _engine->setGameSpeed(speed);
+}
+
 RefreshRate Server::getRefreshRate() const { return _refreshRate; }
 int Server::getRefreshRateMs() const { return _refreshRateMs; }
 GameEngine* Server::getGameEngine() const { return _engine; }

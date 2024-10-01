@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 	Server server(worldEntities, playerEntities);
 
 	server.setRefreshRate(RefreshRate::TWO_FORTY_FPS);
+	server.setSimulationSpeed(2);
 	//FIXME: @cyril
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerOne, 9.8f);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerTwo, 9.8f);

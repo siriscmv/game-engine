@@ -137,7 +137,7 @@ bool Timeline::isPaused() const {
 void Timeline::setSpeed(double new_speed) {
     std::lock_guard<std::mutex> lock(m);
     if (speed != new_speed) {
-        getTime(); // Update last_time before changing speed
+        getTimeUnlocked(); // Update last_time before changing speed
         speed = new_speed;
     }
 }
