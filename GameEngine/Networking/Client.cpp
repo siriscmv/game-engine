@@ -80,7 +80,7 @@ bool Client::handshakeWithServer() {
 
 
         printf("Successfully connected to server with Client ID: %d\n", _clientID);
-        printf("Received %lu entities from server.\n", static_cast<int>(_entities.size()));
+        printf("Received %d entities from server.\n", static_cast<int>(_entities.size()));
         return true;
     }
     catch (const zmq::error_t& e) {

@@ -136,7 +136,8 @@ void Timeline::setSpeed(double new_speed) {
     }
 }
 
-double Timeline::getSpeed() const {
+double Timeline::getSpeed() {
+    std::lock_guard<std::mutex> lock(m);
     return speed;
 }
 
