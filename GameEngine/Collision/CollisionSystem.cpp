@@ -27,7 +27,7 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
     // Helper function to convert a rectangle entity to a SDL_Rect
     const std::function<const SDL_Rect*(const Entity&)> to_rect = [](const Entity& entity) {
         auto* rect = new SDL_Rect{
-            static_cast<int>(entity.getPosition().x), static_cast<int>(entity.getPosition().y),
+            static_cast<int>(entity.getOriginalPosition().x), static_cast<int>(entity.getOriginalPosition().y),
             static_cast<int>(entity.getSize().width), static_cast<int>(entity.getSize().height)
         };
         return rect;
