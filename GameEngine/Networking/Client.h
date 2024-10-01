@@ -38,6 +38,7 @@ private:
     std::vector<Entity*> _entities;    
 
     int _clientID;
+    int _entityID;
 
     RefreshRate _refreshRate;
     int _refreshRateMs;

@@ -39,10 +39,10 @@ void Client::initialize(int pubPort, int subPort, int reqPort) {
 // Retreives client ID and initial world information from server
 bool Client::handshakeWithServer() {
     try {
-        zmq::message_t request("CONNECT", 7);                                     // Request
+        zmq::message_t request("CONNECT", 7);  // Request to connect
         _requester.send(request, zmq::send_flags::none);
 
-        zmq::message_t reply;                                                     // Response
+        zmq::message_t reply;  // Response from server
         auto result = _requester.recv(reply, zmq::recv_flags::none);
 
         if (!result) {
@@ -51,28 +51,31 @@ bool Client::handshakeWithServer() {
         }
 
         std::string response(static_cast<char*>(reply.data()), reply.size());
-        
+
         // Check if the server is full
         if (response == "FULL") {
             printf("Server full, cannot connect\n");
             return false;
         }
 
-        // Validate response format
-        size_t separator = response.find("|");
-        if (separator == std::string::npos) {
+        // Validate response format (expected format: "clientID|assignedEntityID|entityData")
+        size_t firstSeparator = response.find("|");
+        size_t secondSeparator = response.find("|", firstSeparator + 1);
+
+        if (firstSeparator == std::string::npos || secondSeparator == std::string::npos) {
             printf("Invalid response format from server.\n");
             return false;
         }
 
-        // Extract client ID and entity data
-        setClientID(std::stoi(response.substr(0, separator)));
-        std::string entityData = response.substr(separator + 1);
+        // Extract client ID and assigned entity ID
+        setClientID(std::stoi(response.substr(0, firstSeparator)));
+        _entityID = std::stoi(response.substr(firstSeparator + 1, secondSeparator - firstSeparator - 1));
+        std::string entityData = response.substr(secondSeparator + 1);
 
         // Parse entity data and deserialize entities
         size_t pos = 0;
         while ((pos = entityData.find("\n")) != std::string::npos) {
-            std::string serializedEntity = entityData.substr(0, pos);            
+            std::string serializedEntity = entityData.substr(0, pos);
             Entity* entity = deserializeEntity(serializedEntity);
             if (entity) {
                 _entities.push_back(entity);
@@ -80,8 +83,7 @@ bool Client::handshakeWithServer() {
             entityData.erase(0, pos + 1);
         }
 
-
-        printf("Successfully connected to server with Client ID: %d\n", _clientID);
+        printf("Successfully connected to server with Client ID: %d, Assigned Entity ID: %d\n", _clientID, _entityID);
         printf("Received %d entities from server.\n", static_cast<int>(_entities.size()));
         return true;
     }
@@ -129,7 +131,8 @@ void Client::receiveUpdatesFromServer() {
                 Entity* updatedEntity = deserializeEntity(serializedEntity);
 
                 for (Entity* entity : _entities) {
-                    if (_gameState != GameState::PAUSED && entity->getEntityID() == updatedEntity->getEntityID()) {
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
+                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
                         entity->setOriginalPosition(updatedEntity->getOriginalPosition());
                         entity->setSize(updatedEntity->getSize());
                         break;

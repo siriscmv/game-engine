@@ -153,7 +153,7 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
-
+	_onCycle();
 	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine	
 }
 

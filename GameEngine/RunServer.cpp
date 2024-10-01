@@ -2,6 +2,8 @@
 #include "Entity.h"
 #include "Server.h"
 
+
+
 // Use this file to experiment with the Engine
 int main(int argc, char** argv) {
 
@@ -12,6 +14,7 @@ int main(int argc, char** argv) {
 
 	// Game world 
 	Entity platform(Position(0, 600), Size(1920, 50));
+	Entity obstacle(Position(800, 100), Size(200, 200));
 	platform.setEntityType(EntityType::FIXED);
 
 	std::vector<Entity*> playerEntities;
@@ -21,6 +24,7 @@ int main(int argc, char** argv) {
 
 	std::vector<Entity*> worldEntities;
 	worldEntities.push_back(&platform);
+	worldEntities.push_back(&obstacle);
 
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, playerEntities);
@@ -33,6 +37,7 @@ int main(int argc, char** argv) {
 
 	// Initializing the server and simulating the game world in the server
 	server.initialize();
+
 	server.run();
 
 	return 0;
