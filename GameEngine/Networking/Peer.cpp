@@ -16,6 +16,7 @@ Peer::Peer() {
     _requester = zmq::socket_t(_context, zmq::socket_type::req);
     _peerID = -1;
     _entityID = -1;
+    setRefreshRate();
 }
 
 Peer::~Peer() {
@@ -272,3 +273,10 @@ bool Peer::isHost() const { return _isHost; }
 int Peer::getPlayerEntityID() const { return _entityID; }
 std::vector<Entity*> Peer::getWorldEntities() const { return _worldEntities; }
 std::vector<Entity*> Peer::getPlayerEntities() const { return _playerEntities; }
+void Peer::setRefreshRate(RefreshRate rate) {
+    _refreshRate = rate;
+    _refreshRateMs = 1000 / static_cast<int>(rate);
+}
+
+RefreshRate Peer::getRefreshRate() const { return _refreshRate; }
+int Peer::getRefreshRateMs() const { return _refreshRateMs; }

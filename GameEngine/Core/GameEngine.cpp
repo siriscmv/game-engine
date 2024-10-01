@@ -44,11 +44,8 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 			case Mode::SERVER:				
 				if (!_physicsSystem->initialize()) 
 					throw std::runtime_error("Failed to initialize Physics System for Server");
-
-			case Mode::PEER_SERVER:
-				_peerServer->initialize();
-				break;
-				// Client initialization: Requires window, renderer, its own global and local timeline
+				break;			
+			// Client initialization: Requires window, renderer, its own global and local timeline
 			case Mode::CLIENT:
 				if (_client) {
 					_client->initialize();					
@@ -113,67 +110,55 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 
 // Game loop. Runs while the state is 'PLAY'.
 void GameEngine::run() {
-	while (_gameState == GameState::PLAY) {
-		int64_t elapsedTime = _timeline->getTime();
-		// Calculate elapsed time
+	int64_t previousTime = _timeline->getTime();
+	int64_t currentTime;
+	int sleepDurationMs = 0;
+
+	while (_gameState != GameState::EXIT) {
+		
+		currentTime = _timeline->getTime();
+		int64_t elapsedTime = currentTime - previousTime;
+		previousTime = currentTime;
+		
 		switch (_mode) {
-			case Mode::SERVER:
-				handleServerMode(elapsedTime);
-				break;
-			case Mode::PEER_SERVER:
-				handlePeerServerMode();
-				break;
-			case Mode::CLIENT:
-				handleClientMode(elapsedTime);
-				break;
-			case Mode::PEER:
-				handlePeerToPeerMode(elapsedTime);
-				break;
-			case Mode::SINGLE_PLAYER:
-				handleSinglePlayerMode(elapsedTime);
-				break;			
+		case Mode::SERVER:
+			handleServerMode(elapsedTime);
+			sleepDurationMs = getServerRefreshRateMs();
+			break;
+		case Mode::CLIENT:
+			handleClientMode(elapsedTime);
+			sleepDurationMs = _client->getRefreshRateMs();
+			break;
+		case Mode::PEER:
+			handlePeerToPeerMode(elapsedTime);
+			sleepDurationMs = _peer->getRefreshRateMs();
+			break;
+		case Mode::SINGLE_PLAYER:
+			handleSinglePlayerMode(elapsedTime);
+			sleepDurationMs = 1000 / static_cast<int>(RefreshRate::SIXTY_FPS);
+			break;
 		}
-		_timeline->reset(); // reset after each cycle
+		
+		int64_t sleepDurationNs = sleepDurationMs * 1e6;
 
-
-		if (_gameState == GameState::PAUSED) {
-			_timeline->pause();
-		}
-
-		int64_t elapsedMillis = _timeline->getTime();
-		if (elapsedMillis < _timeline->getTic()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(_timeline->getTic() -elapsedMillis));
-		}
-	}
-
-	if (_gameState == GameState::PAUSED) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		if (_gameState == GameState::PLAY) {
-			_timeline->resume();
-		}
+		// Sleep based on frame rate (refresh rate)
+		std::this_thread::sleep_for(std::chrono::nanoseconds(sleepDurationNs));
 	}
 }
 
 // Handles the server's game engine logic in server-client multiplayer
 void GameEngine::handleServerMode(int64_t elapsedTime) {
+	_onCycle();
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
-	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
-
-	_physicsSystem->run(deltaTime, entitiesWithCollisions);                                  // Running the physics engine
-	SDL_Delay(16);
-}
-
-void GameEngine::handlePeerServerMode() {
-	_peerServer->run();
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
+	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine		
 }
 
 // Handles the client's game engine logic in server-client multiplayer
 void GameEngine::handleClientMode(int64_t elapsedTime) {
 	SDL_PumpEvents();                                          // Force an event queue update
-	_renderer->clear();
-
-	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
+	_renderer->clear();	
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -199,16 +184,14 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	inputThread.join();
 	callbackThread.join();
-	communicationThread.join();
-
-	SDL_Delay(16);                                                // Setting 60hz refresh rate
+	communicationThread.join();	
 }
 
 // Handles the logic for peers in peer to peer mode
 void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 	SDL_PumpEvents();
 	_renderer->clear();
-	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -239,16 +222,14 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 
 	inputThread.join();
 	callbackThread.join();
-	communicationThread.join();
-
-	SDL_Delay(16);
+	communicationThread.join();	
 }
 	
 // Handles the singleplayer game engine logic.
 void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	_renderer->clear();
 
-	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -275,9 +256,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 
 	inputThread.join();
 	callbackThread.join();
-	physicsThread.join();
-
-	SDL_Delay(16);                                                // Setting 60hz refresh rate
+	physicsThread.join();	
 }
 
 // Sends the user input to server 
@@ -311,9 +290,11 @@ GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 Client* GameEngine::getClient() { return _client; }
 Peer* GameEngine::getPeer() { return _peer; }
+int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
 
 // Setters
 void GameEngine::setGameState(GameState state) { _gameState = state; }
+void GameEngine::setServerRefreshRateMs(int rate) { _serverRefreshRateMs = rate; }
 
 // Runs on each game cycle
 void GameEngine::setOnCycle(const std::function<void()> &cb) {
@@ -324,12 +305,14 @@ void GameEngine::pauseGame() {
 	_gameState = GameState::PAUSED;
 	_timeline->pause();
 	_physicsSystem->pause();
+	if (_mode == Mode::CLIENT) _client->setGameState(GameState::PAUSED);
 }
 
 void GameEngine::resumeGame() {
 	_gameState = GameState::PLAY;
 	_timeline->resume();
 	_physicsSystem->resume();
+	if (_mode == Mode::CLIENT) _client->setGameState(GameState::PLAY);
 }
 
 void GameEngine::setGameSpeed(double speed) {

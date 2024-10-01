@@ -40,6 +40,7 @@ public:
 
     // Get elapsed time in ns
     int64_t getTime();
+    int64_t getTimeUnlocked();
 
     void pause();
 

@@ -40,6 +40,9 @@ public:
 	void pauseGame();
 	void resumeGame();
 	void setGameSpeed(double speed);
+	
+	int getServerRefreshRateMs() const;
+	void setServerRefreshRateMs(int rate);
 
 private:
 	Window* _window;
@@ -57,12 +60,12 @@ private:
 	Peer* _peer = nullptr;
 	PeerServer* _peerServer = nullptr;
 	
-	void handleServerMode(int64_t elapsedTime);
-
-	void handlePeerServerMode();
+	void handleServerMode(int64_t elapsedTime);	
 
 	void handleClientMode(int64_t elapsedTime);
 	void handlePeerToPeerMode(int64_t elapsedTime);
 	void handleSinglePlayerMode(int64_t elapsedTime);
+
+	int _serverRefreshRateMs;
 };
 

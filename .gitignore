@@ -363,7 +363,8 @@ FodyWeavers.xsd
 
 # Ignore the Game folder and game cpp
 Game/
-game.cpp
+clientGame.cpp
+peerGame.cpp
 
 # Cmake files
 
@@ -384,14 +385,20 @@ cmake-build-debug
 !x64/
 
 # Ignore everything inside x64/RunGame and x64/RunGameEngine
-x64/RunGame/*
-x64/RunGameEngine/*
+x64/RunClientGame/*
+x64/RunPeerGame/*
+x64/RunPeerServer/*
+x64/RunServer/*
 
 # Only the SDL2.dll file in those folders
-!x64/RunGame/SDL2.dll
-!x64/RunGame/libzmq-v143-mt-gd-4_3_5.dll
-!x64/RunGameEngine/SDL2.dll
-!x64/RunGameEngine/libzmq-v143-mt-gd-4_3_5.dll
+!x64/RunClientGame/SDL2.dll
+!x64/RunClientGame/libzmq-v143-mt-gd-4_3_5.dll
+!x64/RunPeerGame/SDL2.dll
+!x64/RunPeerGame/libzmq-v143-mt-gd-4_3_5.dll
+!x64/RunPeerServer/SDL2.dll
+!x64/RunPeerServer/libzmq-v143-mt-gd-4_3_5.dll
+!x64/RunServer/SDL2.dll
+!x64/RunServer/libzmq-v143-mt-gd-4_3_5.dll
 
 # Keep ignoring other x64 folders
 GameEngine/x64/
