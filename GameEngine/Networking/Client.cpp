@@ -143,11 +143,11 @@ void Client::receiveUpdatesFromServer() {
                 allEntityUpdates.erase(0, pos + delimiter.length());
             }
 
-            printf("Received entity updates from server, continuing game loop\n");
+            // printf("Received entity updates from server, continuing game loop\n");
         }
     }
     else {
-        printf("No updates from server, continuing game loop.\n");
+        // printf("No updates from server, continuing game loop.\n");
     }
 }
 
@@ -214,7 +214,7 @@ Entity* Client::deserializeEntity(const std::string& json) {
         entity->setAccelerationX(accelerationX);
         entity->setAccelerationY(accelerationY);
 
-        printf("Deserialized entity ID: %d, Position: (%f, %f), Type: %s\n", id, x, y, typeStr.c_str());
+        // printf("Deserialized entity ID: %d, Position: (%f, %f), Type: %s\n", id, x, y, typeStr.c_str());
 
         return entity;
     }
