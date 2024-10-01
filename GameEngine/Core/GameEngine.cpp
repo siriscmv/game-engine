@@ -150,11 +150,11 @@ void GameEngine::run() {
 
 // Handles the server's game engine logic in server-client multiplayer
 void GameEngine::handleServerMode(int64_t elapsedTime) {
+	_onCycle();
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
-	_onCycle();
-	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine	
+	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine		
 }
 
 // Handles the client's game engine logic in server-client multiplayer

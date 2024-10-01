@@ -2,8 +2,6 @@
 #include "Entity.h"
 #include "Server.h"
 
-
-
 // Use this file to experiment with the Engine
 int main(int argc, char** argv) {
 
@@ -28,15 +26,16 @@ int main(int argc, char** argv) {
 
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, playerEntities);
+
 	server.setRefreshRate(RefreshRate::TWO_FORTY_FPS);
 	//FIXME: @cyril
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerOne, 9.8f);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerTwo, 9.8f);
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(playerThree, 9.8f);
-	// server.getGameEngine()->getPhysicsSystem()->applyPhysics(platform, 0);
+	server.getGameEngine()->getPhysicsSystem()->applyPhysics(obstacle, 0);
 
 	// Initializing the server and simulating the game world in the server
-	server.initialize();
+	server.initialize();	
 
 	server.run();
 
