@@ -29,6 +29,10 @@ public:
     std::vector<Entity*> getPlayerEntities() const;
     std::vector<Entity*> getEntitiesToProcess() const;
 
+    void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
+    RefreshRate getRefreshRate() const;
+    int getRefreshRateMs() const;
+
 private:
     zmq::context_t _context;
     zmq::socket_t _publisher;                             // PUB socket to broadcast entity updates to peers
@@ -45,4 +49,7 @@ private:
     std::vector<int> _knownPeers;                         // List of peer IDs that this peer is currently connected to
 
     std::vector<std::string> split(const std::string& str, char delim);
+
+    RefreshRate _refreshRate;
+    int _refreshRateMs;
 };

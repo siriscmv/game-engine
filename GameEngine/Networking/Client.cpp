@@ -12,6 +12,8 @@ Client::Client() {
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
 	_subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _requester = zmq::socket_t(_context, zmq::socket_type:: req);
+    _gameState = GameState::PLAY;
+    setRefreshRate();
 }
 
 Client::~Client() {
@@ -127,7 +129,7 @@ void Client::receiveUpdatesFromServer() {
                 Entity* updatedEntity = deserializeEntity(serializedEntity);
 
                 for (Entity* entity : _entities) {
-                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                    if (_gameState != GameState::PAUSED && entity->getEntityID() == updatedEntity->getEntityID()) {
                         entity->setOriginalPosition(updatedEntity->getOriginalPosition());
                         entity->setSize(updatedEntity->getSize());
                         break;
@@ -221,4 +223,13 @@ Entity* Client::deserializeEntity(const std::string& json) {
 
 // Setters and getters
 void Client::setClientID(int id) { _clientID = id; }
+void Client::setGameState(GameState gameState) { _gameState = gameState; }
 std::vector<Entity*> Client::getEntities() const { return _entities; }
+
+void Client::setRefreshRate(RefreshRate rate) {
+    _refreshRate = rate;
+    _refreshRateMs = 1000 / static_cast<int>(rate);
+}
+
+RefreshRate Client::getRefreshRate() const { return _refreshRate; }
+int Client::getRefreshRateMs() const { return _refreshRateMs; }

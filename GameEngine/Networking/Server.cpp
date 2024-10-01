@@ -21,6 +21,8 @@ Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Enti
     
     _engine = new GameEngine("Server-side simulation", 0, 0, Mode::SERVER);
     _engine->initialize(_allEntities);
+
+    setRefreshRate();
 }
 
 Server::~Server() {
@@ -197,5 +199,13 @@ std::string Server::serializeEntity(const Entity& entity) {
     return json.str();
 }
 
-// Getters
+// Setter and getters
+void Server::setRefreshRate(RefreshRate rate) {
+    _refreshRate = rate;
+    _refreshRateMs = 1000 / static_cast<int>(rate);
+    _engine->setServerRefreshRateMs(_refreshRateMs);
+}
+
+RefreshRate Server::getRefreshRate() const { return _refreshRate; }
+int Server::getRefreshRateMs() const { return _refreshRateMs; }
 GameEngine* Server::getGameEngine() const { return _engine; }
