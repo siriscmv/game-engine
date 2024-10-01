@@ -63,7 +63,7 @@ public:
     void setSpeed(double new_speed);
 
     // Get the current speed of time progression
-    double getSpeed() const;
+    double getSpeed();
 
     void createNewLocalTimeline();
 };
