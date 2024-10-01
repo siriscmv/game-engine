@@ -21,36 +21,50 @@ void PhysicsSystem::applyPhysics(Entity& entity, float gravity, Velocity velocit
 
 // Similates the physics system. All entities included in the _entities array will experience physics.
 void PhysicsSystem::run(float deltaTime, std::set<Entity*>& entitiesToIgnore) {
-	for (Entity* entity : _entities) {
-		if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
-			// Updating velocity with acceleration (v = u + at)
-			entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
-			entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
+    if (_isPaused) return;
 
-			// Updating position with velocity (s = s0 + vt)
-			entity->setOriginalPosition(Position(
-				entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
-				entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
-			));
-		}
-	}	
+    for (Entity* entity : _entities) {
+        if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
+            // Updating velocity with acceleration (v = u + at)
+            entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
+            entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
+
+            // Updating position with velocity (s = s0 + vt)
+            entity->setOriginalPosition(Position(
+                entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
+                entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
+            ));
+        }
+    }
 }
 
 void PhysicsSystem::runForGivenEntities(float deltaTime, std::set<Entity*>& entitiesToIgnore, const std::vector<Entity*>& entities) {
-	for (Entity* entity : entities) {
-		if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
-			// Updating velocity with acceleration (v = u + at)
-			entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
-			entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
+    if (_isPaused) return;
 
-			// Updating position with velocity (s = s0 + vt)
-			entity->setOriginalPosition(Position(
-				entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
-				entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
-			));
-		}
-	}
+    for (Entity* entity : entities) {
+        if (entitiesToIgnore.find(entity) == entitiesToIgnore.end()) {
+            // Updating velocity with acceleration (v = u + at)
+            entity->setVelocityX(entity->getVelocityX() + entity->getAccelerationX() * deltaTime);
+            entity->setVelocityY(entity->getVelocityY() + entity->getAccelerationY() * deltaTime);
+
+            // Updating position with velocity (s = s0 + vt)
+            entity->setOriginalPosition(Position(
+                entity->getOriginalPosition().x + entity->getVelocityX() * deltaTime,
+                entity->getOriginalPosition().y + entity->getVelocityY() * deltaTime
+            ));
+        }
+    }
 }
+
+void PhysicsSystem::pause() {
+    _isPaused = true;
+}
+
+void PhysicsSystem::resume() {
+    _isPaused = false;
+}
+
+
 
 // Clears up the entities variable
 void PhysicsSystem::shutdown() {

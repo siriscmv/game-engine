@@ -52,6 +52,8 @@ public:
 
     // Change the tic value
     void changeTic(int64_t new_tic);
+    
+    int64_t getTic();
 
     // Check if timeline is paused
     bool isPaused() const;

@@ -21,6 +21,8 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
 
+	_timeline = new Timeline();
+
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
 }
@@ -29,11 +31,14 @@ GameEngine::~GameEngine() {
 	delete _renderer;
 	delete _window;
 	delete _inputManager;	
+	delete _timeline; 
 }
 
 // Initializes the game engine subsystems.
 bool GameEngine::initialize(std::vector<Entity*>& entities) {
 	_entities = entities;	
+	SDL_Scancode pauseScanCode = SDL_GetScancodeFromKey(SDLK_p);
+	_inputManager->bind(pauseScanCode, "Pause", [this]() { this->pauseGame(); });
 
 	try {
 		switch (_mode) {
@@ -111,32 +116,53 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 // Game loop. Runs while the state is 'PLAY'.
 void GameEngine::run() {
 	while (_gameState == GameState::PLAY) {
+		int64_t elapsedTime = _timeline->getTime();
 		// Calculate elapsed time
 		switch (_mode) {
 			case Mode::SERVER:
-				handleServerMode();
+				handleServerMode(elapsedTime);
 				break;
 			case Mode::PEER_SERVER:
 				handlePeerServerMode();
 				break;
 			case Mode::CLIENT:
-				handleClientMode();
+				handleClientMode(elapsedTime);
 				break;
 			case Mode::PEER:
-				handlePeerToPeerMode();
+				handlePeerToPeerMode(elapsedTime);
 				break;
 			case Mode::SINGLE_PLAYER:
-				handleSinglePlayerMode();
+				handleSinglePlayerMode(elapsedTime);
 				break;			
-		}		
+		}
+		_timeline->reset(); // reset after each cycle
+
+
+		if (_gameState == GameState::PAUSED) {
+			_timeline->pause();
+		}
+
+		int64_t elapsedMillis = _timeline->getTime();
+		if (elapsedMillis < _timeline->getTic()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(_timeline->getTic() -elapsedMillis));
+		}
+	}
+
+	if (_gameState == GameState::PAUSED) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		if (_gameState == GameState::PLAY) {
+			_timeline->resume();
+		}
 	}
 }
 
 // Handles the server's game engine logic in server-client multiplayer
-void GameEngine::handleServerMode() {
+void GameEngine::handleServerMode(int64_t elapsedTime) {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
-	_physicsSystem->run(0.1f, entitiesWithCollisions);                                  // Running the physics engine
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
+
+	_physicsSystem->run(deltaTime, entitiesWithCollisions);                                  // Running the physics engine
 	SDL_Delay(16);
 }
 
@@ -145,9 +171,11 @@ void GameEngine::handlePeerServerMode() {
 }
 
 // Handles the client's game engine logic in server-client multiplayer
-void GameEngine::handleClientMode() {
+void GameEngine::handleClientMode(int64_t elapsedTime) {
 	SDL_PumpEvents();                                          // Force an event queue update
 	_renderer->clear();
+
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -178,9 +206,10 @@ void GameEngine::handleClientMode() {
 	SDL_Delay(16);                                                // Setting 60hz refresh rate
 }
 
-void GameEngine::handlePeerToPeerMode() {
+void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 	SDL_PumpEvents();
 	_renderer->clear();
+    float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -203,7 +232,7 @@ void GameEngine::handlePeerToPeerMode() {
 	std::copy_if(_entities.begin(), _entities.end(), std::back_inserter(filteredEntities), predicate);
 
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);
-	_physicsSystem->runForGivenEntities(0.1f, entitiesWithCollisions, filteredEntities);
+	_physicsSystem->runForGivenEntities(deltaTime, entitiesWithCollisions, filteredEntities);
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
@@ -225,8 +254,10 @@ void GameEngine::handlePeerToPeerMode() {
 }
 	
 // Handles the singleplayer game engine logic.
-void GameEngine::handleSinglePlayerMode() {	
+void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	_renderer->clear();
+
+	float deltaTime = static_cast<float>(elapsedTime) * 1e-9f;
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -236,9 +267,9 @@ void GameEngine::handleSinglePlayerMode() {
 		_onCycle();
 	});
 
-	std::thread physicsThread([this]() {
+	std::thread physicsThread([this, deltaTime]() {
 		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
-		_physicsSystem->run(0.1f, entitiesWithCollisions);
+		_physicsSystem->run(deltaTime, entitiesWithCollisions);
 	});
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
@@ -297,4 +328,21 @@ void GameEngine::setGameState(GameState state) { _gameState = state; }
 void GameEngine::setOnCycle(const std::function<void()> &cb) {
 	_onCycle = cb;
 }
+
+void GameEngine::pauseGame() {
+	_gameState = GameState::PAUSED;
+	_timeline->pause();
+	_physicsSystem->pause();
+}
+
+void GameEngine::resumeGame() {
+	_gameState = GameState::PLAY;
+	_timeline->resume();
+	_physicsSystem->resume();
+}
+
+void GameEngine::setGameSpeed(double speed) {
+	_timeline->setSpeed(speed);
+}
+
 

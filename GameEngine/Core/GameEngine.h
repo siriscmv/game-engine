@@ -37,6 +37,10 @@ public:
 	void toggleScalingMode();
 	void sendInputToServer(const std::string& buttonPress);
 
+	void pauseGame();
+	void resumeGame();
+	void setGameSpeed(double speed);
+
 private:
 	Window* _window;
 	Renderer* _renderer;	
@@ -53,12 +57,12 @@ private:
 	Peer* _peer = nullptr;
 	PeerServer* _peerServer = nullptr;
 	
-	void handleServerMode();
+	void handleServerMode(int64_t elapsedTime);
 
 	void handlePeerServerMode();
 
-	void handleClientMode();
-	void handlePeerToPeerMode();
-	void handleSinglePlayerMode();
+	void handleClientMode(int64_t elapsedTime);
+	void handlePeerToPeerMode(int64_t elapsedTime);
+	void handleSinglePlayerMode(int64_t elapsedTime);
 };
 

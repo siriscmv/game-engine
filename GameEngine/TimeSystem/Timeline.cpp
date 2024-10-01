@@ -120,6 +120,10 @@ void Timeline::changeTic(int64_t new_tic) {
     }
 }
 
+int64_t Timeline::getTic() {
+	return tic;
+}
+
 bool Timeline::isPaused() const {
     return paused;
 }
