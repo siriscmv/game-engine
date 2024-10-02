@@ -63,6 +63,9 @@
     <ClCompile Include="..\Game\clientGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RunGameEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\GameEngine.h">

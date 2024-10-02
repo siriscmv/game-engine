@@ -386,6 +386,7 @@ cmake-build-debug
 
 # Ignore everything inside x64/RunGame and x64/RunGameEngine
 x64/RunClientGame/*
+x64/RunGameEngine/*
 x64/RunPeerGame/*
 x64/RunPeerServer/*
 x64/RunServer/*
@@ -393,6 +394,8 @@ x64/RunServer/*
 # Only the SDL2.dll file in those folders
 !x64/RunClientGame/SDL2.dll
 !x64/RunClientGame/libzmq-v143-mt-gd-4_3_5.dll
+!x64/RunGameEngine/SDL2.dll
+!x64/RunGameEngine/libzmq-v143-mt-gd-4_3_5.dll
 !x64/RunPeerGame/SDL2.dll
 !x64/RunPeerGame/libzmq-v143-mt-gd-4_3_5.dll
 !x64/RunPeerServer/SDL2.dll

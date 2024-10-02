@@ -13,6 +13,8 @@ Global
 		Release|x86 = Release|x86
 		RunClientGame|x64 = RunClientGame|x64
 		RunClientGame|x86 = RunClientGame|x86
+		RunGameEngine|x64 = RunGameEngine|x64
+		RunGameEngine|x86 = RunGameEngine|x86
 		RunPeerGame|x64 = RunPeerGame|x64
 		RunPeerGame|x86 = RunPeerGame|x86
 		RunPeerServer|x64 = RunPeerServer|x64
@@ -33,6 +35,10 @@ Global
 		{387DB367-D646-440A-8609-198026C4FD96}.RunClientGame|x64.Build.0 = RunClientGame|x64
 		{387DB367-D646-440A-8609-198026C4FD96}.RunClientGame|x86.ActiveCfg = RunClientGame|Win32
 		{387DB367-D646-440A-8609-198026C4FD96}.RunClientGame|x86.Build.0 = RunClientGame|Win32
+		{387DB367-D646-440A-8609-198026C4FD96}.RunGameEngine|x64.ActiveCfg = RunGameEngine|x64
+		{387DB367-D646-440A-8609-198026C4FD96}.RunGameEngine|x64.Build.0 = RunGameEngine|x64
+		{387DB367-D646-440A-8609-198026C4FD96}.RunGameEngine|x86.ActiveCfg = RunGameEngine|Win32
+		{387DB367-D646-440A-8609-198026C4FD96}.RunGameEngine|x86.Build.0 = RunGameEngine|Win32
 		{387DB367-D646-440A-8609-198026C4FD96}.RunPeerGame|x64.ActiveCfg = RunPeerGame|x64
 		{387DB367-D646-440A-8609-198026C4FD96}.RunPeerGame|x64.Build.0 = RunPeerGame|x64
 		{387DB367-D646-440A-8609-198026C4FD96}.RunPeerGame|x86.ActiveCfg = RunPeerGame|Win32

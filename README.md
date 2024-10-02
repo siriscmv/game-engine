@@ -13,7 +13,13 @@
 
 ## How to Run
 
-### Step 1: Compile servers, clients, and peers
+### Group submission: Compile and run the game engine
+1. Open the solution (`GameEngine.sln`) in Visual Studio Community 2022.
+2. In the run configurations dropdown:
+   - Select **'RunGameEngine'**.
+3. Click the 'Local Windows Debugger' button to run the selected configuration within Visual Studio.
+
+### Individual submission step 1: Compile servers, clients, and peers
 
 1. Open the solution (`GameEngine.sln`) in Visual Studio Community 2022.
 2. In the run configurations dropdown:
@@ -27,7 +33,7 @@
    - Right-click on the solution in solution explorer and click on 'Rebuid'. 
 
 
-### Step 2: Run servers, clients and peers
+### Individual submission step 2: Run servers, clients and peers
 
 1. To run **'Server-Client'**:
    - Navigate to  `~/x64/RunServer` directory.
