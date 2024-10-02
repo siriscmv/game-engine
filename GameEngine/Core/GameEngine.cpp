@@ -36,9 +36,7 @@ GameEngine::~GameEngine() {
 
 // Initializes the game engine subsystems.
 bool GameEngine::initialize(std::vector<Entity*>& entities) {
-	_entities = entities;	
-	SDL_Scancode pauseScanCode = SDL_GetScancodeFromKey(SDLK_p);
-	_inputManager->bind(pauseScanCode, "Pause", [this]() { this->pauseGame(); });
+	_entities = entities;
 
 	try {
 		switch (_mode) {
