@@ -44,8 +44,8 @@
 
 
 **Note:**  
-Ensure that the `SDL2.dll` and `libzmq-v143-mt-gd-4_3_5.dll` files are present in the directories where the `.exe` files are located. These file are already included; do not remove it.
-Ensure that you run the servers before clients (or peers). 
+- Ensure that the `SDL2.dll` and `libzmq-v143-mt-gd-4_3_5.dll` files are present in the directories where the `.exe` files are located. These file are already included; do not remove it.
+- Ensure that you run the servers before clients (or peers). 
 
 </details>
 
