@@ -21,6 +21,7 @@ include_directories(GameEngine/Input)
 include_directories(GameEngine/Physics)
 include_directories(GameEngine/Networking)
 include_directories(GameEngine/TimeSystem)
+include_directories(GameEngine/Zones/SideScroller)
 
 set(GAME_ENGINE_SOURCES
         GameEngine/Core/GameEngine.cpp
@@ -35,6 +36,7 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Networking/Peer.cpp
         GameEngine/Networking/PeerServer.cpp
         GameEngine/TimeSystem/Timeline.cpp
+        GameEngine/Zones/SideScroller/SideScroller.cpp
 )
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})

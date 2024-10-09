@@ -20,6 +20,13 @@ enum class EntityType {
     GHOST // Present in a different realm, is unaffected by and does not affect other entities
 };
 
+enum class DefaultSideScrollerZone {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT
+};
+
 // structure to hold position 
 struct Position {
     float x;

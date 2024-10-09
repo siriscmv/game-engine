@@ -14,7 +14,7 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
         throw std::runtime_error("Unsupported entity types for collision detection");
     }
 
-    if (entityA->getEntityType() == EntityType::GHOST || entityB->getEntityType() == EntityType::GHOST) {
+    if (entityA->getEntityType() == EntityType::GHOST && entityB->getEntityType() == EntityType::GHOST) {
         return false;
     }
 
