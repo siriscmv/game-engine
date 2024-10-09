@@ -156,6 +156,7 @@ EntityType stringToEntityType(const std::string& str) {
     if (str == "DEFAULT") return EntityType::DEFAULT;
     else if (str == "FIXED") return EntityType::FIXED;
     else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "GHOST") return EntityType::GHOST;
     else return EntityType::DEFAULT; 
 }
 

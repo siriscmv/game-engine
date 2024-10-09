@@ -179,6 +179,7 @@ std::string entityTypeToString(EntityType type) {
         case EntityType::DEFAULT: return "DEFAULT";
         case EntityType::FIXED: return "FIXED";
         case EntityType::ELASTIC: return "ELASTIC";
+        case EntityType::GHOST: return "GHOST";
         default: return "DEFAULT";
     }
 }
