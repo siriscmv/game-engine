@@ -2,6 +2,7 @@
 
 #include <Entity.h>
 #include <GameEngine.h>
+#include <Globals.h>
 #include <vector>
 #include <map>
 #ifdef __APPLE__
@@ -22,6 +23,11 @@ public:
 
 	static std::string serializeEntity(const Entity& entity);
 
+	void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
+	RefreshRate getRefreshRate() const;
+	int getRefreshRateMs() const;
+	void setSimulationSpeed(double speed);
+
 private:
 	std::vector<Entity*> _worldEntities;
 	std::vector<Entity*> _playerEntities;                                // Initial spawn points of players
@@ -41,4 +47,7 @@ private:
 	void listenToClientMessages();
 	void processClientInput(int clientId, const std::string& buttonPress);
 	void updateClientEntities();
+
+	RefreshRate _refreshRate;
+	int _refreshRateMs;
 };

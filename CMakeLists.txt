@@ -40,7 +40,7 @@ set(GAME_ENGINE_SOURCES
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})
 
 add_executable(Game Game/main.cpp) # For running the actual game
-add_executable(GameEngine GameEngine/main.cpp) # For running the engine, with its test file
+add_executable(GameEngine GameEngine/RunServer.cpp) # For running the engine, with its test file
 
 target_link_libraries(GameEngine ${SDL2_LIBRARIES})
 target_link_libraries(GameEngine zmq)

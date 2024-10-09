@@ -49,13 +49,18 @@ Timeline::~Timeline() {
 }
 
 int64_t Timeline::now() {
-    return std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()
+    ).count();
 }
 
 int64_t Timeline::getTime() {
     std::lock_guard<std::mutex> lock(m);
+    return getTimeUnlocked();
+}
 
-    // if global timeline, return the current time
+
+int64_t Timeline::getTimeUnlocked() {    
     int64_t current_real_time = (anchor != nullptr) ? anchor->getTime() : now();
 
     if (paused) {
@@ -70,10 +75,11 @@ int64_t Timeline::getTime() {
     return last_time;
 }
 
+
 void Timeline::pause() {
     std::lock_guard<std::mutex> lock(m);
     if (!paused) {
-        getTime(); // Update last_time before pausing
+        getTimeUnlocked(); // Update last_time before pausing
         last_paused_time = (anchor != nullptr) ? anchor->getTime() : now();
         paused = true;
     }
@@ -131,7 +137,7 @@ bool Timeline::isPaused() const {
 void Timeline::setSpeed(double new_speed) {
     std::lock_guard<std::mutex> lock(m);
     if (speed != new_speed) {
-        getTime(); // Update last_time before changing speed
+        getTimeUnlocked(); // Update last_time before changing speed
         speed = new_speed;
     }
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 enum class GameState { PLAY, EXIT, PAUSED};                                     // A state enum class to manage a simple state machine
-enum class Mode { SERVER, CLIENT, PEER, PEER_SERVER, SINGLE_PLAYER };                 // Mode of the game engine (who does it serve)deturner
+enum class Mode { SERVER, CLIENT, PEER, SINGLE_PLAYER };                        // Mode of the game engine (who does it serve)deturner
 
 // An enum class to manage the shape of the entity
 enum class ShapeType {
@@ -45,4 +45,14 @@ struct Acceleration {
     float x;
     float y;
     Acceleration(float x = 0.0f, float y = 0.0f) : x(x), y(y) {}
+};
+
+// Represents refresh rates either a server or a client update their systems
+enum class RefreshRate {
+    FIFTEEN_FPS = 15,
+    THIRTY_FPS = 30,
+    SIXTY_FPS = 60,
+    NINETY_FPS = 90,
+    ONE_TWENTY_FPS = 120,
+    TWO_FORTY_FPS = 240
 };

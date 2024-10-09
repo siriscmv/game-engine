@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
 	// Game world 
 	Entity platform(Position(0, 600), Size(1920, 50));
-	Entity obstacle(Position(800, 300), Size(200, 200));
+	Entity obstacle(Position(800, 100), Size(200, 200));
 	platform.setEntityType(EntityType::FIXED);
 
 	std::vector<Entity*> playerEntities;

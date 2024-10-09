@@ -21,6 +21,8 @@ Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Enti
     
     _engine = new GameEngine("Server-side simulation", 0, 0, Mode::SERVER);
     _engine->initialize(_allEntities);
+
+    setRefreshRate();
 }
 
 Server::~Server() {
@@ -73,7 +75,7 @@ void Server::run() {
 // Returns the initial world info to clients who request it
 void Server::handleClientHandeshake() {
     zmq::message_t request;
-    
+
     if (_responder.recv(request, zmq::recv_flags::dontwait)) {
         std::string clientRequest(static_cast<char*>(request.data()), request.size());
         if (clientRequest == "CONNECT") {
@@ -85,9 +87,11 @@ void Server::handleClientHandeshake() {
                 _availablePlayerEntities.pop_back();
                 _clientMap[clientId] = assignedEntity;
 
-                printf("Client connected with ID: %d, assigned Entity ID: %d\n", clientId, assignedEntity->getEntityID());
+                int assignedEntityID = assignedEntity->getEntityID();
+                printf("Client connected with ID: %d, assigned Entity ID: %d\n", clientId, assignedEntityID);
 
-                std::string response = std::to_string(clientId) + "|";
+                // Create response with client ID, assigned entity ID, and all entity data
+                std::string response = std::to_string(clientId) + "|" + std::to_string(assignedEntityID) + "|";
                 for (const auto& entity : _allEntities) {
                     response += serializeEntity(*entity) + "\n";
                 }
@@ -106,7 +110,7 @@ void Server::handleClientHandeshake() {
                 printf("Client connection attempted, but server is full.\n");
             }
         }
-    }    
+    }
 }
 
 
@@ -197,5 +201,18 @@ std::string Server::serializeEntity(const Entity& entity) {
     return json.str();
 }
 
-// Getters
+// Setter and getters
+void Server::setRefreshRate(RefreshRate rate) {
+    _refreshRate = rate;
+    _refreshRateMs = 1000 / static_cast<int>(rate);
+    _engine->setServerRefreshRateMs(_refreshRateMs);
+}
+
+// Changes the game simulation speed
+void Server::setSimulationSpeed(double speed) {
+    _engine->setGameSpeed(speed);
+}
+
+RefreshRate Server::getRefreshRate() const { return _refreshRate; }
+int Server::getRefreshRateMs() const { return _refreshRateMs; }
 GameEngine* Server::getGameEngine() const { return _engine; }
