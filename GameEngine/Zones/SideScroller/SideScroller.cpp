@@ -54,20 +54,3 @@ void left(Entity* entity, const std::vector<Entity*>& entities) {
 void right(Entity* entity, const std::vector<Entity*>& entities) {
     translate(entities, 50.0f, 0.0f);
 }
-
-void SideScroller::enableDefaultSideScrollerZone(DefaultSideScrollerZone zoneType) {
-    Entity zone(Position(0, 0), Size(0, 0));
-    zone.setEntityType(EntityType::GHOST);
-    //FIXME: @cyril, modify the zone pos and size accordingly for each direction
-
-    switch (zoneType) {
-        case DefaultSideScrollerZone::TOP:
-            addNewZone("TOP", std::make_tuple(zone, &top));
-        case DefaultSideScrollerZone::BOTTOM:
-            addNewZone("BOTTOM", std::make_tuple(zone, &bottom));
-        case DefaultSideScrollerZone::LEFT:
-            addNewZone("LEFT", std::make_tuple(zone, &left));
-        case DefaultSideScrollerZone::RIGHT:
-            addNewZone("RIGHT", std::make_tuple(zone, &right));
-    }
-}
