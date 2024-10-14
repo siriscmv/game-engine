@@ -17,3 +17,10 @@ public:
 private:
     std::unordered_map<std::string, std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>>> _zones;
 };
+
+void translate(const std::vector<Entity *>&, float, float);
+
+void top(Entity*, const std::vector<Entity*>&);
+void bottom(Entity*, const std::vector<Entity*>&);
+void left(Entity*, const std::vector<Entity*>&);
+void right(Entity*, const std::vector<Entity*>&);

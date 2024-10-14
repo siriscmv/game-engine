@@ -22,6 +22,8 @@ public:
     // NOTE: Currently handles only rectangle<->rectangle collisions
     bool hasCollision(const Entity* entityA, const Entity* entityB);
 
+    bool hasCollisionRaw(const Entity* entityA, const Entity* entityB);
+
 private:
     CollisionSystem() = default;
     ~CollisionSystem() = default;

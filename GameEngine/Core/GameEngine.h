@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SideScroller.h>
+
 #include "PeerServer.h"
 #include "Peer.h"
 #include "CollisionSystem.h"
@@ -24,6 +26,7 @@ public:
 	void shutdown();
 
 	InputManager * getInputManager();
+	SideScroller * getSideScroller();
 	GameState getGameState();
 	Client* getClient();
 
@@ -51,6 +54,7 @@ private:
 	Mode _mode;
 	InputManager* _inputManager;
 	PhysicsSystem* _physicsSystem;
+	SideScroller* _sideScroller;
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
 	std::function<void()> _onCycle;

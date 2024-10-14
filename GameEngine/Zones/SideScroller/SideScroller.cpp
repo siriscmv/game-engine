@@ -25,7 +25,7 @@ void SideScroller::removeZone(const std::string& name) {
 void SideScroller::process(Entity* entity, std::vector<Entity*>& entities) const {
     for (const auto & _zone : _zones) {
         auto zone = _zone.second;
-        if (CollisionSystem::getInstance().hasCollision(&std::get<0>(zone), entity)) {
+        if (CollisionSystem::getInstance().hasCollisionRaw(&std::get<0>(zone), entity)) {
             std::get<1>(zone)(entity, entities);
         }
     }

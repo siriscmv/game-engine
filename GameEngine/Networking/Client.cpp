@@ -229,6 +229,7 @@ Entity* Client::deserializeEntity(const std::string& json) {
 void Client::setClientID(int id) { _clientID = id; }
 void Client::setGameState(GameState gameState) { _gameState = gameState; }
 std::vector<Entity*> Client::getEntities() const { return _entities; }
+int Client::getClientID() { return _clientID; };
 
 void Client::setRefreshRate(RefreshRate rate) {
     _refreshRate = rate;

@@ -22,6 +22,7 @@ public:
     static Entity* deserializeEntity(const std::string& json);
 
     void setClientID(int id);
+    int getClientID();
     void setGameState(GameState gameState);
     std::vector<Entity*> getEntities() const;
 

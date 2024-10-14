@@ -17,6 +17,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
+	_sideScroller = new SideScroller();
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
@@ -30,7 +31,8 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 GameEngine::~GameEngine() {
 	delete _renderer;
 	delete _window;
-	delete _inputManager;	
+	delete _inputManager;
+	delete _sideScroller;
 	delete _timeline; 
 }
 
@@ -152,7 +154,7 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
-	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine		
+ 	_physicsSystem->run(deltaTime, entitiesWithCollisions);
 }
 
 // Handles the client's game engine logic in server-client multiplayer
@@ -171,6 +173,14 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	std::thread communicationThread([this]() {
 		_client->receiveUpdatesFromServer();
 	});
+
+	std::thread sideScrollingThread([this]() {
+		const auto self =std::find_if(_entities.begin(), _entities.end(), [this](const Entity* e) {
+			return e->getEntityID() == _client->getClientID();
+		});
+
+		_sideScroller->process(*self, _entities);
+	});
 	
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
@@ -184,7 +194,8 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	inputThread.join();
 	callbackThread.join();
-	communicationThread.join();	
+	communicationThread.join();
+	sideScrollingThread.join();
 }
 
 // Handles the logic for peers in peer to peer mode
@@ -286,6 +297,7 @@ void GameEngine::toggleScalingMode() {
 
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
+SideScroller* GameEngine::getSideScroller() { return _sideScroller; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 Client* GameEngine::getClient() { return _client; }
