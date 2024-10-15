@@ -24,12 +24,6 @@ int main(int argc, char** argv) {
 	worldEntities.push_back(&platform);
 	worldEntities.push_back(&obstacle);
 
-	Entity zone(Position(0, 0), Size(400,  250));
-	zone.setEntityType(EntityType::GHOST);
-	zone.setShapeType(ShapeType::RECTANGLE);
-	zone.setColor(SDL_Color{255, 188, 66});
-	worldEntities.push_back(&zone);
-
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, playerEntities);
 

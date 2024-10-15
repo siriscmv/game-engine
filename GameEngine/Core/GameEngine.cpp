@@ -175,19 +175,25 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	});
 
 	std::thread sideScrollingThread([this]() {
-		const auto self =std::find_if(_entities.begin(), _entities.end(), [this](const Entity* e) {
-			return e->getEntityID() == _client->getClientID();
+		auto self = std::find_if(_entities.begin(), _entities.end(), [this](const Entity* e) {
+			return e->getEntityID() == _client->getEntityID();
 		});
 
 		_sideScroller->process(*self, _entities);
 	});
 	
 	auto [scaleX, scaleY] = _window->getScaleFactors();
+	Position offset = _client->getViewOffset();
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
+		Position pos = entity->getOriginalPosition();
+		entity->setOriginalPosition(Position{ pos.x + offset.x, pos.y + offset.y });
+
 		entity->applyScaling(scaleX, scaleY);
 		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
+
+		entity->setOriginalPosition(Position{ pos.x - offset.x, pos.y - offset.y });
 	}
 
 	_renderer->present();

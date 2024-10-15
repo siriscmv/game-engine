@@ -23,12 +23,15 @@ public:
 
     void setClientID(int id);
     int getClientID();
+    int getEntityID();
+    Position getViewOffset();
     void setGameState(GameState gameState);
     std::vector<Entity*> getEntities() const;
 
     void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
     RefreshRate getRefreshRate() const;
     int getRefreshRateMs() const;
+    void setViewOffset(Position viewOffset);
 
 private:
     zmq::context_t _context;
@@ -40,6 +43,7 @@ private:
 
     int _clientID;
     int _entityID;
+    Position _viewOffset;
 
     RefreshRate _refreshRate;
     int _refreshRateMs;

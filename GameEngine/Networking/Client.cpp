@@ -14,6 +14,8 @@ Client::Client() {
     _requester = zmq::socket_t(_context, zmq::socket_type:: req);
     _gameState = GameState::PLAY;
     setRefreshRate();
+
+    _viewOffset = Position(0, 0);
 }
 
 Client::~Client() {
@@ -230,6 +232,8 @@ void Client::setClientID(int id) { _clientID = id; }
 void Client::setGameState(GameState gameState) { _gameState = gameState; }
 std::vector<Entity*> Client::getEntities() const { return _entities; }
 int Client::getClientID() { return _clientID; };
+int Client::getEntityID() { return _entityID; };
+
 
 void Client::setRefreshRate(RefreshRate rate) {
     _refreshRate = rate;
@@ -238,3 +242,12 @@ void Client::setRefreshRate(RefreshRate rate) {
 
 RefreshRate Client::getRefreshRate() const { return _refreshRate; }
 int Client::getRefreshRateMs() const { return _refreshRateMs; }
+
+Position Client::getViewOffset() {
+    return _viewOffset;
+}
+
+void Client::setViewOffset(Position viewOffset) {
+    _viewOffset = viewOffset;
+}
+
