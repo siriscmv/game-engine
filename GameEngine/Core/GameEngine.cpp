@@ -300,7 +300,6 @@ void GameEngine::toggleScalingMode() {
 	_window->toggleScalingMode();
 }
 
-
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
 SideScroller* GameEngine::getSideScroller() { return _sideScroller; }
@@ -309,6 +308,8 @@ PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 Client* GameEngine::getClient() { return _client; }
 Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
+std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
+
 
 // Setters
 void GameEngine::setGameState(GameState state) { _gameState = state; }

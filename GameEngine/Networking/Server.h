@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 class Server {
 public:
-	Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& playerEntities);
+	Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& spawnPoints);
 	~Server();
 
 	void initialize(int pubPort = 5555, int subPort = 5556, int reqPort = 5557);
@@ -32,8 +32,7 @@ public:
 
 private:
 	std::vector<Entity*> _worldEntities;
-	std::vector<Entity*> _playerEntities;                                // Initial spawn points of players
-	std::vector<Entity*> _availablePlayerEntities;                       // Player entities that aren't assigned to a client yet
+	std::vector<Entity*> _spawnPoints;                                   // Spawn points of players	
 	std::vector<Entity*> _allEntities;                                   // All entities
 	zmq::context_t _context;
 	zmq::socket_t _publisher;

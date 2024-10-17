@@ -3,21 +3,17 @@
 #include <thread>
 #include <chrono>
 
-Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& playerEntities) {
+Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& spawnPoints) {
     _context = zmq::context_t(1); 
     _publisher = zmq::socket_t(_context, zmq::socket_type::pub);
     _subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _responder = zmq::socket_t(_context, zmq::socket_type::rep);
 
-
     _worldEntities = worldEntities;
-    _playerEntities = playerEntities;
-    _availablePlayerEntities = playerEntities;
-
-    _nextClientID = 0;
-
+    _spawnPoints = spawnPoints;
     _allEntities = worldEntities;
-    _allEntities.insert(_allEntities.end(), playerEntities.begin(), playerEntities.end());
+
+    _nextClientID = 0;      
     
     _engine = new GameEngine("Server-side simulation", 0, 0, Mode::SERVER);
     _engine->initialize(_allEntities);
@@ -81,34 +77,40 @@ void Server::handleClientHandeshake() {
         if (clientRequest == "CONNECT") {
             int clientId = _nextClientID++;
 
-            // Assign a player entity and respond with client ID + entity info
-            if (!_availablePlayerEntities.empty()) {
-                Entity* assignedEntity = _availablePlayerEntities.back();
-                _availablePlayerEntities.pop_back();
-                _clientMap[clientId] = assignedEntity;
+            // Pick a random spawn point
+            int randomIndex = rand() % _spawnPoints.size();
+            Entity* spawnPoint = _spawnPoints[randomIndex];
 
-                int assignedEntityID = assignedEntity->getEntityID();
-                printf("Client connected with ID: %d, assigned Entity ID: %d\n", clientId, assignedEntityID);
+            // Get the spawn point's position and size
+            Position spawnPos = spawnPoint->getOriginalPosition();
+            Size spawnSize = spawnPoint->getSize();
 
-                // Create response with client ID, assigned entity ID, and all entity data
-                std::string response = std::to_string(clientId) + "|" + std::to_string(assignedEntityID) + "|";
-                for (const auto& entity : _allEntities) {
-                    response += serializeEntity(*entity) + "\n";
-                }
+            // Generate a random position within the spawn point boundaries
+            float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
+            float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
 
-                zmq::message_t reply(response.size());
-                memcpy(reply.data(), response.c_str(), response.size());
-                _responder.send(reply, zmq::send_flags::none);
+            // Creating a player entity on that random position within the spawn point's boundaries
+            Entity* playerEntity = new Entity(Position(playerX, playerY), Size(50, 50));
+            playerEntity->setEntityID(_allEntities.size() + _spawnPoints.size() + 1);
+            _engine->getPhysicsSystem()->applyPhysics(*playerEntity, 9.8f);
+            _engine->getEntities().push_back(playerEntity);
+
+            // Store the player entity in the client Map
+            _clientMap[clientId] = playerEntity;
+            _allEntities.push_back(playerEntity);                           
+
+            printf("Client connected with ID: %d, created Player Entity ID: %d at Spawn Point (%f, %f)\n",
+                clientId, playerEntity->getEntityID(), spawnPos.x, spawnPos.y);
+
+            // Create response with client ID, assigned entity ID, and all entity data
+            std::string response = std::to_string(clientId) + "|" + std::to_string(playerEntity->getEntityID()) + "|";
+            for (const auto& entity : _allEntities) {
+                response += serializeEntity(*entity) + "\n";
             }
-            // If server is full respond with the message 'FULL' 
-            else {
-                std::string response = "FULL";
-                zmq::message_t reply(response.size());
-                memcpy(reply.data(), response.c_str(), response.size());
-                _responder.send(reply, zmq::send_flags::none);
 
-                printf("Client connection attempted, but server is full.\n");
-            }
+            zmq::message_t reply(response.size());
+            memcpy(reply.data(), response.c_str(), response.size());
+            _responder.send(reply, zmq::send_flags::none);
         }
     }
 }
