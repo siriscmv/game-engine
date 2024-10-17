@@ -92,8 +92,11 @@ void Server::handleClientHandeshake() {
             // Creating a player entity on that random position within the spawn point's boundaries
             Entity* playerEntity = new Entity(Position(playerX, playerY), Size(50, 50));
             playerEntity->setEntityID(_allEntities.size() + _spawnPoints.size() + 1);
-            _engine->getPhysicsSystem()->applyPhysics(*playerEntity, 9.8f);
+            playerEntity->setAccelerationY(9.8f);
+
+            // Pushing the player entity into entity lists in the game engine and physics system
             _engine->getEntities().push_back(playerEntity);
+            _engine->getPhysicsSystem()->getEntities().push_back(playerEntity);
 
             // Store the player entity in the client Map
             _clientMap[clientId] = playerEntity;
