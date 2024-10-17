@@ -3,6 +3,8 @@
 #include "Entity.h"
 #include "Globals.h"
 #include <vector>
+#include <JSON/json.hpp>
+using json = nlohmann::json;
 #ifdef __APPLE__
 #include <zmq.hpp>
 #else

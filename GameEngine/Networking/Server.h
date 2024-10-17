@@ -5,6 +5,8 @@
 #include <Globals.h>
 #include <vector>
 #include <map>
+#include <JSON/json.hpp>
+using json = nlohmann::json;
 #ifdef __APPLE__
 #include <zmq.hpp>
 #else

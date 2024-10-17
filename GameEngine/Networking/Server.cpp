@@ -186,20 +186,19 @@ std::string entityTypeToString(EntityType type) {
 
 // Serializes an entity to a JSON string
 std::string Server::serializeEntity(const Entity& entity) {
-    std::ostringstream json;
-    json << "{";
-    json << "\"id\": " << entity.getEntityID() << ",";
-    json << "\"x\": " << entity.getOriginalPosition().x << ",";
-    json << "\"y\": " << entity.getOriginalPosition().y << ",";
-    json << "\"width\": " << entity.getSize().width << ",";
-    json << "\"height\": " << entity.getSize().height << ",";
-    json << "\"type\": \"" << entityTypeToString(entity.getEntityType()) << "\",";
-    json << "\"velocityX\": " << entity.getVelocityX() << ",";
-    json << "\"velocityY\": " << entity.getVelocityY() << ",";
-    json << "\"accelerationX\": " << entity.getAccelerationX() << ",";
-    json << "\"accelerationY\": " << entity.getAccelerationY();
-    json << "}";
-    return json.str();
+    json jsonEntity = {
+        {"id", entity.getEntityID()},
+        {"x", entity.getOriginalPosition().x},
+        {"y", entity.getOriginalPosition().y},
+        {"width", entity.getSize().width},
+        {"height", entity.getSize().height},
+        {"type", entityTypeToString(entity.getEntityType())},
+        {"velocityX", entity.getVelocityX()},
+        {"velocityY", entity.getVelocityY()},
+        {"accelerationX", entity.getAccelerationX()},
+        {"accelerationY", entity.getAccelerationY()}
+    };
+    return jsonEntity.dump(); 
 }
 
 // Setter and getters

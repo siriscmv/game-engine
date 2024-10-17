@@ -66,6 +66,9 @@
     <ClCompile Include="RunGameEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Zones\SideScroller\SideScroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\GameEngine.h">
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Networking\PeerServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Zones\SideScroller\SideScroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
