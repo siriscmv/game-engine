@@ -5,9 +5,13 @@
 #include <vector>
 #ifdef __APPLE__
 #include <zmq.hpp>
+#include <nlohmann/json.hpp>
 #else
 #include <ZMQ/zmq.hpp>
+#include <JSON/json.hpp>
 #endif
+
+using json = nlohmann::json;
 
 class Client {
 public:
