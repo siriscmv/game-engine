@@ -1,5 +1,5 @@
 #include "Entity.h"
-
+#include <string>
 #include <algorithm>
 
 #include "Renderer.h"
@@ -209,4 +209,13 @@ void Entity::shutdown() {
         SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
+}
+
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else return EntityType::DEFAULT; // Default case
 }

@@ -299,6 +299,27 @@ std::string entityTypeToString(EntityType type) {
     }
 }
 
+std::string entityToString(const Entity& entity) {
+    std::ostringstream oss;
+
+    oss << "id:" << entity.getEntityID() << '|'
+        << "x:" << entity.getOriginalPosition().x << '|'
+        << "y:" << entity.getOriginalPosition().y << '|'
+        << "width:" << entity.getSize().width << '|'
+        << "height:" << entity.getSize().height << '|'
+        << "type:" << entityTypeToString(entity.getEntityType()) << '|'
+        << "velocityX:" << entity.getVelocityX() << '|'
+        << "velocityY:" << entity.getVelocityY() << '|'
+        << "accelerationX:" << entity.getAccelerationX() << '|'
+        << "accelerationY:" << entity.getAccelerationY() << '|'
+        << "cr:" << static_cast<int>(entity.getColor().r) << '|'
+        << "cg:" << static_cast<int>(entity.getColor().g) << '|'
+        << "cb:" << static_cast<int>(entity.getColor().b) << '|'
+        << "ca:" << static_cast<int>(entity.getColor().a);
+
+    return oss.str();
+}
+
 json entityToJson(const Entity& entity) {
     json jsonEntity = {
         {"id", entity.getEntityID()},
@@ -311,27 +332,40 @@ json entityToJson(const Entity& entity) {
         {"velocityY", entity.getVelocityY()},
         {"accelerationX", entity.getAccelerationX()},
         {"accelerationY", entity.getAccelerationY()},
-            {"cr", entity.getColor().r},
-          {"cg", entity.getColor().g},
-        {"cb", entity.getColor().b},
-          {"ca", entity.getColor().a},
+        {"cr", static_cast<int>(entity.getColor().r)},
+        {"cg", static_cast<int>(entity.getColor().g)},
+        {"cb", static_cast<int>(entity.getColor().b)},
+        {"ca", static_cast<int>(entity.getColor().a)},
     };
 
     return jsonEntity;
 }
 
+constexpr bool useJSON = false;
+
 // Broadcasts entity updates to all clients
 void Server::updateClientEntities() {
-    json updateMessage = {
-    {"type", "entity_update"},
-    {"entities", json::array()}
-    };
+    std::string allEntitiesData;
 
-    for (const Entity* entity : _allEntities) {
-        updateMessage["entities"].push_back(entityToJson(*entity));
+    if (useJSON) {
+        json updateMessage = {
+            {"type", "entity_update"},
+            {"entities", json::array()}
+        };
+
+        for (const Entity* entity : _allEntities) {
+            updateMessage["entities"].push_back(entityToJson(*entity));
+        }
+
+        allEntitiesData = updateMessage.dump();
+    } else {
+        std::ostringstream oss;
+        oss << "entity_update|";
+        for (const Entity* entity : _allEntities) {
+            oss << "||" << entityToString(*entity);
+        }
+        allEntitiesData = oss.str();
     }
-
-    std::string allEntitiesData = updateMessage.dump();
 
     zmq::message_t message(allEntitiesData.size());
     memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());

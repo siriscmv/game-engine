@@ -92,3 +92,5 @@ private:
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID
 };
+
+EntityType stringToEntityType(const std::string& str);

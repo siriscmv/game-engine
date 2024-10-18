@@ -135,15 +135,6 @@ void Client::sendInputToServer(const std::string& buttonPress) {
     printf("Sent input to server: %s\n", buttonPress.c_str());
 }
 
-// Converts entity type string into an enum variable
-EntityType stringToEntityType(const std::string& str) {
-    if (str == "DEFAULT") return EntityType::DEFAULT;
-    else if (str == "FIXED") return EntityType::FIXED;
-    else if (str == "ELASTIC") return EntityType::ELASTIC;
-    else if (str == "GHOST") return EntityType::GHOST;
-    else return EntityType::DEFAULT;
-}
-
 Entity* jsonToEntity(json jsonEntity) {
     // Extract values
     int id = jsonEntity["id"];
@@ -158,7 +149,8 @@ Entity* jsonToEntity(json jsonEntity) {
     float velocityY = jsonEntity["velocityY"];
     float accelerationX = jsonEntity["accelerationX"];
     float accelerationY = jsonEntity["accelerationY"];
-    auto color = SDL_Color{jsonEntity["cr"], jsonEntity["cg"], jsonEntity["cb"], jsonEntity["ca"]};
+
+    auto color = SDL_Color{static_cast<uint8_t>(jsonEntity["cr"].get<int>()), static_cast<uint8_t>(jsonEntity["cg"].get<int>()), static_cast<uint8_t>(jsonEntity["cb"].get<int>()), static_cast<uint8_t>(jsonEntity["ca"].get<int>())};
 
     // Create the entity
     Entity* entity = new Entity(Position(x, y), Size(width, height));
@@ -173,6 +165,58 @@ Entity* jsonToEntity(json jsonEntity) {
     return entity;
 }
 
+// Function to split a string by a delimiter
+std::vector<std::string> split(const std::string& str, const std::string& delimiter) {
+    std::vector<std::string> tokens;
+    size_t start = 0;
+    size_t end = str.find(delimiter);
+
+    while (end != std::string::npos) {
+        tokens.push_back(str.substr(start, end - start));
+        start = end + delimiter.length();
+        end = str.find(delimiter, start);
+    }
+    tokens.push_back(str.substr(start));
+    return tokens;
+}
+
+// Function to parse a key-value string into an Entity
+Entity* stringToEntity(const std::string& entityString) {
+    std::istringstream iss(entityString);
+    std::string token;
+    Entity* entity = new Entity(Position(0, 0), Size(0, 0)); // Default entity
+
+    while (std::getline(iss, token, '|')) {
+        size_t dashPos = token.find(':');
+        std::string key = token.substr(0, dashPos);
+        std::string value = token.substr(dashPos + 1);
+
+        printf("Key: %s, Value: %s\n", key.c_str(), value.c_str());
+
+        // Set entity properties based on key-value pairs
+        if (key == "id") entity->setEntityID(std::stoi(value));
+        else if (key == "x") entity->setPosition(Position(std::stof(value), entity->getPosition().y));
+        else if (key == "y") entity->setPosition(Position(entity->getPosition().x, std::stof(value)));
+        else if (key == "width") entity->setSize(Size(std::stof(value), entity->getSize().height));
+        else if (key == "height") entity->setSize(Size(entity->getSize().width, std::stof(value)));
+        else if (key == "type") entity->setEntityType(stringToEntityType(value));
+        else if (key == "velocityX") entity->setVelocityX(std::stof(value));
+        else if (key == "velocityY") entity->setVelocityY(std::stof(value));
+        else if (key == "accelerationX") entity->setAccelerationX(std::stof(value));
+        else if (key == "accelerationY") entity->setAccelerationY(std::stof(value));
+        else if (key == "cr") entity->setColor(SDL_Color{ static_cast<uint8_t>(std::stoi(value)), entity->getColor().g, entity->getColor().b, entity->getColor().a });
+        else if (key == "cg") entity->setColor(SDL_Color{ entity->getColor().r, static_cast<uint8_t>(std::stoi(value)), entity->getColor().b, entity->getColor().a });
+        else if (key == "cb") entity->setColor(SDL_Color{ entity->getColor().r, entity->getColor().g, static_cast<uint8_t>(std::stoi(value)), entity->getColor().a });
+        else if (key == "ca") entity->setColor(SDL_Color{ entity->getColor().r, entity->getColor().g, entity->getColor().b, static_cast<uint8_t>(std::stoi(value)) });
+    }
+
+    entity->setOriginalSize(entity->getSize());
+    entity->setOriginalPosition(entity->getPosition());
+    return entity;
+}
+
+constexpr bool useJSON = false;
+
 // Receives entity updates from the server
 void Client::receiveEntityUpdatesFromServer() {
     zmq::message_t update;
@@ -180,25 +224,56 @@ void Client::receiveEntityUpdatesFromServer() {
     if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
         std::string allEntityUpdates(static_cast<char*>(update.data()), update.size());
 
-        json entityUpdates = json::parse(allEntityUpdates);
+        if (useJSON) {
+            json entityUpdates = json::parse(allEntityUpdates);
 
-        if (entityUpdates["type"] != "entity_update") {
-            printf("Invalid entity update message.\n");
-            return;
-        }
-
-        for (const auto& updatedJSONEntity: entityUpdates["entities"]) {
-            const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
-            for (Entity* entity : _entities) {
-                if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
-                if (entity->getEntityID() == updatedEntity->getEntityID()) {
-                    entity->setOriginalPosition(updatedEntity->getOriginalPosition());
-                    entity->setSize(updatedEntity->getSize());
-                    break;
-                }
+            if (entityUpdates["type"] != "entity_update") {
+                printf("Invalid entity update message.\n");
+                return;
             }
 
-            delete updatedEntity;
+            for (const auto& updatedJSONEntity : entityUpdates["entities"]) {
+                const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
+
+                for (Entity*& entity : _entities) {
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
+                        continue;
+                    }
+
+                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                        *entity = *updatedEntity;
+                        break;
+                    }
+                }
+
+                delete updatedEntity;
+            }
+        } else {
+            auto parts = split(allEntityUpdates, "|||");
+            if (parts.size() != 2 || parts[0] != "entity_update") {
+                throw std::runtime_error("Invalid data format");
+            }
+
+            // Split the entity data by "||"
+            auto entityStrings = split(parts[1], "||");
+            std::vector<Entity> entities;
+
+            for (const auto& entityString : entityStrings) {
+                const auto* updatedEntity = stringToEntity(entityString);
+
+                for (Entity*& entity : _entities) {
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
+                        continue;
+                    }
+
+                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                        *entity = *updatedEntity;
+                        break;
+                    }
+                }
+
+                delete updatedEntity;
+            }
         }
     }
 }
