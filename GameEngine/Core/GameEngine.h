@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SideScroller.h>
+
 #include "PeerServer.h"
 #include "Peer.h"
 #include "CollisionSystem.h"
@@ -24,6 +26,7 @@ public:
 	void shutdown();
 
 	InputManager * getInputManager();
+	SideScroller * getSideScroller();
 	GameState getGameState();
 	Client* getClient();
 
@@ -40,6 +43,9 @@ public:
 	void pauseGame();
 	void resumeGame();
 	void setGameSpeed(double speed);
+	
+	int getServerRefreshRateMs() const;
+	void setServerRefreshRateMs(int rate);
 
 private:
 	Window* _window;
@@ -48,6 +54,7 @@ private:
 	Mode _mode;
 	InputManager* _inputManager;
 	PhysicsSystem* _physicsSystem;
+	SideScroller* _sideScroller;
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
 	std::function<void()> _onCycle;
@@ -57,12 +64,12 @@ private:
 	Peer* _peer = nullptr;
 	PeerServer* _peerServer = nullptr;
 	
-	void handleServerMode(int64_t elapsedTime);
-
-	void handlePeerServerMode();
+	void handleServerMode(int64_t elapsedTime);	
 
 	void handleClientMode(int64_t elapsedTime);
 	void handlePeerToPeerMode(int64_t elapsedTime);
 	void handleSinglePlayerMode(int64_t elapsedTime);
+
+	int _serverRefreshRateMs;
 };
 

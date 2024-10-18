@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="RunPeerServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\GameEngine.cpp">
@@ -39,7 +39,7 @@
     <ClCompile Include="Core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Game\game.cpp">
+    <ClCompile Include="..\Game\peerGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Networking\Client.cpp">
@@ -49,6 +49,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimeSystem\Timeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\Peer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking\PeerServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RunServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Game\clientGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RunGameEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -84,6 +99,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TimeSystem\Timeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\Peer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Networking\PeerServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

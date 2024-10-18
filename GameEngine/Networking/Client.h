@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "Globals.h"
 #include <vector>
 #ifdef __APPLE__
 #include <zmq.hpp>
@@ -21,7 +22,16 @@ public:
     static Entity* deserializeEntity(const std::string& json);
 
     void setClientID(int id);
+    int getClientID();
+    int getEntityID();
+    Position getViewOffset();
+    void setGameState(GameState gameState);
     std::vector<Entity*> getEntities() const;
+
+    void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
+    RefreshRate getRefreshRate() const;
+    int getRefreshRateMs() const;
+    void setViewOffset(Position viewOffset);
 
 private:
     zmq::context_t _context;
@@ -32,5 +42,11 @@ private:
     std::vector<Entity*> _entities;    
 
     int _clientID;
+    int _entityID;
+    Position _viewOffset;
 
+    RefreshRate _refreshRate;
+    int _refreshRateMs;
+
+    GameState _gameState;
 };

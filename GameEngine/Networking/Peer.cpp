@@ -16,6 +16,7 @@ Peer::Peer() {
     _requester = zmq::socket_t(_context, zmq::socket_type::req);
     _peerID = -1;
     _entityID = -1;
+    setRefreshRate();
 }
 
 Peer::~Peer() {
@@ -73,10 +74,11 @@ bool Peer::handshakeWithServer() {
         // Get peer ID and assigned player entity ID
         _peerID = std::stoi(parts[0]);
         _entityID = std::stoi(parts[1]);
-        std::cout << "Assigned Peer ID: " << _peerID << ", Entity ID: " << _entityID << std::endl;
+        _isHost = (std::stoi(parts[2]) == 1);
+        std::cout << "Assigned Peer ID: " << _peerID << ", Entity ID: " << _entityID << ", Is Host: " << _isHost << std::endl;
 
         // Parse the peerEntityMap
-        std::vector<std::string> peerEntityPairs = split(parts[2], ';');
+        std::vector<std::string> peerEntityPairs = split(parts[3], ';');
         for (const auto& pairStr : peerEntityPairs) {
             if (pairStr.empty()) continue;
             std::vector<std::string> pair = split(pairStr, ',');
@@ -102,16 +104,29 @@ bool Peer::handshakeWithServer() {
         _publisher.bind("tcp://*:" + std::to_string(pubPort));
         std::cout << "PUB socket bound to port: " << pubPort << std::endl;
 
-        // Deserialize entities
-        std::string entitiesData = parts[3];
-        std::vector<std::string> entityLines = split(entitiesData, '\n');
-        for (const auto& entityStr : entityLines) {
+        // Deserialize world entities 
+        std::string worldEntitiesData = parts[4];
+        std::vector<std::string> worldEntityLines = split(worldEntitiesData, '\n');
+        for (const auto& entityStr : worldEntityLines) {
             if (entityStr.empty()) continue;
             Entity* entity = Client::deserializeEntity(entityStr);
             if (entity) {
+                _worldEntities.push_back(entity);
                 _entities.push_back(entity);
             }
         }
+
+        // Deserialize player entities
+        std::string playerEntitiesData = parts[5];
+        std::vector<std::string> playerEntityLines = split(playerEntitiesData, '\n');
+        for (const auto& entityStr : playerEntityLines) {
+            if (entityStr.empty()) continue;
+            Entity* entity = Client::deserializeEntity(entityStr);
+            if (entity) {
+                _playerEntities.push_back(entity);
+                _entities.push_back(entity);
+            }
+        }       
 
         return true;
     }
@@ -127,21 +142,31 @@ bool Peer::handshakeWithServer() {
 
 // Broadcasts player entity updates to other peers
 void Peer::broadcastUpdates() {
-    std::ostringstream messageStream;
-    messageStream << "PEER_UPDATE|" << _peerID << "|" << _entityID;
-
-    for (auto _entity : _entities) {
-        if (_entity->getEntityID() == _entityID) {
-            // Only broadcast the entity controlled by this peer
-            messageStream << "|" << _entity->getOriginalPosition().x << "," << _entity->getOriginalPosition().y;
-            break;
+    if (_isHost) {
+        // Host peer broadcasts updates for all world entities
+        for (auto entity : _worldEntities) {
+            // Broadcast world entity update
+            std::ostringstream messageStream;
+            messageStream << "WORLD_UPDATE|" << entity->getEntityID() << "|" << entity->getOriginalPosition().x << "," << entity->getOriginalPosition().y;
+            std::string message = messageStream.str();
+            zmq::message_t zmqMessage(message.size());
+            memcpy(zmqMessage.data(), message.c_str(), message.size());
+            _publisher.send(zmqMessage, zmq::send_flags::none);
         }
     }
 
-    std::string message = messageStream.str();
-    zmq::message_t zmqMessage(message.size());
-    memcpy(zmqMessage.data(), message.c_str(), message.size());
-    _publisher.send(zmqMessage, zmq::send_flags::none);
+    // All peers broadcast their own player entity updates
+    for (auto entity : _playerEntities) {
+        if (entity->getEntityID() == _entityID) {
+            std::ostringstream messageStream;
+            messageStream << "PEER_UPDATE|" << _peerID << "|" << _entityID << "|" << entity->getOriginalPosition().x << "," << entity->getOriginalPosition().y;
+            std::string message = messageStream.str();
+            zmq::message_t zmqMessage(message.size());
+            memcpy(zmqMessage.data(), message.c_str(), message.size());
+            _publisher.send(zmqMessage, zmq::send_flags::none);
+            break;
+        }
+    }
 }
 
 // Receives player entity updates from other peers
@@ -164,7 +189,7 @@ void Peer::receiveUpdates() {
                 _knownPeers.push_back(newPeerID);
 
                 // Subscribe to the new peer's publisher
-                int newPeerPubPort = newPeerID; 
+                int newPeerPubPort = newPeerID;
                 _subscriber.connect("tcp://localhost:" + std::to_string(newPeerPubPort));
                 std::cout << "Subscribed to new peer ID: " << newPeerID << " on port: " << newPeerPubPort << std::endl;
             }
@@ -178,7 +203,7 @@ void Peer::receiveUpdates() {
             int senderPeerID = std::stoi(parts[1]);
             int senderEntityID = std::stoi(parts[2]);
 
-            if (senderPeerID == _peerID) continue; 
+            if (senderPeerID == _peerID) continue;
 
             std::vector<std::string> positionParts = split(parts[3], ',');
             if (positionParts.size() != 2) continue;
@@ -186,8 +211,28 @@ void Peer::receiveUpdates() {
             float posX = std::stof(positionParts[0]);
             float posY = std::stof(positionParts[1]);
 
-            for (auto& entity : _entities) {
+            for (auto& entity : _playerEntities) {
                 if (entity->getEntityID() == senderEntityID) {
+                    entity->setOriginalPosition(Position(posX, posY));
+                    break;
+                }
+            }
+        }
+        else if (received_msg.rfind("WORLD_UPDATE|", 0) == 0) {
+            // Handle world entity updates from host
+            std::vector<std::string> parts = split(received_msg, '|');
+            if (parts.size() < 3) continue;
+
+            int entityID = std::stoi(parts[1]);
+
+            std::vector<std::string> positionParts = split(parts[2], ',');
+            if (positionParts.size() != 2) continue;
+
+            float posX = std::stof(positionParts[0]);
+            float posY = std::stof(positionParts[1]);
+
+            for (auto& entity : _worldEntities) {
+                if (entity->getEntityID() == entityID) {
                     entity->setOriginalPosition(Position(posX, posY));
                     break;
                 }
@@ -196,9 +241,42 @@ void Peer::receiveUpdates() {
     }
 }
 
+// Returns the entity list that physics should be applied to, for this peer.
+std::vector<Entity*> Peer::getEntitiesToProcess() const {
+    std::vector<Entity*> entitiesToProcess;
 
+    // Always process own player entity
+    for (auto entity : _playerEntities) {
+        if (entity->getEntityID() == _entityID) {
+            entitiesToProcess.push_back(entity);
+            break;
+        }
+    }
+
+    // If host, also process world entities
+    if (_isHost) {
+        entitiesToProcess.insert(
+            entitiesToProcess.end(),
+            _worldEntities.begin(),
+            _worldEntities.end()
+        );
+    }
+
+    return entitiesToProcess;
+}
 
 // Setters and getters
 int Peer::getPeerId() const {return _peerID;}
 void Peer::setPeerID(int id) { _peerID = id; }
 std::vector<Entity*> Peer::getEntities() const { return _entities; }
+bool Peer::isHost() const { return _isHost; }
+int Peer::getPlayerEntityID() const { return _entityID; }
+std::vector<Entity*> Peer::getWorldEntities() const { return _worldEntities; }
+std::vector<Entity*> Peer::getPlayerEntities() const { return _playerEntities; }
+void Peer::setRefreshRate(RefreshRate rate) {
+    _refreshRate = rate;
+    _refreshRateMs = 1000 / static_cast<int>(rate);
+}
+
+RefreshRate Peer::getRefreshRate() const { return _refreshRate; }
+int Peer::getRefreshRateMs() const { return _refreshRateMs; }

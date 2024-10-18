@@ -146,9 +146,17 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 }
 
 // Scales the entity based on the scale factors passed into the function
-void Entity::applyScaling(float scaleX, float scaleY) {
+void Entity::applyScaling(float scaleX, float scaleY, Position offset, int entityId) {
+    const bool skip = _entityType == EntityType::GHOST || _entityID == entityId;
+
     _position.x = _originalPosition.x * scaleX;
     _position.y = _originalPosition.y * scaleY;
+
+    if (!skip) {
+        _position.x -= offset.x;
+        _position.y -= offset.y;
+    }
+
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
