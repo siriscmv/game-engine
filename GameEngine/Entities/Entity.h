@@ -13,10 +13,10 @@
 // Entity class. Represents an object drawn on the screen.
 class Entity {
 public:    
-    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 });                          // Rectangles
-    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 });                       // Circles
-    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 });     // Triangles
-    Entity(const char *texturePath, Position position, Size size);                                       // Textured entities
+    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);                          // Rectangles
+    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);                       // Circles
+    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);     // Triangles
+    Entity(const char *texturePath, Position position, Size size, bool hidden);                                       // Textured entities
 
     ~Entity();
 
@@ -39,6 +39,8 @@ public:
     void setTriangleHeight(float height);
     void setOriginalTriangleHeight(float height);
     void setColor(SDL_Color color);
+    void setHidden(bool hidden);
+
 
     // Getters
     int getEntityID() const;
@@ -54,17 +56,19 @@ public:
     float getCircleRadius() const;
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
-
+	bool getHidden() const;
     void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
     void render(SDL_Renderer *renderer);                  // Render entity 
     void applyScaling(float scaleX, float scaleY, Position offset = Position(0, 0), int entityId = -1);
-	void resetToOriginalPosition();
+    void teleportTo(const Position& position);
     void shutdown();
 
 private:
     Position _position = {};
     Size _size = {};
+	// help with entity visibility
+    bool _hidden;
     EntityType _entityType = EntityType::DEFAULT;
     ShapeType _shape = ShapeType::NONE;
     Velocity _velocity = {};

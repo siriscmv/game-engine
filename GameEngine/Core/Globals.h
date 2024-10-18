@@ -66,7 +66,7 @@ enum class RefreshRate {
 };
 
 enum class ZoneType {
-    STANDARD,
+    SPAWN,
     DEATH
 };
 

@@ -7,10 +7,11 @@
 
 class SideScroller {
 public:
-    void addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>>& zone);
+    void addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>& zone);
     void removeZone(const std::string& name);
     void process(Entity* entity, std::vector<Entity*>& entities) const;
 
 private:
-    std::unordered_map<std::string, std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>>> _zones;
+    std::unordered_map<std::string, std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>> _zones;
+    std::vector<Position> _spawnPoints; // store spawn points
 };

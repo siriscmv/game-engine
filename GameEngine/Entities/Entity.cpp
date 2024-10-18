@@ -12,7 +12,7 @@
 int Entity::_nextID = 0;
 
 // Constructor for Rectangles
-Entity::Entity(Position position, Size size, SDL_Color color) {
+Entity::Entity(Position position, Size size, SDL_Color color, bool hidden) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -20,10 +20,11 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
     setOriginalSize(size);
     setShapeType(ShapeType::RECTANGLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Contructor for Circles
-Entity::Entity(Position position, float radius, SDL_Color color) {
+Entity::Entity(Position position, float radius, SDL_Color color, bool hidden ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -31,10 +32,11 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
     setOriginalCircleRadius(radius);
     setShapeType(ShapeType::CIRCLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Constructor for triangles
-Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
+Entity::Entity(Position position, float baseLength, float height, SDL_Color color, bool hidden ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -44,21 +46,23 @@ Entity::Entity(Position position, float baseLength, float height, SDL_Color colo
     setOriginalTriangleHeight(height);
     setShapeType(ShapeType::TRIANGLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Constructor for textured entities
-Entity::Entity(const char *texturePath, Position position, Size size) {
+Entity::Entity(const char *texturePath, Position position, Size size, bool hidden) {
     generateEntityID();
     _texturePath = texturePath;
     setPosition(position);
     setOriginalPosition(position);
     setSize(size);
     setShapeType(ShapeType::TEXTURE);
+	setHidden(hidden);
 }
 
-void resetToOriginalPosition(Entity* entity) {
-	entity->setPosition(entity->getOriginalPosition());
-}
+//void resetToOriginalPosition(Entity* entity) {
+//	entity->setPosition(entity->getOriginalPosition());
+//}
 
 Entity::~Entity() {
     shutdown();
@@ -84,6 +88,7 @@ void Entity::setOriginalTriangleBaseLength(float baseLength) { _originalTriangle
 void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
 void Entity::setOriginalTriangleHeight(float height) { _originalTriangleHeight = height; }
 void Entity::setColor(SDL_Color color) { _color = color; }
+void Entity::setHidden(bool hidden) { _hidden = hidden; }
 
 // Getters
 int Entity::getEntityID() const { return _entityID; }
@@ -99,6 +104,7 @@ float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
+bool Entity::getHidden() const { return _hidden; }
 
 
 
@@ -179,8 +185,17 @@ void Entity::applyScaling(float scaleX, float scaleY, Position offset, int entit
     }
 }
 
+// Teleports the entity to the position passed
+void Entity::teleportTo(const Position& position) {
+    setPosition(position);
+}
+
+
 // Renders the entity onto the screen
 void Entity::render(SDL_Renderer *renderer) {
+	if (_hidden) {
+		return;
+	}
     switch (_shape) {
         case ShapeType::TEXTURE: 
             if (_texture != nullptr) {
