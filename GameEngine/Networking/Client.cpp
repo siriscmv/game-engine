@@ -1,6 +1,7 @@
 #include "Client.h"
 #include <iostream>
 #include <string>
+#include <thread>
 #ifdef __APPLE__
 #include <zmq.hpp>
 #else
@@ -10,6 +11,8 @@
 Client::Client() {    
 	_context = zmq::context_t(1);
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
+	_heartbeatPublisher = zmq::socket_t(_context, zmq::socket_type::pub);
+    _entitySubscriber = zmq::socket_t(_context, zmq::socket_type::sub);
 	_subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _requester = zmq::socket_t(_context, zmq::socket_type:: req);
     _gameState = GameState::PLAY;
@@ -20,21 +23,28 @@ Client::Client() {
 
 Client::~Client() {
 	_publisher.close();
+    _heartbeatPublisher.close();
 	_subscriber.close();
+    _entitySubscriber.close();
 }
 
 // Initializes the client. Binds ports into pub-sub and req-rep models.
-void Client::initialize(int pubPort, int subPort, int reqPort) {    
+void Client::initialize(int pubPort, int entitySubPort, int reqPort, int heartbearPort, int subPort) {    
 
     _publisher.connect("tcp://localhost:" + std::to_string(pubPort));   
-    _subscriber.connect("tcp://localhost:" + std::to_string(subPort)); 
+    _heartbeatPublisher.connect("tcp://localhost:" + std::to_string(heartbearPort));
+    _entitySubscriber.connect("tcp://localhost:" + std::to_string(entitySubPort));
+    _subscriber.connect("tcp://localhost:" + std::to_string(subPort));
     _requester.connect("tcp://localhost:" + std::to_string(reqPort));  
-    _subscriber.set(zmq::sockopt::subscribe, "entity_update");
+    _entitySubscriber.set(zmq::sockopt::subscribe, "entity_update");
+    _subscriber.set(zmq::sockopt::subscribe, "");
 
     printf("Client initialized.\n");
     printf("Connected to server on ports:\n");
     printf("Publisher port: %d\n", pubPort);
-    printf("Subscriber port: %d\n", subPort);
+    printf("Hearbeat port: %d\n", heartbearPort);
+    printf("Entity updates subscriber port: %d\n", entitySubPort);
+    printf("General subscriber port: %d\n", subPort);
     printf("Request-Response port: %d\n", reqPort);
 }
 
@@ -52,13 +62,7 @@ bool Client::handshakeWithServer() {
             return false;
         }
 
-        std::string response(static_cast<char*>(reply.data()), reply.size());
-
-        // Check if the server is full
-        if (response == "FULL") {
-            printf("Server full, cannot connect\n");
-            return false;
-        }
+        std::string response(static_cast<char*>(reply.data()), reply.size());        
 
         // Validate response format (expected format: "clientID|assignedEntityID|entityData")
         size_t firstSeparator = response.find("|");
@@ -83,7 +87,7 @@ bool Client::handshakeWithServer() {
                 _entities.push_back(entity);
             }
             entityData.erase(0, pos + 1);
-        }
+        }        
 
         printf("Successfully connected to server with Client ID: %d, Assigned Entity ID: %d\n", _clientID, _entityID);
         printf("Received %d entities from server.\n", static_cast<int>(_entities.size()));
@@ -99,13 +103,31 @@ bool Client::handshakeWithServer() {
     }
 }
 
+// Sends heartbeat messages to the server
+void Client::sendHeartbeatToServer() {    
+    json heartbeatMessage = {
+        {"type", "heartbeat"},
+        {"clientId", _clientID}
+    };
+    
+    std::string message = heartbeatMessage.dump();
+   
+    zmq::message_t zmqMessage(message.size());
+    memcpy(zmqMessage.data(), message.c_str(), message.size());
+    _heartbeatPublisher.send(zmqMessage, zmq::send_flags::none);
+}
+
 
 // Sends keypresses to the server
 void Client::sendInputToServer(const std::string& buttonPress) {
-    std::ostringstream messageStream;
-    messageStream << "keypress|" << std::setw(4) << std::setfill('0') << _clientID << buttonPress;   // Ensuring fixed length for client ID
-    std::string message = messageStream.str();
-
+    json keypressMessage = {
+        {"type", "keypress"},
+        {"clientId", _clientID},
+        {"buttonPress", buttonPress}
+    };
+    
+    std::string message = keypressMessage.dump();
+    
     zmq::message_t zmqMessage(message.size());
     memcpy(zmqMessage.data(), message.c_str(), message.size());
     _publisher.send(zmqMessage, zmq::send_flags::none);
@@ -115,10 +137,10 @@ void Client::sendInputToServer(const std::string& buttonPress) {
 
 
 // Receives entity updates from the server
-void Client::receiveUpdatesFromServer() {
+void Client::receiveEntityUpdatesFromServer() {
     zmq::message_t update;
 
-    if (_subscriber.recv(update, zmq::recv_flags::dontwait)) {
+    if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
         std::string allEntityUpdates(static_cast<char*>(update.data()), update.size());
 
         // Check for the "entity_update|" prefix and remove it
@@ -143,15 +165,47 @@ void Client::receiveUpdatesFromServer() {
 
                 delete updatedEntity;
                 allEntityUpdates.erase(0, pos + delimiter.length());
-            }
-
-            // printf("Received entity updates from server, continuing game loop\n");
+            }            
         }
     }
-    else {
-        // printf("No updates from server, continuing game loop.\n");
+}
+
+// Receives all other messages from the server apart from entity updates
+void Client::receiveMessagesFromServer() {
+    zmq::message_t update;
+
+    if (_subscriber.recv(update, zmq::recv_flags::dontwait)) {
+        std::string message(static_cast<char*>(update.data()), update.size());
+        json jsonMessage = json::parse(message);
+
+        // Handles client disconnect message
+        if (jsonMessage["type"] == "disconnect") {
+            int entityID = jsonMessage["entityID"];
+
+            // Iterate through _entities and remove the one with the matching entityID
+            for (auto it = _entities.begin(); it != _entities.end(); ++it) {
+                if ((*it)->getEntityID() == entityID) {
+                    delete* it;  
+                    _entities.erase(it);  
+                    printf("A player disconnected. Their player entity was removed.\n");
+                    break;  
+                }
+            }
+        }
+        // Handles new connection message
+        else if (jsonMessage["type"] == "new_connection") {
+            std::string serializedEntity = jsonMessage["entity"];
+
+            // Deserialize and add the new entity to the entities list
+            Entity* newEntity = deserializeEntity(serializedEntity);
+            if (newEntity && newEntity->getEntityID() != _entityID) {
+                _entities.push_back(newEntity);
+                printf("A new player has connected. Their player entity ID: %d\n", newEntity->getEntityID());
+            }
+        }
     }
 }
+
 
 // Converts entity type string into an enum variable
 EntityType stringToEntityType(const std::string& str) {

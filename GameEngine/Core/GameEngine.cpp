@@ -160,7 +160,13 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 // Handles the client's game engine logic in server-client multiplayer
 void GameEngine::handleClientMode(int64_t elapsedTime) {
 	SDL_PumpEvents();                                          // Force an event queue update
-	_renderer->clear();	
+	_renderer->clear();
+
+	_entities = _client->getEntities();
+
+	std::thread heartbeatThread([this]() {
+		_client->sendHeartbeatToServer();
+	});
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -171,7 +177,8 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	});
 
 	std::thread communicationThread([this]() {
-		_client->receiveUpdatesFromServer();
+		_client->receiveEntityUpdatesFromServer();
+		_client->receiveMessagesFromServer();
 	});
 
 	std::thread sideScrollingThread([this]() {
@@ -202,6 +209,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	callbackThread.join();
 	communicationThread.join();
 	sideScrollingThread.join();
+	heartbeatThread.join();
 }
 
 // Handles the logic for peers in peer to peer mode

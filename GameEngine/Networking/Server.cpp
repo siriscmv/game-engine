@@ -5,15 +5,18 @@
 
 Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& spawnPoints) {
     _context = zmq::context_t(1); 
+    _entityPublisher = zmq::socket_t(_context, zmq::socket_type::pub);
     _publisher = zmq::socket_t(_context, zmq::socket_type::pub);
     _subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
+    _heartbeatSubscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _responder = zmq::socket_t(_context, zmq::socket_type::rep);
 
     _worldEntities = worldEntities;
     _spawnPoints = spawnPoints;
     _allEntities = worldEntities;
 
-    _nextClientID = 0;      
+    _nextClientID = 0;
+    _nextEntityID = _worldEntities.size() + _spawnPoints.size();
     
     _engine = new GameEngine("Server-side simulation", 0, 0, Mode::SERVER);
     _engine->initialize(_allEntities);
@@ -22,24 +25,31 @@ Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Enti
 }
 
 Server::~Server() {
-    _publisher.close();
+    _entityPublisher.close();
     _subscriber.close();
+    _heartbeatSubscriber.close();
+    _publisher.close();
     _engine->shutdown();
 }
 
 // Initializes the server. Binds ports into pub-sub and req-rep models.
-void Server::initialize(int pubPort, int subPort, int reqPort) {   
+void Server::initialize(int entityPubPort, int subPort, int reqPort, int heartbeatPort, int pubPort) {   
 
+    _entityPublisher.bind("tcp://*:" + std::to_string(entityPubPort));
     _publisher.bind("tcp://*:" + std::to_string(pubPort));
     _subscriber.bind("tcp://*:" + std::to_string(subPort));
+    _heartbeatSubscriber.bind("tcp://*:" + std::to_string(heartbeatPort));
     _responder.bind("tcp://*:" + std::to_string(reqPort));
 
-    _subscriber.set(zmq::sockopt::subscribe, "keypress");                        // Subscribing to 'keypress' topic
+    _subscriber.set(zmq::sockopt::subscribe, "");
+    _heartbeatSubscriber.set(zmq::sockopt::subscribe, "");
 
     printf("Server started and listening on the following ports:\n");
-    printf("Publisher port: %d\n", pubPort);
+    printf("Entity updates publisher port: %d\n", entityPubPort);
+    printf("General publisher port: %d\n", pubPort);
     printf("Subscriber port: %d\n", subPort);
     printf("Request-Response port: %d\n", reqPort);
+    printf("Heartbeat port: %d\n", heartbeatPort);
 }
 
 // Server loop. Receives updates about keyboard inputs from clients. Sends updates 
@@ -59,13 +69,21 @@ void Server::run() {
         while (true) {
             handleClientHandeshake();
             listenToClientMessages();
+            monitorHeartbeats();
             updateClientEntities();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));              // 60hz tick rate
         }
     });
 
+    std::thread heartbeatThread([this]() {
+        while (true) {
+            listenToHeartbeatMessages();              
+        }
+        });
+
     gameEngineThread.join();
     clientThread.join();
+    heartbeatThread.join();
 }
 
 // Returns the initial world info to clients who request it
@@ -91,7 +109,7 @@ void Server::handleClientHandeshake() {
 
             // Creating a player entity on that random position within the spawn point's boundaries
             Entity* playerEntity = new Entity(Position(playerX, playerY), Size(50, 50));
-            playerEntity->setEntityID(_allEntities.size() + _spawnPoints.size() + 1);
+            playerEntity->setEntityID(_nextEntityID++);
             playerEntity->setAccelerationY(9.8f);
 
             // Pushing the player entity into entity lists in the game engine and physics system
@@ -100,7 +118,10 @@ void Server::handleClientHandeshake() {
 
             // Store the player entity in the client Map
             _clientMap[clientId] = playerEntity;
-            _allEntities.push_back(playerEntity);                           
+            _allEntities.push_back(playerEntity);
+
+            // Initialize last heartbeat time
+            _lastHeartbeatMap[clientId] = std::chrono::steady_clock::now();
 
             printf("Client connected with ID: %d, created Player Entity ID: %d at Spawn Point (%f, %f)\n",
                 clientId, playerEntity->getEntityID(), spawnPos.x, spawnPos.y);
@@ -114,7 +135,105 @@ void Server::handleClientHandeshake() {
             zmq::message_t reply(response.size());
             memcpy(reply.data(), response.c_str(), response.size());
             _responder.send(reply, zmq::send_flags::none);
+
+            // Notify all other clients about this new connection
+            broadcastNewConnection(playerEntity);
         }
+    }
+}
+
+// Moniors heartbeats of the clients to detect disconnects. Delegates to
+// 'handleClientDisconnect' method upon detecting a disconnect.
+void Server::monitorHeartbeats() {    
+    auto now = std::chrono::steady_clock::now();
+
+    std::vector<int> disconnectedClients;
+
+    for (const auto& [clientId, lastHeartbeat] : _lastHeartbeatMap) {
+        auto durationSinceLastHeartbeat = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastHeartbeat);
+        
+        if (durationSinceLastHeartbeat > _heartbeatTimeout) {
+            disconnectedClients.push_back(clientId);
+        }
+    }
+
+    for (int clientId : disconnectedClients) {
+        handleClientDisconnect(clientId);
+    }    
+}
+
+// Disconnect a client from the server and cleans up their player entity object 
+void Server::handleClientDisconnect(int clientId) {
+    printf("Client with ID: %d disconnected.\n", clientId);
+
+    // Remove player entity from the game engine, physics system, and all entities list
+    Entity* playerEntity = _clientMap[clientId];
+
+    auto& gameEntities = _engine->getEntities();
+    gameEntities.erase(std::remove(gameEntities.begin(), gameEntities.end(), playerEntity), gameEntities.end());
+    
+    auto& physicsEntities = _engine->getPhysicsSystem()->getEntities();
+    physicsEntities.erase(std::remove(physicsEntities.begin(), physicsEntities.end(), playerEntity), physicsEntities.end());
+    
+    _allEntities.erase(std::remove(_allEntities.begin(), _allEntities.end(), playerEntity), _allEntities.end());
+
+    // Remove from the client map and heartbeat map
+    _clientMap.erase(clientId);
+    _lastHeartbeatMap.erase(clientId);
+
+    // Inform all clients about the disconnection
+    broadcastDisconnect(playerEntity->getEntityID());
+
+    delete playerEntity;  
+}
+
+// Broadcasts the newly connected player's entity details to already connected clients
+void Server::broadcastNewConnection(Entity* playerEntity) {
+    json newConnectionMessage = {
+        {"type", "new_connection"},
+        {"entity", serializeEntity(*playerEntity)}
+    };
+
+    std::string message = newConnectionMessage.dump();
+    zmq::message_t zmqMessage(message.size());
+    memcpy(zmqMessage.data(), message.c_str(), message.size());
+
+    _publisher.send(zmqMessage, zmq::send_flags::none);
+}
+
+// Broadcasts a disconnect message to all clients
+void Server::broadcastDisconnect(int playerEntityID) {
+    json disconnectMessage = {
+        {"type", "disconnect"},
+        {"entityID", playerEntityID}
+    };
+
+    std::string message = disconnectMessage.dump();
+    zmq::message_t zmqMessage(message.size());
+    memcpy(zmqMessage.data(), message.c_str(), message.size());
+
+    _publisher.send(zmqMessage, zmq::send_flags::none);  
+}
+
+// Listens to heartbeat messages from clients
+void Server::listenToHeartbeatMessages() {
+    try {
+        zmq::message_t request;
+        if (_heartbeatSubscriber.recv(request, zmq::recv_flags::dontwait)) {
+            std::string message(static_cast<char*>(request.data()), request.size());
+            json jsonMessage = json::parse(message);
+            
+            if (jsonMessage["type"] == "heartbeat") {
+                int clientId = jsonMessage["clientId"];
+                _lastHeartbeatMap[clientId] = std::chrono::steady_clock::now();                 
+            }
+        }
+    }
+    catch (const nlohmann::json::exception& e) {
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error processing heartbeat: " << e.what() << std::endl;
     }
 }
 
@@ -125,24 +244,29 @@ void Server::listenToClientMessages() {
         zmq::message_t request;
         if (_subscriber.recv(request, zmq::recv_flags::dontwait)) {
             std::string message(static_cast<char*>(request.data()), request.size());
-        
-            if (message.rfind("keypress|", 0) == 0) {
-                message = message.substr(9);  
-                int clientId = std::stoi(message.substr(0, 4));
-                std::string buttonPress = message.substr(4);
 
+            json jsonMessage = json::parse(message);
+
+            // Extract the message type and client ID
+            std::string messageType = jsonMessage["type"];            
+            int clientId = jsonMessage["clientId"];
+
+            // Handle keypress messages
+            if (messageType == "keypress") {
+                std::string buttonPress = jsonMessage["buttonPress"];
                 printf("Received input from Client %d: %s\n", clientId, buttonPress.c_str());
                 processClientInput(clientId, buttonPress);
-            }
+            }            
         }
-        else {
-            /*printf("No input from clients, continuing server loop.\n");*/
-        }
+    }
+    catch (const nlohmann::json::exception& e) {
+        std::cerr << "JSON parsing error: " << e.what() << std::endl;
     }
     catch (const std::exception& e) {
-        std::cerr << "Error processing input: " << e.what() << std::endl;        
+        std::cerr << "Error processing input: " << e.what() << std::endl;
     }
 }
+
 
 // Processes keypress from client and updates corresponding player entity velocity
 void Server::processClientInput(int clientId, const std::string& buttonPress) {
@@ -175,7 +299,7 @@ void Server::updateClientEntities() {
 
     zmq::message_t message(allEntitiesData.size());
     memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());
-    _publisher.send(message, zmq::send_flags::none);    
+    _entityPublisher.send(message, zmq::send_flags::none);
 }
 
 // Converts entity type into a string
@@ -221,3 +345,8 @@ void Server::setSimulationSpeed(double speed) {
 RefreshRate Server::getRefreshRate() const { return _refreshRate; }
 int Server::getRefreshRateMs() const { return _refreshRateMs; }
 GameEngine* Server::getGameEngine() const { return _engine; }
+
+// Sets the heartbeat timeout value 
+void Server::setHeartBeatTimeout(int milliseconds) {
+    _heartbeatTimeout = std::chrono::milliseconds(milliseconds);
+}
