@@ -1,6 +1,7 @@
 #include "Client.h"
 #include <iostream>
 #include <string>
+#include <thread>
 #ifdef __APPLE__
 #include <zmq.hpp>
 #else
@@ -10,6 +11,8 @@
 Client::Client() {    
 	_context = zmq::context_t(1);
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
+	_heartbeatPublisher = zmq::socket_t(_context, zmq::socket_type::pub);
+    _entitySubscriber = zmq::socket_t(_context, zmq::socket_type::sub);
 	_subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _requester = zmq::socket_t(_context, zmq::socket_type:: req);
     _gameState = GameState::PLAY;
@@ -20,21 +23,28 @@ Client::Client() {
 
 Client::~Client() {
 	_publisher.close();
+    _heartbeatPublisher.close();
 	_subscriber.close();
+    _entitySubscriber.close();
 }
 
 // Initializes the client. Binds ports into pub-sub and req-rep models.
-void Client::initialize(int pubPort, int subPort, int reqPort) {    
+void Client::initialize(int pubPort, int entitySubPort, int reqPort, int heartbearPort, int subPort) {    
 
     _publisher.connect("tcp://localhost:" + std::to_string(pubPort));   
-    _subscriber.connect("tcp://localhost:" + std::to_string(subPort)); 
+    _heartbeatPublisher.connect("tcp://localhost:" + std::to_string(heartbearPort));
+    _entitySubscriber.connect("tcp://localhost:" + std::to_string(entitySubPort));
+    _subscriber.connect("tcp://localhost:" + std::to_string(subPort));
     _requester.connect("tcp://localhost:" + std::to_string(reqPort));  
-    _subscriber.set(zmq::sockopt::subscribe, "entity_update");
+    _entitySubscriber.set(zmq::sockopt::subscribe, "entity_update");
+    _subscriber.set(zmq::sockopt::subscribe, "");
 
     printf("Client initialized.\n");
     printf("Connected to server on ports:\n");
     printf("Publisher port: %d\n", pubPort);
-    printf("Subscriber port: %d\n", subPort);
+    printf("Hearbeat port: %d\n", heartbearPort);
+    printf("Entity updates subscriber port: %d\n", entitySubPort);
+    printf("General subscriber port: %d\n", subPort);
     printf("Request-Response port: %d\n", reqPort);
 }
 
@@ -52,13 +62,7 @@ bool Client::handshakeWithServer() {
             return false;
         }
 
-        std::string response(static_cast<char*>(reply.data()), reply.size());
-
-        // Check if the server is full
-        if (response == "FULL") {
-            printf("Server full, cannot connect\n");
-            return false;
-        }
+        std::string response(static_cast<char*>(reply.data()), reply.size());        
 
         // Validate response format (expected format: "clientID|assignedEntityID|entityData")
         size_t firstSeparator = response.find("|");
@@ -83,7 +87,7 @@ bool Client::handshakeWithServer() {
                 _entities.push_back(entity);
             }
             entityData.erase(0, pos + 1);
-        }
+        }        
 
         printf("Successfully connected to server with Client ID: %d, Assigned Entity ID: %d\n", _clientID, _entityID);
         printf("Received %d entities from server.\n", static_cast<int>(_entities.size()));
@@ -99,13 +103,31 @@ bool Client::handshakeWithServer() {
     }
 }
 
+// Sends heartbeat messages to the server
+void Client::sendHeartbeatToServer() {    
+    json heartbeatMessage = {
+        {"type", "heartbeat"},
+        {"clientId", _clientID}
+    };
+    
+    std::string message = heartbeatMessage.dump();
+   
+    zmq::message_t zmqMessage(message.size());
+    memcpy(zmqMessage.data(), message.c_str(), message.size());
+    _heartbeatPublisher.send(zmqMessage, zmq::send_flags::none);
+}
+
 
 // Sends keypresses to the server
 void Client::sendInputToServer(const std::string& buttonPress) {
-    std::ostringstream messageStream;
-    messageStream << "keypress|" << std::setw(4) << std::setfill('0') << _clientID << buttonPress;   // Ensuring fixed length for client ID
-    std::string message = messageStream.str();
-
+    json keypressMessage = {
+        {"type", "keypress"},
+        {"clientId", _clientID},
+        {"buttonPress", buttonPress}
+    };
+    
+    std::string message = keypressMessage.dump();
+    
     zmq::message_t zmqMessage(message.size());
     memcpy(zmqMessage.data(), message.c_str(), message.size());
     _publisher.send(zmqMessage, zmq::send_flags::none);
@@ -115,10 +137,10 @@ void Client::sendInputToServer(const std::string& buttonPress) {
 
 
 // Receives entity updates from the server
-void Client::receiveUpdatesFromServer() {
+void Client::receiveEntityUpdatesFromServer() {
     zmq::message_t update;
 
-    if (_subscriber.recv(update, zmq::recv_flags::dontwait)) {
+    if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
         std::string allEntityUpdates(static_cast<char*>(update.data()), update.size());
 
         // Check for the "entity_update|" prefix and remove it
@@ -143,15 +165,47 @@ void Client::receiveUpdatesFromServer() {
 
                 delete updatedEntity;
                 allEntityUpdates.erase(0, pos + delimiter.length());
-            }
-
-            // printf("Received entity updates from server, continuing game loop\n");
+            }            
         }
     }
-    else {
-        // printf("No updates from server, continuing game loop.\n");
+}
+
+// Receives all other messages from the server apart from entity updates
+void Client::receiveMessagesFromServer() {
+    zmq::message_t update;
+
+    if (_subscriber.recv(update, zmq::recv_flags::dontwait)) {
+        std::string message(static_cast<char*>(update.data()), update.size());
+        json jsonMessage = json::parse(message);
+
+        // Handles client disconnect message
+        if (jsonMessage["type"] == "disconnect") {
+            int entityID = jsonMessage["entityID"];
+
+            // Iterate through _entities and remove the one with the matching entityID
+            for (auto it = _entities.begin(); it != _entities.end(); ++it) {
+                if ((*it)->getEntityID() == entityID) {
+                    delete* it;  
+                    _entities.erase(it);  
+                    printf("A player disconnected. Their player entity was removed.\n");
+                    break;  
+                }
+            }
+        }
+        // Handles new connection message
+        else if (jsonMessage["type"] == "new_connection") {
+            std::string serializedEntity = jsonMessage["entity"];
+
+            // Deserialize and add the new entity to the entities list
+            Entity* newEntity = deserializeEntity(serializedEntity);
+            if (newEntity && newEntity->getEntityID() != _entityID) {
+                _entities.push_back(newEntity);
+                printf("A new player has connected. Their player entity ID: %d\n", newEntity->getEntityID());
+            }
+        }
     }
 }
+
 
 // Converts entity type string into an enum variable
 EntityType stringToEntityType(const std::string& str) {
@@ -162,51 +216,25 @@ EntityType stringToEntityType(const std::string& str) {
     else return EntityType::DEFAULT; 
 }
 
-// Deserializes entity info from a JSON string and creates and Entity object with it
-Entity* Client::deserializeEntity(const std::string& json) {
+// Deserializes entity info from a JSON string and creates an Entity object with it
+Entity* Client::deserializeEntity(const std::string& jsonString) {
     try {
-        // Find positions of the fields
-        size_t idPos = json.find("\"id\": ");
-        size_t xPos = json.find("\"x\": ");
-        size_t yPos = json.find("\"y\": ");
-        size_t widthPos = json.find("\"width\": ");
-        size_t heightPos = json.find("\"height\": ");
-        size_t typePos = json.find("\"type\": \"");
-        size_t velocityXPos = json.find("\"velocityX\": ");
-        size_t velocityYPos = json.find("\"velocityY\": ");
-        size_t accelerationXPos = json.find("\"accelerationX\": ");
-        size_t accelerationYPos = json.find("\"accelerationY\": ");
-
-        // Ensure all required fields exist
-        if (idPos == std::string::npos || xPos == std::string::npos || yPos == std::string::npos ||
-            widthPos == std::string::npos || heightPos == std::string::npos || typePos == std::string::npos ||
-            velocityXPos == std::string::npos || velocityYPos == std::string::npos ||
-            accelerationXPos == std::string::npos || accelerationYPos == std::string::npos) {
-            printf("Error: Invalid JSON format for entity.\n");
-            return nullptr;
-        }
+        // Parse the JSON string
+        json jsonEntity = json::parse(jsonString);
 
         // Extract values
-        int id = std::stoi(json.substr(idPos + 6, json.find(",", idPos) - (idPos + 6)));
-        float x = std::stof(json.substr(xPos + 5, json.find(",", xPos) - (xPos + 5)));
-        float y = std::stof(json.substr(yPos + 5, json.find(",", yPos) - (yPos + 5)));
-        float width = std::stof(json.substr(widthPos + 9, json.find(",", widthPos) - (widthPos + 9)));
-        float height = std::stof(json.substr(heightPos + 10, json.find(",", heightPos) - (heightPos + 10)));
-
-        // Extract entity type
-        size_t typeValueStart = typePos + 9; // Length of "\"type\": \"" is 9
-        size_t typeValueEnd = json.find("\"", typeValueStart);
-        std::string typeStr = json.substr(typeValueStart, typeValueEnd - typeValueStart);
+        int id = jsonEntity["id"];
+        float x = jsonEntity["x"];
+        float y = jsonEntity["y"];
+        float width = jsonEntity["width"];
+        float height = jsonEntity["height"];
+        std::string typeStr = jsonEntity["type"];
         EntityType entityType = stringToEntityType(typeStr);
 
-        // Extract velocity and acceleration
-        float velocityX = std::stof(json.substr(velocityXPos + 13, json.find(",", velocityXPos) - (velocityXPos + 13)));
-        float velocityY = std::stof(json.substr(velocityYPos + 13, json.find(",", velocityYPos) - (velocityYPos + 13)));
-        float accelerationX = std::stof(json.substr(accelerationXPos + 16, json.find(",", accelerationXPos) - (accelerationXPos + 16)));
-
-        // For accelerationY (last field), find the closing brace
-        size_t accelerationYEnd = json.find("}", accelerationYPos);
-        float accelerationY = std::stof(json.substr(accelerationYPos + 16, accelerationYEnd - (accelerationYPos + 16)));
+        float velocityX = jsonEntity["velocityX"];
+        float velocityY = jsonEntity["velocityY"];
+        float accelerationX = jsonEntity["accelerationX"];
+        float accelerationY = jsonEntity["accelerationY"];
 
         // Create the entity
         Entity* entity = new Entity(Position(x, y), Size(width, height));
@@ -217,11 +245,9 @@ Entity* Client::deserializeEntity(const std::string& json) {
         entity->setAccelerationX(accelerationX);
         entity->setAccelerationY(accelerationY);
 
-        // printf("Deserialized entity ID: %d, Position: (%f, %f), Type: %s\n", id, x, y, typeStr.c_str());
-
         return entity;
     }
-    catch (const std::exception& e) {
+    catch (const nlohmann::json::exception& e) {
         printf("Deserialization error: %s\n", e.what());
         return nullptr;
     }
