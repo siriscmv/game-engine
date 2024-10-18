@@ -59,6 +59,7 @@ public:
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
     void render(SDL_Renderer *renderer);                  // Render entity 
     void applyScaling(float scaleX, float scaleY, Position offset = Position(0, 0), int entityId = -1);
+	void resetToOriginalPosition();
     void shutdown();
 
 private:

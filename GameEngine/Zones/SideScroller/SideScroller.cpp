@@ -25,10 +25,18 @@ void SideScroller::removeZone(const std::string& name) {
 void SideScroller::process(Entity* entity, std::vector<Entity*>& entities) const {
     for (const auto & _zone : _zones) {
         auto zone = _zone.second;
+
         if (CollisionSystem::getInstance().hasCollisionRaw(&std::get<0>(zone), entity)) {
-            std::vector<Entity*> filteredEntities;
-            std::copy_if(entities.begin(), entities.end(), std::back_inserter(filteredEntities), [entity](const Entity* e) {return entity != e;});
-            std::get<1>(zone)(entity, filteredEntities);
+            if (std::get<1>(zone) == ZoneType::DEATH) {
+                // Teleport entity to oroginal spawn position
+				entity->resetToOriginalPosition();
+                }
+            }
+            else {
+                std::vector<Entity*> filteredEntities;
+                std::copy_if(entities.begin(), entities.end(), std::back_inserter(filteredEntities), [entity](const Entity* e) { return entity != e; });
+                std::get<1>(zone)(entity, filteredEntities);
+            }
         }
     }
 }

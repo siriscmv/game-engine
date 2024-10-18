@@ -56,6 +56,10 @@ Entity::Entity(const char *texturePath, Position position, Size size) {
     setShapeType(ShapeType::TEXTURE);
 }
 
+void resetToOriginalPosition(Entity* entity) {
+	entity->setPosition(entity->getOriginalPosition());
+}
+
 Entity::~Entity() {
     shutdown();
 }
