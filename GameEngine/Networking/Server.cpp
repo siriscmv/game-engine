@@ -288,20 +288,6 @@ void Server::processClientInput(int clientId, const std::string& buttonPress) {
     }
 }
 
-// Broadcasts entity updates to all clients
-void Server::updateClientEntities() {
-    std::string messagePrefix = "entity_update|";
-    std::string allEntitiesData = messagePrefix;
-
-    for (Entity* entity : _allEntities) {
-        allEntitiesData += serializeEntity(*entity) + "\n";  
-    }
-
-    zmq::message_t message(allEntitiesData.size());
-    memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());
-    _entityPublisher.send(message, zmq::send_flags::none);
-}
-
 // Converts entity type into a string
 std::string entityTypeToString(EntityType type) {
     switch (type) {
@@ -313,8 +299,7 @@ std::string entityTypeToString(EntityType type) {
     }
 }
 
-// Serializes an entity to a JSON string
-std::string Server::serializeEntity(const Entity& entity) {
+json entityToJson(const Entity& entity) {
     json jsonEntity = {
         {"id", entity.getEntityID()},
         {"x", entity.getOriginalPosition().x},
@@ -327,7 +312,31 @@ std::string Server::serializeEntity(const Entity& entity) {
         {"accelerationX", entity.getAccelerationX()},
         {"accelerationY", entity.getAccelerationY()}
     };
-    return jsonEntity.dump(); 
+
+    return jsonEntity;
+}
+
+// Broadcasts entity updates to all clients
+void Server::updateClientEntities() {
+    json updateMessage = {
+    {"type", "entity_update"},
+    {"entities", json::array()}
+    };
+
+    for (const Entity* entity : _allEntities) {
+        updateMessage["entities"].push_back(entityToJson(*entity));
+    }
+
+    std::string allEntitiesData = updateMessage.dump();
+
+    zmq::message_t message(allEntitiesData.size());
+    memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());
+    _entityPublisher.send(message, zmq::send_flags::none);
+}
+
+// Serializes an entity to a JSON string
+std::string Server::serializeEntity(const Entity& entity) {
+    return entityToJson(entity).dump();
 }
 
 // Setter and getters

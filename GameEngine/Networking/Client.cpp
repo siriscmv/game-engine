@@ -36,7 +36,7 @@ void Client::initialize(int pubPort, int entitySubPort, int reqPort, int heartbe
     _entitySubscriber.connect("tcp://localhost:" + std::to_string(entitySubPort));
     _subscriber.connect("tcp://localhost:" + std::to_string(subPort));
     _requester.connect("tcp://localhost:" + std::to_string(reqPort));  
-    _entitySubscriber.set(zmq::sockopt::subscribe, "entity_update");
+    _entitySubscriber.set(zmq::sockopt::subscribe, "");
     _subscriber.set(zmq::sockopt::subscribe, "");
 
     printf("Client initialized.\n");
@@ -135,6 +135,41 @@ void Client::sendInputToServer(const std::string& buttonPress) {
     printf("Sent input to server: %s\n", buttonPress.c_str());
 }
 
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else return EntityType::DEFAULT;
+}
+
+Entity* jsonToEntity(json jsonEntity) {
+    // Extract values
+    int id = jsonEntity["id"];
+    float x = jsonEntity["x"];
+    float y = jsonEntity["y"];
+    float width = jsonEntity["width"];
+    float height = jsonEntity["height"];
+    std::string typeStr = jsonEntity["type"];
+    EntityType entityType = stringToEntityType(typeStr);
+
+    float velocityX = jsonEntity["velocityX"];
+    float velocityY = jsonEntity["velocityY"];
+    float accelerationX = jsonEntity["accelerationX"];
+    float accelerationY = jsonEntity["accelerationY"];
+
+    // Create the entity
+    Entity* entity = new Entity(Position(x, y), Size(width, height));
+    entity->setEntityID(id);
+    entity->setEntityType(entityType);
+    entity->setVelocityX(velocityX);
+    entity->setVelocityY(velocityY);
+    entity->setAccelerationX(accelerationX);
+    entity->setAccelerationY(accelerationY);
+
+    return entity;
+}
 
 // Receives entity updates from the server
 void Client::receiveEntityUpdatesFromServer() {
@@ -143,29 +178,25 @@ void Client::receiveEntityUpdatesFromServer() {
     if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
         std::string allEntityUpdates(static_cast<char*>(update.data()), update.size());
 
-        // Check for the "entity_update|" prefix and remove it
-        if (allEntityUpdates.rfind("entity_update|", 0) == 0) {
-            allEntityUpdates = allEntityUpdates.substr(14);
+        json entityUpdates = json::parse(allEntityUpdates);
 
-            size_t pos = 0;
-            std::string delimiter = "\n";
+        if (entityUpdates["type"] != "entity_update") {
+            printf("Invalid entity update message.\n");
+            return;
+        }
 
-            while ((pos = allEntityUpdates.find(delimiter)) != std::string::npos) {
-                std::string serializedEntity = allEntityUpdates.substr(0, pos);
-                Entity* updatedEntity = deserializeEntity(serializedEntity);
-
-                for (Entity* entity : _entities) {
-                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
-                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
-                        entity->setOriginalPosition(updatedEntity->getOriginalPosition());
-                        entity->setSize(updatedEntity->getSize());
-                        break;
-                    }
+        for (const auto& updatedJSONEntity: entityUpdates["entities"]) {
+            const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
+            for (Entity* entity : _entities) {
+                if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
+                if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                    entity->setOriginalPosition(updatedEntity->getOriginalPosition());
+                    entity->setSize(updatedEntity->getSize());
+                    break;
                 }
+            }
 
-                delete updatedEntity;
-                allEntityUpdates.erase(0, pos + delimiter.length());
-            }            
+            delete updatedEntity;
         }
     }
 }
@@ -206,46 +237,12 @@ void Client::receiveMessagesFromServer() {
     }
 }
 
-
-// Converts entity type string into an enum variable
-EntityType stringToEntityType(const std::string& str) {
-    if (str == "DEFAULT") return EntityType::DEFAULT;
-    else if (str == "FIXED") return EntityType::FIXED;
-    else if (str == "ELASTIC") return EntityType::ELASTIC;
-    else if (str == "GHOST") return EntityType::GHOST;
-    else return EntityType::DEFAULT; 
-}
-
 // Deserializes entity info from a JSON string and creates an Entity object with it
 Entity* Client::deserializeEntity(const std::string& jsonString) {
     try {
         // Parse the JSON string
         json jsonEntity = json::parse(jsonString);
-
-        // Extract values
-        int id = jsonEntity["id"];
-        float x = jsonEntity["x"];
-        float y = jsonEntity["y"];
-        float width = jsonEntity["width"];
-        float height = jsonEntity["height"];
-        std::string typeStr = jsonEntity["type"];
-        EntityType entityType = stringToEntityType(typeStr);
-
-        float velocityX = jsonEntity["velocityX"];
-        float velocityY = jsonEntity["velocityY"];
-        float accelerationX = jsonEntity["accelerationX"];
-        float accelerationY = jsonEntity["accelerationY"];
-
-        // Create the entity
-        Entity* entity = new Entity(Position(x, y), Size(width, height));
-        entity->setEntityID(id);
-        entity->setEntityType(entityType);
-        entity->setVelocityX(velocityX);
-        entity->setVelocityY(velocityY);
-        entity->setAccelerationX(accelerationX);
-        entity->setAccelerationY(accelerationY);
-
-        return entity;
+        return jsonToEntity(jsonEntity);
     }
     catch (const nlohmann::json::exception& e) {
         printf("Deserialization error: %s\n", e.what());
