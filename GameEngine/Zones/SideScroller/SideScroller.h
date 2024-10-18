@@ -1,9 +1,15 @@
+//
+// Created by Cyril Melvin Vincent on 10/9/24.
+//
+
 #pragma once
 #include <Entity.h>
-#include "unordered_map"
-#include "tuple"
-#include "functional"
+#include <unordered_map>
+#include <tuple>
+#include <functional>
 #include <vector>
+#include <string>
+#include "Globals.h" 
 
 class SideScroller {
 public:
@@ -12,6 +18,6 @@ public:
     void process(Entity* entity, std::vector<Entity*>& entities) const;
 
 private:
-    std::unordered_map<std::string, std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>> _zones;
+    std::unordered_map<std::string, std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>&)>, ZoneType>> _zones;
     std::vector<Position> _spawnPoints; // store spawn points
 };

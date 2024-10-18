@@ -13,10 +13,10 @@
 // Entity class. Represents an object drawn on the screen.
 class Entity {
 public:    
-    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);                          // Rectangles
-    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);                       // Circles
-    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 }, bool hidden);     // Triangles
-    Entity(const char *texturePath, Position position, Size size, bool hidden);                                       // Textured entities
+    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false );                          // Rectangles
+    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false);                       // Circles
+    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false);     // Triangles
+    Entity(const char *texturePath, Position position, Size size, bool hidden = false);                                       // Textured entities
 
     ~Entity();
 
