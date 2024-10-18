@@ -64,6 +64,6 @@ private:
 
 	// A map to track the last heartbeat time for each client
 	std::unordered_map<int, std::chrono::time_point<std::chrono::steady_clock>> _lastHeartbeatMap; 
-	std::chrono::milliseconds _heartbeatTimeout = std::chrono::milliseconds(5000);                  // 1 sec default timeout
+	std::chrono::milliseconds _heartbeatTimeout = std::chrono::milliseconds(1000);                  // 1 sec default timeout
 
 };
