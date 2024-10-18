@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
 	// Game world 
 	Entity platform(Position(0, 600), Size(1920, 50));
 	Entity obstacle(Position(800, 100), Size(200, 200));
+	Entity obstacleTwo(Position(2000, 400), Size(200, 200));                // Off screen object
 	platform.setEntityType(EntityType::FIXED);
 
 	std::vector<Entity*> spawnPoints;
@@ -23,6 +24,7 @@ int main(int argc, char** argv) {
 	std::vector<Entity*> worldEntities;
 	worldEntities.push_back(&platform);
 	worldEntities.push_back(&obstacle);
+	worldEntities.push_back(&obstacleTwo);
 
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, spawnPoints);
@@ -32,6 +34,7 @@ int main(int argc, char** argv) {
 	
 	// Applying physics
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(obstacle, 0);
+	server.getGameEngine()->getPhysicsSystem()->applyPhysics(obstacleTwo, 0);
 
 	// Initializing the server and simulating the game world in the server
 	server.initialize();

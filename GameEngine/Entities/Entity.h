@@ -56,9 +56,10 @@ public:
     float getTriangleHeight() const;
 
     void generateEntityID();
-    bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
-    void render(SDL_Renderer *renderer);                  // Render entity 
+    bool loadTexture(SDL_Renderer *renderer);                                   // Load texture into entity
+    void render(SDL_Renderer *renderer, const Camera& camera);                  // Render entity 
     void applyScaling(float scaleX, float scaleY);        
+    bool isWithinViewPort(const Camera& camera) const;
     void shutdown();
 
 private:
@@ -84,9 +85,9 @@ private:
     const char* _texturePath = nullptr;                  // Path of the texture file
     SDL_Texture* _texture = nullptr;                     // Texture of the entity
 
-    void drawRectangle(SDL_Renderer* renderer);
-    void drawCircle(SDL_Renderer* renderer);
-    void drawTriangle(SDL_Renderer* renderer);
+    void drawRectangle(SDL_Renderer* renderer, Position position);
+    void drawCircle(SDL_Renderer* renderer, Position position);
+    void drawTriangle(SDL_Renderer* renderer, Position position);
 
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID

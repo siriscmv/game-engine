@@ -64,3 +64,10 @@ enum class RefreshRate {
     ONE_TWENTY_FPS = 120,
     TWO_FORTY_FPS = 240
 };
+
+// Camera object to track the area that needs to be rendered
+struct Camera {
+    int x, y;
+    Size size;
+    Size originalSize;    
+};

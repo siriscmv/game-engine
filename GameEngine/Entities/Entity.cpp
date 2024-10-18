@@ -98,13 +98,13 @@ float Entity::getTriangleHeight() const { return _triangleHeight; }
 
 
 
-void Entity::drawRectangle(SDL_Renderer *renderer) {    
-    SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
+void Entity::drawRectangle(SDL_Renderer *renderer, Position position) {    
+    SDL_Rect rect = { position.x, position.y, _size.width, _size.height};
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);
 }
 
-void Entity::drawCircle(SDL_Renderer *renderer) {
+void Entity::drawCircle(SDL_Renderer *renderer, Position position) {
 
     // using the SDL_SetRenderDrawColor function to set the color of the circle
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
@@ -114,20 +114,20 @@ void Entity::drawCircle(SDL_Renderer *renderer) {
             int dx = _circleRadius - w; // horizontal offset
             int dy = _circleRadius - h; // vertical offset
             if ((dx * dx + dy * dy) <= (_circleRadius * _circleRadius))             {
-                SDL_RenderDrawPoint(renderer, _position.x + dx, _position.y + dy);
+                SDL_RenderDrawPoint(renderer, position.x + dx, position.y + dy);
             }
         }
     }
 }
 
-void Entity::drawTriangle(SDL_Renderer *renderer) {
+void Entity::drawTriangle(SDL_Renderer *renderer, Position position) {
     // using the SDL_SetRenderDrawColor function to set the color of the triangle
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     // creating an array of points to draw the triangle
     SDL_Point points[3] = {
-        {_position.x, _position.y},
-        {_position.x + _triangleBaseLength, _position.y},
-        {_position.x + _triangleBaseLength / 2, _position.y - _triangleHeight}};
+        {position.x, position.y},
+        {position.x + _triangleBaseLength, position.y},
+        {position.x + _triangleBaseLength / 2, position.y - _triangleHeight}};
     // using the SDL_RenderDrawLines function to draw the triangle
     SDL_RenderDrawLines(renderer, points, 3);
 }
@@ -168,33 +168,51 @@ void Entity::applyScaling(float scaleX, float scaleY) {
 }
 
 // Renders the entity onto the screen
-void Entity::render(SDL_Renderer *renderer) {
+void Entity::render(SDL_Renderer* renderer, const Camera& camera) {
+
+    // Adjusted position based on camera's position (to render relative to the camera)
+    Position adjustedPosition = {
+        _position.x - camera.x,  
+        _position.y - camera.y   
+    };
+
     switch (_shape) {
-        case ShapeType::TEXTURE: 
-            if (_texture != nullptr) {
-                SDL_Rect dstRect = { _position.x, _position.y, _size.width, _size.height };
-                SDL_RenderCopy(renderer, _texture, nullptr, &dstRect);
-            }
-            else {
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, 
-                    "Failed to render entity: Texture is null at position (%f, %f)\n", _position.x, _position.y);
-            }
-            break;        
-        case ShapeType::RECTANGLE:
-            drawRectangle(renderer);
-            break;
-        
-        case ShapeType::CIRCLE:
-            drawCircle(renderer);
-            break;
-        
-        case ShapeType::TRIANGLE:
-            drawTriangle(renderer);
-            break;
-        default:
-            break;
+    case ShapeType::TEXTURE:
+        if (_texture != nullptr) {
+            SDL_Rect dstRect = { adjustedPosition.x, adjustedPosition.y, _size.width, _size.height };
+            SDL_RenderCopy(renderer, _texture, nullptr, &dstRect);
+        }
+        else {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to render entity: Texture is null at position (%f, %f)\n", _position.x, _position.y);
+        }
+        break;
+    case ShapeType::RECTANGLE:
+        drawRectangle(renderer, adjustedPosition);
+        break;
+
+    case ShapeType::CIRCLE:
+        drawCircle(renderer, adjustedPosition);
+        break;
+
+    case ShapeType::TRIANGLE:
+        drawTriangle(renderer, adjustedPosition);
+        break;
+    default:
+        break;
     }
 }
+
+
+// Checks whether the entity is within the camera's boundaries (viewport).
+bool Entity::isWithinViewPort(const Camera& camera) const {   
+    return !(
+        _position.x + _size.width < camera.x ||             // Entity is completely to the left of the camera
+        _position.x > camera.x + camera.size.width ||       // Entity is completely to the right of the camera
+        _position.y + _size.height < camera.y ||            // Entity is completely above the camera
+        _position.y > camera.y + camera.size.height         // Entity is completely below the camera
+        );
+}
+
 
 // Cleans up class variables
 void Entity::shutdown() {

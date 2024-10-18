@@ -49,6 +49,11 @@ public:
 
 	std::vector<Entity*>& getEntities();
 
+	void initializeCamera(int width, int height);
+	void resizeCamera(float scaleX, float scaleY);
+	void moveCamera(int x, int y);
+	Camera& getCamera();
+
 private:
 	Window* _window;
 	Renderer* _renderer;	
@@ -73,5 +78,7 @@ private:
 	void handleSinglePlayerMode(int64_t elapsedTime);
 
 	int _serverRefreshRateMs;
+
+	Camera _camera;
 };
 

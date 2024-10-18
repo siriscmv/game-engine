@@ -14,6 +14,7 @@
 GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeight, Mode mode) {
 	_mode = mode;
 	_window = new Window(windowTitle, windowWidth, windowHeight);
+	initializeCamera(windowWidth, windowHeight);
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
@@ -110,6 +111,30 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 	return true;
 }
 
+// Initializes the camera. Sets position and size.
+void GameEngine::initializeCamera(int width, int height) {
+	_camera.x = 0;  
+	_camera.y = 0;
+	_camera.size.width = width;  
+	_camera.originalSize.width = width;  
+	_camera.size.height = height;  
+	_camera.originalSize.height = height;  
+}
+
+// Resizes the camera based on the scale factors passed in. 
+void GameEngine::resizeCamera(float scaleX, float scaleY) {	
+	_camera.size.width = static_cast<int>(_camera.originalSize.width * scaleX);
+	_camera.size.height = static_cast<int>(_camera.originalSize.height * scaleY);
+}
+
+
+// Moves the camera's position to the passed in coordinates
+void GameEngine::moveCamera(int newX, int newY) {
+	_camera.x = newX;
+	_camera.y = newY;
+}
+
+
 // Game loop. Runs while the state is 'PLAY'.
 void GameEngine::run() {
 	int64_t previousTime = _timeline->getTime();
@@ -159,48 +184,39 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 
 // Handles the client's game engine logic in server-client multiplayer
 void GameEngine::handleClientMode(int64_t elapsedTime) {
-	SDL_PumpEvents();                                          // Force an event queue update
+	SDL_PumpEvents(); // Force an event queue update
 	_renderer->clear();
 
 	_entities = _client->getEntities();
 
 	std::thread heartbeatThread([this]() {
 		_client->sendHeartbeatToServer();
-	});
+		});
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
-	});
+		});
 
 	std::thread callbackThread([this]() {
 		_onCycle();
-	});
+		});
 
 	std::thread communicationThread([this]() {
 		_client->receiveEntityUpdatesFromServer();
 		_client->receiveMessagesFromServer();
-	});
-
-	std::thread sideScrollingThread([this]() {
-		auto self = std::find_if(_entities.begin(), _entities.end(), [this](const Entity* e) {
-			return e->getEntityID() == _client->getEntityID();
 		});
 
-		_sideScroller->process(*self, _entities);
-	});
-	
 	auto [scaleX, scaleY] = _window->getScaleFactors();
-	Position offset = _client->getViewOffset();
+	resizeCamera(scaleX, scaleY);
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
-		Position pos = entity->getOriginalPosition();
-		entity->setOriginalPosition(Position{ pos.x + offset.x, pos.y + offset.y });
-
 		entity->applyScaling(scaleX, scaleY);
-		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
 
-		entity->setOriginalPosition(Position{ pos.x - offset.x, pos.y - offset.y });
+		// Only render if within the viewport
+		if (entity->isWithinViewPort(_camera)) {
+			entity->render(_renderer->getSDLRenderer(), _camera);  // Pass the camera reference
+		}
 	}
 
 	_renderer->present();
@@ -208,7 +224,6 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	inputThread.join();
 	callbackThread.join();
 	communicationThread.join();
-	sideScrollingThread.join();
 	heartbeatThread.join();
 }
 
@@ -237,8 +252,8 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
-		entity->applyScaling(scaleX, scaleY);
-		entity->render(_renderer->getSDLRenderer());
+		entity->applyScaling(scaleX, scaleY);		
+		entity->render(_renderer->getSDLRenderer(), _camera);
 	}
 
 	_renderer->present();
@@ -273,8 +288,8 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
-		entity->applyScaling(scaleX, scaleY);
-		entity->render(_renderer->getSDLRenderer());              // Rendering all entities
+		entity->applyScaling(scaleX, scaleY);		
+		entity->render(_renderer->getSDLRenderer(), _camera);              // Rendering all entities
 	}
 
 	_renderer->present();
@@ -317,6 +332,7 @@ Client* GameEngine::getClient() { return _client; }
 Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
 std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
+Camera& GameEngine::getCamera() { return _camera; }
 
 
 // Setters
