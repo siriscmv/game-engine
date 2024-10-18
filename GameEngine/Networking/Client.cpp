@@ -158,6 +158,7 @@ Entity* jsonToEntity(json jsonEntity) {
     float velocityY = jsonEntity["velocityY"];
     float accelerationX = jsonEntity["accelerationX"];
     float accelerationY = jsonEntity["accelerationY"];
+    auto color = SDL_Color{jsonEntity["cr"], jsonEntity["cg"], jsonEntity["cb"], jsonEntity["ca"]};
 
     // Create the entity
     Entity* entity = new Entity(Position(x, y), Size(width, height));
@@ -167,6 +168,7 @@ Entity* jsonToEntity(json jsonEntity) {
     entity->setVelocityY(velocityY);
     entity->setAccelerationX(accelerationX);
     entity->setAccelerationY(accelerationY);
+    entity->setColor(color);
 
     return entity;
 }

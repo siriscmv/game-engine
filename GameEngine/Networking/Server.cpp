@@ -310,7 +310,11 @@ json entityToJson(const Entity& entity) {
         {"velocityX", entity.getVelocityX()},
         {"velocityY", entity.getVelocityY()},
         {"accelerationX", entity.getAccelerationX()},
-        {"accelerationY", entity.getAccelerationY()}
+        {"accelerationY", entity.getAccelerationY()},
+            {"cr", entity.getColor().r},
+          {"cg", entity.getColor().g},
+        {"cb", entity.getColor().b},
+          {"ca", entity.getColor().a},
     };
 
     return jsonEntity;

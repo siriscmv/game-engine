@@ -95,10 +95,9 @@ float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
+SDL_Color Entity::getColor() const { return _color; }
 
-
-
-void Entity::drawRectangle(SDL_Renderer *renderer) {    
+void Entity::drawRectangle(SDL_Renderer *renderer) {
     SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);

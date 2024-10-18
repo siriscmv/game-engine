@@ -54,6 +54,7 @@ public:
     float getCircleRadius() const;
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
+    SDL_Color getColor() const;
 
     void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
