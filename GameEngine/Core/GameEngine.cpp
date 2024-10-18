@@ -188,12 +188,14 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	// Rendering all entities
 	for (Entity* entity : _entities) {
 		Position pos = entity->getOriginalPosition();
-		entity->setOriginalPosition(Position{ pos.x + offset.x, pos.y + offset.y });
+		// const bool skip = entity->getEntityID() == _client->getEntityID();
+		const bool skip = entity->getEntityType() == EntityType::GHOST;
+		// if (!skip) entity->setOriginalPosition(Position{ pos.x - offset.x, pos.y - offset.y });
 
-		entity->applyScaling(scaleX, scaleY);
+		entity->applyScaling(scaleX, scaleY, offset, _client->getEntityID());
 		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
 
-		entity->setOriginalPosition(Position{ pos.x - offset.x, pos.y - offset.y });
+		// if (!skip) entity->setOriginalPosition(Position{ pos.x + offset.x, pos.y + offset.y });
 	}
 
 	_renderer->present();
