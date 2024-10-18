@@ -34,6 +34,7 @@ public:
 	// Shuts the physics engine down
 	void shutdown();
 
+	std::vector<Entity*>& getEntities();
 	void setEntities(const std::vector<Entity *> &entities);
 
 private:

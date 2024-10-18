@@ -4,6 +4,7 @@
 
 #pragma once
 #include <Entity.h>
+#include <string>
 #include "unordered_map"
 #include "tuple"
 #include "functional"

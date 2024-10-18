@@ -3,7 +3,9 @@
 //
 
 #include "SideScroller.h"
-
+#include <stdexcept>
+#include <iterator>
+#include <algorithm> 
 #include <CollisionSystem.h>
 
 void SideScroller::addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>>& zone) {
