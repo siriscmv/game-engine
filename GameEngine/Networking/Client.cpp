@@ -191,8 +191,6 @@ Entity* stringToEntity(const std::string& entityString) {
         std::string key = token.substr(0, dashPos);
         std::string value = token.substr(dashPos + 1);
 
-        printf("Key: %s, Value: %s\n", key.c_str(), value.c_str());
-
         // Set entity properties based on key-value pairs
         if (key == "id") entity->setEntityID(std::stoi(value));
         else if (key == "x") entity->setPosition(Position(std::stof(value), entity->getPosition().y));
