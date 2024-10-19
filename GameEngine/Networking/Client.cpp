@@ -159,7 +159,7 @@ void Client::receiveEntityUpdatesFromServer() {
                     if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
                     if (entity->getEntityID() == updatedEntity->getEntityID()) {
                         entity->setOriginalPosition(updatedEntity->getOriginalPosition());
-                        entity->setSize(updatedEntity->getSize());
+                        entity->setSize(updatedEntity->getSize());                        
                         break;
                     }
                 }
@@ -268,7 +268,7 @@ Entity* Client::deserializeEntity(const std::string& jsonString) {
 // Setters and getters
 void Client::setClientID(int id) { _clientID = id; }
 void Client::setGameState(GameState gameState) { _gameState = gameState; }
-std::vector<Entity*> Client::getEntities() const { return _entities; }
+std::vector<Entity*>& Client::getEntities() { return _entities; }
 int Client::getClientID() { return _clientID; };
 int Client::getEntityID() { return _entityID; };
 

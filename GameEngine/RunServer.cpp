@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 	Entity topBoundary(Position(0, 0), Size(1920, 50));
 	topBoundary.setEntityType(EntityType::GHOST);
 	topBoundary.setZoneType(ZoneType::SIDESCROLL);
-	Entity bottomBoundary(Position(0, 1870), Size(1920, 50));
+	Entity bottomBoundary(Position(0, 1030), Size(1920, 50));
 	bottomBoundary.setEntityType(EntityType::GHOST);
 	bottomBoundary.setZoneType(ZoneType::SIDESCROLL);
 
