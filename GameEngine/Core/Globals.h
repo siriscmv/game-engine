@@ -64,3 +64,10 @@ enum class RefreshRate {
     ONE_TWENTY_FPS = 120,
     TWO_FORTY_FPS = 240
 };
+
+enum class ZoneType {
+    SPAWN,
+    DEATH
+};
+
+
