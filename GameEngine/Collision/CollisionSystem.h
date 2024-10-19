@@ -25,8 +25,7 @@ public:
 
     bool hasCollisionRaw(const Entity* entityA, const Entity* entityB);
 
-    void handleDeathZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap);
-    std::pair<int, int> handleSideScrollZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap);
+    void handleDeathZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap);    
     void teleportToSpawnPoint(Entity* entity, const std::vector<Entity*>& entities);
 
 private:
