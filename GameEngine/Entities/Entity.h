@@ -13,10 +13,10 @@
 // Entity class. Represents an object drawn on the screen.
 class Entity {
 public:    
-    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 });                          // Rectangles
-    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 });                       // Circles
-    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 });     // Triangles
-    Entity(const char *texturePath, Position position, Size size);                                       // Textured entities
+    Entity(Position position, Size size, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false );                          // Rectangles
+    Entity(Position position, float radius, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false);                       // Circles
+    Entity(Position position, float baseLength, float height, SDL_Color color = { 255, 0, 0, 255 }, bool hidden = false);     // Triangles
+    Entity(const char *texturePath, Position position, Size size, bool hidden = false);                                       // Textured entities
 
     ~Entity();
 
@@ -40,6 +40,8 @@ public:
     void setTriangleHeight(float height);
     void setOriginalTriangleHeight(float height);
     void setColor(SDL_Color color);
+    void setHidden(bool hidden);
+
 
     // Getters
     int getEntityID() const;
@@ -56,17 +58,22 @@ public:
     float getCircleRadius() const;
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
+    bool getHidden() const;
+    SDL_Color getColor() const;
 
     void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);                                   // Load texture into entity
     void render(SDL_Renderer *renderer, const Camera& camera);                  // Render entity 
     void applyScaling(float scaleX, float scaleY);        
     bool isWithinViewPort(const Camera& camera) const;
+    void teleportTo(const Position& position);
     void shutdown();
 
 private:
     Position _position = {};
     Size _size = {};
+	// help with entity visibility
+    bool _hidden;
     EntityType _entityType = EntityType::DEFAULT;
     ZoneType _zoneType = ZoneType::NONE;
     ShapeType _shape = ShapeType::NONE;
@@ -95,3 +102,5 @@ private:
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID
 };
+
+EntityType stringToEntityType(const std::string& str);

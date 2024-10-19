@@ -61,7 +61,7 @@
 ## Requirements
 - Install SDL2: `brew install sdl2`
 - Install CMake: `brew install cmake`
-- Install 0mq - `brew install cppzmq zeromq`
+- Install other deps - `brew install cppzmq zeromq nlohmann-json`
 
 ## Building and running
 - Note: Pre-built binaries can be found at `./build`

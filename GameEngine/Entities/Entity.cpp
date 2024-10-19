@@ -1,5 +1,5 @@
 #include "Entity.h"
-
+#include <string>
 #include <algorithm>
 
 #include "Renderer.h"
@@ -12,7 +12,7 @@
 int Entity::_nextID = 0;
 
 // Constructor for Rectangles
-Entity::Entity(Position position, Size size, SDL_Color color) {
+Entity::Entity(Position position, Size size, SDL_Color color, bool hidden) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -20,10 +20,11 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
     setOriginalSize(size);
     setShapeType(ShapeType::RECTANGLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Contructor for Circles
-Entity::Entity(Position position, float radius, SDL_Color color) {
+Entity::Entity(Position position, float radius, SDL_Color color, bool hidden ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -31,10 +32,11 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
     setOriginalCircleRadius(radius);
     setShapeType(ShapeType::CIRCLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Constructor for triangles
-Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
+Entity::Entity(Position position, float baseLength, float height, SDL_Color color, bool hidden ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -44,17 +46,23 @@ Entity::Entity(Position position, float baseLength, float height, SDL_Color colo
     setOriginalTriangleHeight(height);
     setShapeType(ShapeType::TRIANGLE);
     setColor(color);
+    setHidden(hidden);
 }
 
 // Constructor for textured entities
-Entity::Entity(const char *texturePath, Position position, Size size) {
+Entity::Entity(const char *texturePath, Position position, Size size, bool hidden) {
     generateEntityID();
     _texturePath = texturePath;
     setPosition(position);
     setOriginalPosition(position);
     setSize(size);
     setShapeType(ShapeType::TEXTURE);
+	setHidden(hidden);
 }
+
+//void resetToOriginalPosition(Entity* entity) {
+//	entity->setPosition(entity->getOriginalPosition());
+//}
 
 Entity::~Entity() {
     shutdown();
@@ -81,6 +89,7 @@ void Entity::setOriginalTriangleBaseLength(float baseLength) { _originalTriangle
 void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
 void Entity::setOriginalTriangleHeight(float height) { _originalTriangleHeight = height; }
 void Entity::setColor(SDL_Color color) { _color = color; }
+void Entity::setHidden(bool hidden) { _hidden = hidden; }
 
 // Getters
 int Entity::getEntityID() const { return _entityID; }
@@ -97,8 +106,8 @@ float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
-
-
+bool Entity::getHidden() const { return _hidden; }
+SDL_Color Entity::getColor() const { return _color; }
 
 void Entity::drawRectangle(SDL_Renderer *renderer, Position position) {    
     SDL_Rect rect = { position.x, position.y, _size.width, _size.height};
@@ -148,9 +157,17 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 }
 
 // Scales the entity based on the scale factors passed into the function
-void Entity::applyScaling(float scaleX, float scaleY) {
+void Entity::applyScaling(float scaleX, float scaleY, Position offset, int entityId) {
+    const bool skip = _entityType == EntityType::GHOST || _entityID == entityId;
+
     _position.x = _originalPosition.x * scaleX;
     _position.y = _originalPosition.y * scaleY;
+
+    if (!skip) {
+        _position.x -= offset.x;
+        _position.y -= offset.y;
+    }
+
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
@@ -169,8 +186,17 @@ void Entity::applyScaling(float scaleX, float scaleY) {
     }
 }
 
+// Teleports the entity to the position passed
+void Entity::teleportTo(const Position& position) {
+    setPosition(position);
+}
+
+
 // Renders the entity onto the screen
 void Entity::render(SDL_Renderer* renderer, const Camera& camera) {
+    if (_hidden) {
+		  return;
+	  }
 
     // Adjusted position based on camera's position (to render relative to the camera)
     Position adjustedPosition = {
@@ -222,4 +248,13 @@ void Entity::shutdown() {
         SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
+}
+
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else return EntityType::DEFAULT; // Default case
 }

@@ -72,3 +72,8 @@ struct Camera {
     Size size;
     Size originalSize;    
 };
+
+enum class ZoneType {
+    SPAWN,
+    DEATH
+};

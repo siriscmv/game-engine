@@ -405,3 +405,6 @@ x64/RunServer/*
 
 # Keep ignoring other x64 folders
 GameEngine/x64/
+/Docs/Dependencies
+/GameEngine/RunGame
+/CMakeSettings.json
