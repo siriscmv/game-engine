@@ -43,6 +43,7 @@ public:
 	void pauseGame();
 	void resumeGame();
 	void setGameSpeed(double speed);
+	void setClientMap(std::map<int, Entity*>& clientMap);
 	
 	int getServerRefreshRateMs() const;
 	void setServerRefreshRateMs(int rate);
@@ -69,7 +70,7 @@ private:
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;
-	PeerServer* _peerServer = nullptr;
+	std::map<int, Entity*>* _clientMap;
 	
 	void handleServerMode(int64_t elapsedTime);	
 

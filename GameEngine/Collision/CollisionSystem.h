@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <map>
 #include <vector>
 #include "Entity.h"
 
@@ -23,6 +24,10 @@ public:
     bool hasCollision(const Entity* entityA, const Entity* entityB);
 
     bool hasCollisionRaw(const Entity* entityA, const Entity* entityB);
+
+    void handleDeathZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap);
+    std::pair<int, int> handleSideScrollZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap);
+    void teleportToSpawnPoint(Entity* entity, const std::vector<Entity*>& entities);
 
 private:
     CollisionSystem() = default;

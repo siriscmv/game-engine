@@ -68,6 +68,7 @@ void Entity::setOriginalPosition(Position position) { _originalPosition = positi
 void Entity::setSize(Size size) { _size = size; }
 void Entity::setOriginalSize(Size size) { _originalSize = size; }
 void Entity::setEntityType(EntityType entityType) { _entityType = entityType; }
+void Entity::setZoneType(ZoneType zoneType) { _zoneType = zoneType; }
 void Entity::setShapeType(ShapeType shape) { _shape = shape; }
 void Entity::setVelocityX(float velocityX) { _velocity.x = velocityX; }
 void Entity::setVelocityY(float velocityY) { _velocity.y = velocityY; }
@@ -87,6 +88,7 @@ Position Entity::getPosition() const { return _position; }
 Position Entity::getOriginalPosition() const { return _originalPosition; }
 Size Entity::getSize() const { return _size; }
 EntityType Entity::getEntityType() const { return _entityType; }
+ZoneType Entity::getZoneType() const { return _zoneType; }
 ShapeType Entity::getShapeType() const { return _shape; }
 float Entity::getVelocityX() const { return _velocity.x; }
 float Entity::getVelocityY() const { return _velocity.y; }

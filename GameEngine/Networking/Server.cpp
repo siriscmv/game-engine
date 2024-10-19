@@ -3,23 +3,22 @@
 #include <thread>
 #include <chrono>
 
-Server::Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& spawnPoints) {
+Server::Server(const std::vector<Entity*>& entities) {
     _context = zmq::context_t(1); 
     _entityPublisher = zmq::socket_t(_context, zmq::socket_type::pub);
     _publisher = zmq::socket_t(_context, zmq::socket_type::pub);
     _subscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _heartbeatSubscriber = zmq::socket_t(_context, zmq::socket_type::sub);
     _responder = zmq::socket_t(_context, zmq::socket_type::rep);
-
-    _worldEntities = worldEntities;
-    _spawnPoints = spawnPoints;
-    _allEntities = worldEntities;
+    
+    _allEntities = entities;
 
     _nextClientID = 0;
-    _nextEntityID = _worldEntities.size() + _spawnPoints.size();
+    _nextEntityID = entities.size();
     
     _engine = new GameEngine("Server-side simulation", 0, 0, Mode::SERVER);
     _engine->initialize(_allEntities);
+    _engine->setClientMap(_clientMap);
 
     setRefreshRate();
 }
@@ -95,9 +94,22 @@ void Server::handleClientHandeshake() {
         if (clientRequest == "CONNECT") {
             int clientId = _nextClientID++;
 
+            // Collect all spawn points from the _allEntities list
+            std::vector<Entity*> spawnPoints;
+            for (Entity* entity : _allEntities) {
+                if (entity->getZoneType() == ZoneType::SPAWN) {
+                    spawnPoints.push_back(entity);
+                }
+            }
+
+            // Throw an error if no spawn points are found
+            if (spawnPoints.empty()) {
+                throw std::runtime_error("No spawn points found in the world!");
+            }
+
             // Pick a random spawn point
-            int randomIndex = rand() % _spawnPoints.size();
-            Entity* spawnPoint = _spawnPoints[randomIndex];
+            int randomIndex = rand() % spawnPoints.size();
+            Entity* spawnPoint = spawnPoints[randomIndex];
 
             // Get the spawn point's position and size
             Position spawnPos = spawnPoint->getOriginalPosition();
@@ -313,6 +325,18 @@ std::string entityTypeToString(EntityType type) {
     }
 }
 
+// Converts zone type into a string
+std::string zoneTypeToString(ZoneType type) {
+    switch (type) {
+    case ZoneType::NONE: return "NONE";
+    case ZoneType::SPAWN: return "SPAWN";
+    case ZoneType::DEATH: return "DEATH";
+    case ZoneType::SIDESCROLL: return "SIDESCROLL";
+    default: return "NONE";
+    }
+}
+
+
 // Serializes an entity to a JSON string
 std::string Server::serializeEntity(const Entity& entity) {
     json jsonEntity = {
@@ -322,6 +346,7 @@ std::string Server::serializeEntity(const Entity& entity) {
         {"width", entity.getSize().width},
         {"height", entity.getSize().height},
         {"type", entityTypeToString(entity.getEntityType())},
+        {"zoneType", zoneTypeToString(entity.getZoneType())},
         {"velocityX", entity.getVelocityX()},
         {"velocityY", entity.getVelocityY()},
         {"accelerationX", entity.getAccelerationX()},

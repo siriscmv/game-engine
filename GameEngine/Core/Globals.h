@@ -20,11 +20,12 @@ enum class EntityType {
     GHOST // Present in a different realm, is unaffected by and does not affect other entities
 };
 
-enum class DefaultSideScrollerZone {
-    TOP,
-    BOTTOM,
-    LEFT,
-    RIGHT
+// An enum class to differentiate between zone types. 
+enum class ZoneType {
+    NONE,                          // Not a Zone
+    SPAWN,                         // Spawn zones
+    DEATH,                         // Death zones
+    SIDESCROLL                     // Side boundaries
 };
 
 // structure to hold position 

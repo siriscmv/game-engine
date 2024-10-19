@@ -216,6 +216,14 @@ EntityType stringToEntityType(const std::string& str) {
     else return EntityType::DEFAULT; 
 }
 
+// Converts zone type string into an enum variable
+ZoneType stringToZoneType(const std::string& str) {
+    if (str == "SPAWN") return ZoneType::SPAWN;
+    else if (str == "DEATH") return ZoneType::DEATH;
+    else if (str == "SIDESCROLL") return ZoneType::SIDESCROLL;
+    else return ZoneType::NONE;  
+}
+
 // Deserializes entity info from a JSON string and creates an Entity object with it
 Entity* Client::deserializeEntity(const std::string& jsonString) {
     try {
@@ -230,6 +238,8 @@ Entity* Client::deserializeEntity(const std::string& jsonString) {
         float height = jsonEntity["height"];
         std::string typeStr = jsonEntity["type"];
         EntityType entityType = stringToEntityType(typeStr);
+        std::string zoneTypeStr = jsonEntity["zoneType"];  
+        ZoneType zoneType = stringToZoneType(zoneTypeStr); 
 
         float velocityX = jsonEntity["velocityX"];
         float velocityY = jsonEntity["velocityY"];
@@ -240,6 +250,7 @@ Entity* Client::deserializeEntity(const std::string& jsonString) {
         Entity* entity = new Entity(Position(x, y), Size(width, height));
         entity->setEntityID(id);
         entity->setEntityType(entityType);
+        entity->setZoneType(zoneType);
         entity->setVelocityX(velocityX);
         entity->setVelocityY(velocityY);
         entity->setAccelerationX(accelerationX);

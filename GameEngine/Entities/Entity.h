@@ -27,6 +27,7 @@ public:
     void setPosition(Position position);
     void setOriginalPosition(Position position);
     void setEntityType(EntityType entityType);
+    void setZoneType(ZoneType zoneType);
     void setShapeType(ShapeType shapeType);
     void setVelocityX(float velocityX);
     void setVelocityY(float velocityY);
@@ -46,6 +47,7 @@ public:
     Position getPosition() const;
     Position getOriginalPosition() const;
     EntityType getEntityType() const;
+    ZoneType getZoneType() const;
     ShapeType getShapeType() const;
     float getVelocityX() const;
     float getVelocityY() const;
@@ -66,6 +68,7 @@ private:
     Position _position = {};
     Size _size = {};
     EntityType _entityType = EntityType::DEFAULT;
+    ZoneType _zoneType = ZoneType::NONE;
     ShapeType _shape = ShapeType::NONE;
     Velocity _velocity = {};
     Acceleration _acceleration = {};

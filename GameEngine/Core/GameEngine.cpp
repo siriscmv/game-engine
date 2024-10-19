@@ -177,6 +177,7 @@ void GameEngine::run() {
 void GameEngine::handleServerMode(int64_t elapsedTime) {
 	_onCycle();
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
+	_collisionSystem->handleDeathZoneCollision(_entities, *_clientMap);                 // Death zone collision
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
  	_physicsSystem->run(deltaTime, entitiesWithCollisions);
@@ -213,9 +214,9 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	for (Entity* entity : _entities) {
 		entity->applyScaling(scaleX, scaleY);
 
-		// Only render if within the viewport
-		if (entity->isWithinViewPort(_camera)) {
-			entity->render(_renderer->getSDLRenderer(), _camera);  // Pass the camera reference
+		// Only render if within the viewport and not ghost entities
+		if (entity->isWithinViewPort(_camera) && entity->getEntityType() != EntityType::GHOST) {
+			entity->render(_renderer->getSDLRenderer(), _camera);  
 		}
 	}
 
@@ -338,6 +339,7 @@ Camera& GameEngine::getCamera() { return _camera; }
 // Setters
 void GameEngine::setGameState(GameState state) { _gameState = state; }
 void GameEngine::setServerRefreshRateMs(int rate) { _serverRefreshRateMs = rate; }
+void GameEngine::setClientMap(std::map<int, Entity*>& clientMap) { _clientMap = &clientMap; }
 
 // Runs on each game cycle
 void GameEngine::setOnCycle(const std::function<void()> &cb) {
