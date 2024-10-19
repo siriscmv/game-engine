@@ -331,6 +331,7 @@ std::string entityToString(const Entity& entity) {
         << "width:" << entity.getSize().width << '|'
         << "height:" << entity.getSize().height << '|'
         << "type:" << entityTypeToString(entity.getEntityType()) << '|'
+        << "zoneType:" << zoneTypeToString(entity.getZoneType()) << '|'
         << "velocityX:" << entity.getVelocityX() << '|'
         << "velocityY:" << entity.getVelocityY() << '|'
         << "accelerationX:" << entity.getAccelerationX() << '|'

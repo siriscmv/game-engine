@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Globals.h"
 #include <utility>
+#include <string>
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
 #else
@@ -99,3 +100,4 @@ private:
 };
 
 EntityType stringToEntityType(const std::string& str);
+ZoneType stringToZoneType(const std::string& str);

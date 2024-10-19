@@ -241,3 +241,11 @@ EntityType stringToEntityType(const std::string& str) {
     else if (str == "FIXED") return EntityType::FIXED;
     else return EntityType::DEFAULT; // Default case
 }
+
+// Converts zone type string into an enum variable
+ZoneType stringToZoneType(const std::string& str) {
+    if (str == "SPAWN") return ZoneType::SPAWN;
+    else if (str == "DEATH") return ZoneType::DEATH;
+    else if (str == "SIDESCROLL") return ZoneType::SIDESCROLL;
+    else return ZoneType::NONE;
+}
