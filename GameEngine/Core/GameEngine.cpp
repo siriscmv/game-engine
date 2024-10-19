@@ -110,6 +110,8 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 	return true;
 }
 
+int runs = 0;
+
 // Game loop. Runs while the state is 'PLAY'.
 void GameEngine::run() {
 	int64_t previousTime = _timeline->getTime();
@@ -145,7 +147,14 @@ void GameEngine::run() {
 
 		// Sleep based on frame rate (refresh rate)
 		std::this_thread::sleep_for(std::chrono::nanoseconds(sleepDurationNs));
+
+		runs += 1;
+
+		if (runs == 1000) {
+			exit(0);
+		}
 	}
+
 }
 
 // Handles the server's game engine logic in server-client multiplayer

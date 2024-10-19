@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
 
 	// Player spawn points
 	Entity spawnPointOne(Position(0, 0), Size(200, 200));
-	Entity spawnPointTwo(Position(1520, 0), Size(200, 200));
+	Entity spawnPointTwo(Position(120, 0), Size(200, 200));
 	spawnPointOne.setEntityType(EntityType::GHOST);
 	spawnPointTwo.setEntityType(EntityType::GHOST);
 
@@ -21,14 +21,24 @@ int main(int argc, char** argv) {
 	spawnPoints.push_back(&spawnPointTwo);
 
 	std::vector<Entity*> worldEntities;
-	worldEntities.push_back(&platform);
-	worldEntities.push_back(&obstacle);
+
+	int entities = 1000;
+
+	for (int i = 0; i < entities; i++) {
+		Entity entity(Position(0, i), Size(100, 100));
+		entity.setEntityType(EntityType::GHOST);
+		worldEntities.push_back(&entity);
+	}
 
 	// Creating the server with the world entities and player entities.
 	Server server(worldEntities, spawnPoints);
 
 	server.setRefreshRate(RefreshRate::TWO_FORTY_FPS);
 	server.setSimulationSpeed(1);
+
+	for (auto *e: worldEntities) {
+		server.getGameEngine()->getPhysicsSystem()->applyPhysics(*e, 10);
+	}
 	
 	// Applying physics
 	server.getGameEngine()->getPhysicsSystem()->applyPhysics(obstacle, 0);
