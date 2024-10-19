@@ -11,7 +11,7 @@
 #include <string>
 #include "Globals.h" 
 
-class SideScroller {
+class ZoneManager {
 public:
     void addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>& zone);
     void removeZone(const std::string& name);

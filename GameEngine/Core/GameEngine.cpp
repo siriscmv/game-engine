@@ -18,7 +18,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
-	_sideScroller = new SideScroller();
+	_zoneManager = new ZoneManager();
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
@@ -33,7 +33,7 @@ GameEngine::~GameEngine() {
 	delete _renderer;
 	delete _window;
 	delete _inputManager;
-	delete _sideScroller;
+	delete _zoneManager;
 	delete _timeline; 
 }
 
@@ -326,7 +326,7 @@ void GameEngine::toggleScalingMode() {
 
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
-SideScroller* GameEngine::getSideScroller() { return _sideScroller; }
+ZoneManager* GameEngine::getZoneManager() { return _zoneManager; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 CollisionSystem* GameEngine::getCollisionSystem() { return _collisionSystem; }

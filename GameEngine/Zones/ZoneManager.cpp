@@ -2,13 +2,13 @@
 // Created by Cyril Melvin Vincent on 10/9/24.
 //
 
-#include "SideScroller.h"
+#include "ZoneManager.h"
 #include <stdexcept>
 #include <iterator>
 #include <algorithm> 
 #include <CollisionSystem.h>
 
-void SideScroller::addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>& zone) {
+void ZoneManager::addNewZone(const std::string& name, const std::tuple<Entity, std::function<void(Entity*, std::vector<Entity*>& entities)>, ZoneType>& zone) {
     if (_zones.find(name) != _zones.end()) {
         throw std::invalid_argument("This Side scroller zone already exists");
     }
@@ -20,7 +20,7 @@ void SideScroller::addNewZone(const std::string& name, const std::tuple<Entity, 
     _zones.insert(std::make_pair(name, zone));
 }
 
-void SideScroller::removeZone(const std::string& name) {
+void ZoneManager::removeZone(const std::string& name) {
     if (_zones.find(name) == _zones.end()) {
         throw std::invalid_argument("This Side scroller zone does not exist");
     }
@@ -28,7 +28,7 @@ void SideScroller::removeZone(const std::string& name) {
     _zones.erase(name);
 }
 
-void SideScroller::process(Entity* entity, std::vector<Entity*>& entities) const {
+void ZoneManager::process(Entity* entity, std::vector<Entity*>& entities) const {
     for (const auto& _zone : _zones) {
         auto zone = _zone.second;
 
