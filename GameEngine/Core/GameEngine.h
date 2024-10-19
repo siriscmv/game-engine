@@ -47,6 +47,8 @@ public:
 	int getServerRefreshRateMs() const;
 	void setServerRefreshRateMs(int rate);
 
+	std::vector<Entity*>& getEntities();
+
 private:
 	Window* _window;
 	Renderer* _renderer;	

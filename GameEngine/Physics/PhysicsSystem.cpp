@@ -71,6 +71,9 @@ void PhysicsSystem::shutdown() {
 	_entities.clear();
 }
 
+// Getter for the entities list
+std::vector<Entity*>& PhysicsSystem::getEntities() { return _entities; }
+
 void PhysicsSystem::setEntities(const std::vector<Entity*>& entities) {
 	_entities = entities;
 }
