@@ -238,17 +238,18 @@ void Client::receiveEntityUpdatesFromServer() {
                         continue;
                     }
 
-                for (Entity* entity : _entities) {
-                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
-                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
+                    for (Entity* entity : _entities) {
+                        if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+                        if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
 
-                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
-                        *entity = *updatedEntity;
-                        break;
+                        if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                            *entity = *updatedEntity;
+                            break;
+                        }
                     }
-                }
 
-                delete updatedEntity;
+                    delete updatedEntity;
+                }
             }
         } else {
             auto parts = split(allEntityUpdates, "|||");
@@ -314,15 +315,6 @@ void Client::receiveMessagesFromServer() {
             }
         }
     }
-}
-
-// Converts entity type string into an enum variable
-EntityType stringToEntityType(const std::string& str) {
-    if (str == "DEFAULT") return EntityType::DEFAULT;
-    else if (str == "FIXED") return EntityType::FIXED;
-    else if (str == "ELASTIC") return EntityType::ELASTIC;
-    else if (str == "GHOST") return EntityType::GHOST;
-    else return EntityType::DEFAULT; 
 }
 
 // Converts zone type string into an enum variable
