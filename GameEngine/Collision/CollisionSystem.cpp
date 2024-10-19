@@ -104,3 +104,49 @@ void CollisionSystem::handleCollision(Entity *entity) {
             break;
     }
 }
+
+// Handles player entity collisions with death zones
+void CollisionSystem::handleDeathZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap) {
+    for (Entity* entity : entities) {
+        if (entity->getZoneType() == ZoneType::DEATH) {
+            // Check collision between this death zone and all player entities
+            for (const auto& [clientId, playerEntity] : clientMap) {
+                if (hasCollisionRaw(entity, playerEntity)) {                    
+                    teleportToSpawnPoint(playerEntity, entities);                    
+                }
+            }
+        }
+    }
+}
+
+// Teleports the entity to a random spawn point
+void CollisionSystem::teleportToSpawnPoint(Entity* entity, const std::vector<Entity*>& entities) {
+    std::vector<Entity*> spawnPoints;
+
+    for (Entity* spawnEntity : entities) {
+        if (spawnEntity->getZoneType() == ZoneType::SPAWN) {
+            spawnPoints.push_back(spawnEntity);
+        }
+    }
+
+    // If no spawn points found, throw error
+    if (spawnPoints.empty()) {
+        throw std::runtime_error("No spawn points found for teleportation!");
+    }
+
+    // Pick a random spawn point and teleport the entity
+    int randomIndex = rand() % spawnPoints.size();
+    Entity* spawnPoint = spawnPoints[randomIndex];
+    
+    // Get the spawn point's position and size
+    Position spawnPos = spawnPoint->getOriginalPosition();
+    Size spawnSize = spawnPoint->getSize();
+
+    // Generate a random position within the spawn point boundaries
+    float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
+    float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
+
+    entity->setOriginalPosition(Position(playerX, playerY));
+    entity->setVelocityX(0);
+    entity->setVelocityY(0);
+}

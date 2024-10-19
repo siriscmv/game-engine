@@ -27,6 +27,7 @@ public:
     void setPosition(Position position);
     void setOriginalPosition(Position position);
     void setEntityType(EntityType entityType);
+    void setZoneType(ZoneType zoneType);
     void setShapeType(ShapeType shapeType);
     void setVelocityX(float velocityX);
     void setVelocityY(float velocityY);
@@ -48,6 +49,7 @@ public:
     Position getPosition() const;
     Position getOriginalPosition() const;
     EntityType getEntityType() const;
+    ZoneType getZoneType() const;
     ShapeType getShapeType() const;
     float getVelocityX() const;
     float getVelocityY() const;
@@ -60,9 +62,10 @@ public:
     SDL_Color getColor() const;
 
     void generateEntityID();
-    bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
-    void render(SDL_Renderer *renderer);                  // Render entity 
-    void applyScaling(float scaleX, float scaleY, Position offset = Position(0, 0), int entityId = -1);
+    bool loadTexture(SDL_Renderer *renderer);                                   // Load texture into entity
+    void render(SDL_Renderer *renderer, const Camera& camera);                  // Render entity 
+    void applyScaling(float scaleX, float scaleY);        
+    bool isWithinViewPort(const Camera& camera) const;
     void teleportTo(const Position& position);
     void shutdown();
 
@@ -72,6 +75,7 @@ private:
 	// help with entity visibility
     bool _hidden;
     EntityType _entityType = EntityType::DEFAULT;
+    ZoneType _zoneType = ZoneType::NONE;
     ShapeType _shape = ShapeType::NONE;
     Velocity _velocity = {};
     Acceleration _acceleration = {};
@@ -91,9 +95,9 @@ private:
     const char* _texturePath = nullptr;                  // Path of the texture file
     SDL_Texture* _texture = nullptr;                     // Texture of the entity
 
-    void drawRectangle(SDL_Renderer* renderer);
-    void drawCircle(SDL_Renderer* renderer);
-    void drawTriangle(SDL_Renderer* renderer);
+    void drawRectangle(SDL_Renderer* renderer, Position position);
+    void drawCircle(SDL_Renderer* renderer, Position position);
+    void drawTriangle(SDL_Renderer* renderer, Position position);
 
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID

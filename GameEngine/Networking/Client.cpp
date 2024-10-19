@@ -238,6 +238,10 @@ void Client::receiveEntityUpdatesFromServer() {
                         continue;
                     }
 
+                for (Entity* entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
+
                     if (entity->getEntityID() == updatedEntity->getEntityID()) {
                         *entity = *updatedEntity;
                         break;
@@ -310,6 +314,23 @@ void Client::receiveMessagesFromServer() {
             }
         }
     }
+}
+
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else return EntityType::DEFAULT; 
+}
+
+// Converts zone type string into an enum variable
+ZoneType stringToZoneType(const std::string& str) {
+    if (str == "SPAWN") return ZoneType::SPAWN;
+    else if (str == "DEATH") return ZoneType::DEATH;
+    else if (str == "SIDESCROLL") return ZoneType::SIDESCROLL;
+    else return ZoneType::NONE;  
 }
 
 // Deserializes entity info from a JSON string and creates an Entity object with it
