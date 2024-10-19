@@ -15,8 +15,16 @@ enum class ShapeType {
 // An enum class that denotes the type of entity
 enum class EntityType {
     DEFAULT, // Is affected by collisions
-    FIXED, // Is unaffected by collisions
-    ELASTIC // A collision causes a reversal in movement direction
+    FIXED, // Is unaffected by collisions, but can stop other entities from moving
+    ELASTIC, // A collision causes a reversal in movement direction
+    GHOST // Present in a different realm, is unaffected by and does not affect other entities
+};
+
+enum class DefaultSideScrollerZone {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT
 };
 
 // structure to hold position 

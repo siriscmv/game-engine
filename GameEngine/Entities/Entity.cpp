@@ -1,5 +1,5 @@
 #include "Entity.h"
-
+#include <string>
 #include <algorithm>
 
 #include "Renderer.h"
@@ -95,10 +95,9 @@ float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
+SDL_Color Entity::getColor() const { return _color; }
 
-
-
-void Entity::drawRectangle(SDL_Renderer *renderer) {    
+void Entity::drawRectangle(SDL_Renderer *renderer) {
     SDL_Rect rect = {_position.x, _position.y, _size.width, _size.height};
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderFillRect(renderer, &rect);
@@ -146,9 +145,17 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 }
 
 // Scales the entity based on the scale factors passed into the function
-void Entity::applyScaling(float scaleX, float scaleY) {
+void Entity::applyScaling(float scaleX, float scaleY, Position offset, int entityId) {
+    const bool skip = _entityType == EntityType::GHOST || _entityID == entityId;
+
     _position.x = _originalPosition.x * scaleX;
     _position.y = _originalPosition.y * scaleY;
+
+    if (!skip) {
+        _position.x -= offset.x;
+        _position.y -= offset.y;
+    }
+
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
@@ -202,4 +209,13 @@ void Entity::shutdown() {
         SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
+}
+
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else return EntityType::DEFAULT; // Default case
 }

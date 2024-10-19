@@ -54,11 +54,12 @@ public:
     float getCircleRadius() const;
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
+    SDL_Color getColor() const;
 
     void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);             // Load texture into entity
     void render(SDL_Renderer *renderer);                  // Render entity 
-    void applyScaling(float scaleX, float scaleY);        
+    void applyScaling(float scaleX, float scaleY, Position offset = Position(0, 0), int entityId = -1);
     void shutdown();
 
 private:
@@ -91,3 +92,5 @@ private:
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID
 };
+
+EntityType stringToEntityType(const std::string& str);

@@ -17,6 +17,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
 	_inputManager = new InputManager();
+	_sideScroller = new SideScroller();
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
@@ -30,7 +31,8 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 GameEngine::~GameEngine() {
 	delete _renderer;
 	delete _window;
-	delete _inputManager;	
+	delete _inputManager;
+	delete _sideScroller;
 	delete _timeline; 
 }
 
@@ -152,13 +154,19 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
-	_physicsSystem->run(deltaTime, entitiesWithCollisions);                             // Running the physics engine		
+ 	_physicsSystem->run(deltaTime, entitiesWithCollisions);
 }
 
 // Handles the client's game engine logic in server-client multiplayer
 void GameEngine::handleClientMode(int64_t elapsedTime) {
 	SDL_PumpEvents();                                          // Force an event queue update
-	_renderer->clear();	
+	_renderer->clear();
+
+	_entities = _client->getEntities();
+
+	std::thread heartbeatThread([this]() {
+		_client->sendHeartbeatToServer();
+	});
 
 	std::thread inputThread([this]() {
 		_inputManager->process();
@@ -169,22 +177,41 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	});
 
 	std::thread communicationThread([this]() {
-		_client->receiveUpdatesFromServer();
+		_client->receiveEntityUpdatesFromServer();
+		_client->receiveMessagesFromServer();
+	});
+
+	std::thread sideScrollingThread([this]() {
+		auto self = std::find_if(_entities.begin(), _entities.end(), [this](const Entity* e) {
+			return e->getEntityID() == _client->getEntityID();
+		});
+
+		_sideScroller->process(*self, _entities);
 	});
 	
 	auto [scaleX, scaleY] = _window->getScaleFactors();
+	Position offset = _client->getViewOffset();
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
-		entity->applyScaling(scaleX, scaleY);
+		Position pos = entity->getOriginalPosition();
+		// const bool skip = entity->getEntityID() == _client->getEntityID();
+		const bool skip = entity->getEntityType() == EntityType::GHOST;
+		// if (!skip) entity->setOriginalPosition(Position{ pos.x - offset.x, pos.y - offset.y });
+
+		entity->applyScaling(scaleX, scaleY, offset, _client->getEntityID());
 		entity->render(_renderer->getSDLRenderer());             // Rendering all entities
+
+		// if (!skip) entity->setOriginalPosition(Position{ pos.x + offset.x, pos.y + offset.y });
 	}
 
 	_renderer->present();
 
 	inputThread.join();
 	callbackThread.join();
-	communicationThread.join();	
+	communicationThread.join();
+	sideScrollingThread.join();
+	heartbeatThread.join();
 }
 
 // Handles the logic for peers in peer to peer mode
@@ -283,14 +310,16 @@ void GameEngine::toggleScalingMode() {
 	_window->toggleScalingMode();
 }
 
-
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
+SideScroller* GameEngine::getSideScroller() { return _sideScroller; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 Client* GameEngine::getClient() { return _client; }
 Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
+std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
+
 
 // Setters
 void GameEngine::setGameState(GameState state) { _gameState = state; }
