@@ -39,13 +39,13 @@ set(GAME_ENGINE_SOURCES
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})
 
-add_executable(Game Game/main.cpp) # For running the actual game
-add_executable(GameEngine GameEngine/RunServer.cpp) # For running the engine, with its test file
+add_executable(Client Game/main.cpp) # For running the actual game
+add_executable(Server GameEngine/RunServer.cpp) # For running the engine, with its test file
 
-target_link_libraries(GameEngine ${SDL2_LIBRARIES})
-target_link_libraries(GameEngine zmq)
-target_link_libraries(GameEngine GameEngineLib)
+target_link_libraries(Server ${SDL2_LIBRARIES})
+target_link_libraries(Server zmq)
+target_link_libraries(Server GameEngineLib)
 
-target_link_libraries(Game ${SDL2_LIBRARIES})
-target_link_libraries(Game zmq)
-target_link_libraries(Game GameEngineLib)
+target_link_libraries(Client ${SDL2_LIBRARIES})
+target_link_libraries(Client zmq)
+target_link_libraries(Client GameEngineLib)
