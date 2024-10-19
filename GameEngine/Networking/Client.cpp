@@ -269,6 +269,7 @@ void Client::receiveEntityUpdatesFromServer() {
                 const auto* updatedEntity = stringToEntity(entityString);
 
                 for (Entity*& entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
                     if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
                         continue;
                     }
