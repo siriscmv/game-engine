@@ -329,6 +329,8 @@ InputManager* GameEngine::getInputManager() { return _inputManager; }
 SideScroller* GameEngine::getSideScroller() { return _sideScroller; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
+CollisionSystem* GameEngine::getCollisionSystem() { return _collisionSystem; }
+Window* GameEngine::getWindow() { return _window; }
 Client* GameEngine::getClient() { return _client; }
 Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }

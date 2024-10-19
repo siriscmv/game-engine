@@ -155,6 +155,7 @@ void Client::receiveEntityUpdatesFromServer() {
                 Entity* updatedEntity = deserializeEntity(serializedEntity);
 
                 for (Entity* entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
                     if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
                     if (entity->getEntityID() == updatedEntity->getEntityID()) {
                         entity->setOriginalPosition(updatedEntity->getOriginalPosition());

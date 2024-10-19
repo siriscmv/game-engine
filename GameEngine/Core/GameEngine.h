@@ -36,6 +36,8 @@ public:
 	// A callback function that is triggered after each render cycle
 	void setOnCycle(const std::function<void()> &);
 	PhysicsSystem* getPhysicsSystem();
+	CollisionSystem* getCollisionSystem();
+	Window* getWindow();
 
 	void toggleScalingMode();
 	void sendInputToServer(const std::string& buttonPress);

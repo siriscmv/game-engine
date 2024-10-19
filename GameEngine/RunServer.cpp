@@ -6,8 +6,8 @@
 int main(int argc, char** argv) {
 
 	// Player spawn points
-	Entity spawnPointOne(Position(0, 0), Size(200, 200));
-	Entity spawnPointTwo(Position(1520, 0), Size(200, 200));
+	Entity spawnPointOne(Position(0, 100), Size(200, 200));
+	Entity spawnPointTwo(Position(1520, 100), Size(200, 200));
 	spawnPointOne.setEntityType(EntityType::GHOST);
 	spawnPointOne.setZoneType(ZoneType::SPAWN);
 	spawnPointTwo.setEntityType(EntityType::GHOST);
