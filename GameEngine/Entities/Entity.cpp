@@ -1,5 +1,5 @@
 #include "Entity.h"
-
+#include <string>
 #include <algorithm>
 
 #include "Renderer.h"
@@ -23,7 +23,7 @@ Entity::Entity(Position position, Size size, SDL_Color color) {
 }
 
 // Contructor for Circles
-Entity::Entity(Position position, float radius, SDL_Color color) {
+Entity::Entity(Position position, float radius, SDL_Color color ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -34,7 +34,7 @@ Entity::Entity(Position position, float radius, SDL_Color color) {
 }
 
 // Constructor for triangles
-Entity::Entity(Position position, float baseLength, float height, SDL_Color color) {
+Entity::Entity(Position position, float baseLength, float height, SDL_Color color ) {
     generateEntityID();
     setPosition(position);
     setOriginalPosition(position);
@@ -55,6 +55,10 @@ Entity::Entity(const char *texturePath, Position position, Size size) {
     setSize(size);
     setShapeType(ShapeType::TEXTURE);
 }
+
+//void resetToOriginalPosition(Entity* entity) {
+//	entity->setPosition(entity->getOriginalPosition());
+//}
 
 Entity::~Entity() {
     shutdown();
@@ -97,8 +101,7 @@ float Entity::getAccelerationY() const { return _acceleration.y; }
 float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
-
-
+SDL_Color Entity::getColor() const { return _color; }
 
 void Entity::drawRectangle(SDL_Renderer *renderer, Position position) {    
     SDL_Rect rect = { position.x, position.y, _size.width, _size.height};
@@ -151,6 +154,7 @@ bool Entity::loadTexture(SDL_Renderer *renderer) {
 void Entity::applyScaling(float scaleX, float scaleY) {
     _position.x = _originalPosition.x * scaleX;
     _position.y = _originalPosition.y * scaleY;
+
     switch (_shape) {
     case ShapeType::RECTANGLE:
     case ShapeType::TEXTURE:        
@@ -169,9 +173,14 @@ void Entity::applyScaling(float scaleX, float scaleY) {
     }
 }
 
+// Teleports the entity to the position passed
+void Entity::teleportTo(const Position& position) {
+    setPosition(position);
+}
+
+
 // Renders the entity onto the screen
 void Entity::render(SDL_Renderer* renderer, const Camera& camera) {
-
     // Adjusted position based on camera's position (to render relative to the camera)
     Position adjustedPosition = {
         _position.x - camera.x,  
@@ -222,4 +231,13 @@ void Entity::shutdown() {
         SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
+}
+
+// Converts entity type string into an enum variable
+EntityType stringToEntityType(const std::string& str) {
+    if (str == "DEFAULT") return EntityType::DEFAULT;
+    else if (str == "GHOST") return EntityType::GHOST;
+    else if (str == "ELASTIC") return EntityType::ELASTIC;
+    else if (str == "FIXED") return EntityType::FIXED;
+    else return EntityType::DEFAULT; // Default case
 }

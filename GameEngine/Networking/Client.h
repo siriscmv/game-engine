@@ -3,13 +3,15 @@
 #include "Entity.h"
 #include "Globals.h"
 #include <vector>
-#include <JSON/json.hpp>
-using json = nlohmann::json;
 #ifdef __APPLE__
 #include <zmq.hpp>
+#include <nlohmann/json.hpp>
 #else
 #include <ZMQ/zmq.hpp>
+#include <JSON/json.hpp>
 #endif
+
+using json = nlohmann::json;
 
 class Client {
 public:

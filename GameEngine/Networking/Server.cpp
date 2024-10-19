@@ -300,20 +300,6 @@ void Server::processClientInput(int clientId, const std::string& buttonPress) {
     }
 }
 
-// Broadcasts entity updates to all clients
-void Server::updateClientEntities() {
-    std::string messagePrefix = "entity_update|";
-    std::string allEntitiesData = messagePrefix;
-
-    for (Entity* entity : _allEntities) {
-        allEntitiesData += serializeEntity(*entity) + "\n";  
-    }
-
-    zmq::message_t message(allEntitiesData.size());
-    memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());
-    _entityPublisher.send(message, zmq::send_flags::none);
-}
-
 // Converts entity type into a string
 std::string entityTypeToString(EntityType type) {
     switch (type) {
@@ -336,9 +322,28 @@ std::string zoneTypeToString(ZoneType type) {
     }
 }
 
+std::string entityToString(const Entity& entity) {
+    std::ostringstream oss;
 
-// Serializes an entity to a JSON string
-std::string Server::serializeEntity(const Entity& entity) {
+    oss << "id:" << entity.getEntityID() << '|'
+        << "x:" << entity.getOriginalPosition().x << '|'
+        << "y:" << entity.getOriginalPosition().y << '|'
+        << "width:" << entity.getSize().width << '|'
+        << "height:" << entity.getSize().height << '|'
+        << "type:" << entityTypeToString(entity.getEntityType()) << '|'
+        << "velocityX:" << entity.getVelocityX() << '|'
+        << "velocityY:" << entity.getVelocityY() << '|'
+        << "accelerationX:" << entity.getAccelerationX() << '|'
+        << "accelerationY:" << entity.getAccelerationY() << '|'
+        << "cr:" << static_cast<int>(entity.getColor().r) << '|'
+        << "cg:" << static_cast<int>(entity.getColor().g) << '|'
+        << "cb:" << static_cast<int>(entity.getColor().b) << '|'
+        << "ca:" << static_cast<int>(entity.getColor().a);
+
+    return oss.str();
+}
+
+json entityToJson(const Entity& entity) {
     json jsonEntity = {
         {"id", entity.getEntityID()},
         {"x", entity.getOriginalPosition().x},
@@ -350,9 +355,50 @@ std::string Server::serializeEntity(const Entity& entity) {
         {"velocityX", entity.getVelocityX()},
         {"velocityY", entity.getVelocityY()},
         {"accelerationX", entity.getAccelerationX()},
-        {"accelerationY", entity.getAccelerationY()}
+        {"accelerationY", entity.getAccelerationY()},
+        {"cr", static_cast<int>(entity.getColor().r)},
+        {"cg", static_cast<int>(entity.getColor().g)},
+        {"cb", static_cast<int>(entity.getColor().b)},
+        {"ca", static_cast<int>(entity.getColor().a)},
     };
-    return jsonEntity.dump(); 
+
+    return jsonEntity;
+}
+
+constexpr bool useJSON = false;
+
+// Broadcasts entity updates to all clients
+void Server::updateClientEntities() {
+    std::string allEntitiesData;
+
+    if (useJSON) {
+        json updateMessage = {
+            {"type", "entity_update"},
+            {"entities", json::array()}
+        };
+
+        for (const Entity* entity : _allEntities) {
+            updateMessage["entities"].push_back(entityToJson(*entity));
+        }
+
+        allEntitiesData = updateMessage.dump();
+    } else {
+        std::ostringstream oss;
+        oss << "entity_update|";
+        for (const Entity* entity : _allEntities) {
+            oss << "||" << entityToString(*entity);
+        }
+        allEntitiesData = oss.str();
+    }
+
+    zmq::message_t message(allEntitiesData.size());
+    memcpy(message.data(), allEntitiesData.c_str(), allEntitiesData.size());
+    _entityPublisher.send(message, zmq::send_flags::none);
+}
+
+// Serializes an entity to a JSON string
+std::string Server::serializeEntity(const Entity& entity) {
+    return entityToJson(entity).dump();
 }
 
 // Setter and getters

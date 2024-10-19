@@ -314,6 +314,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+venv
 
 # Cake - Uncomment if you are using it
 # tools/**
@@ -405,3 +406,6 @@ x64/RunServer/*
 
 # Keep ignoring other x64 folders
 GameEngine/x64/
+/Docs/Dependencies
+/GameEngine/RunGame
+/CMakeSettings.json
