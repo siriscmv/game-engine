@@ -338,7 +338,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Zones/SideScroller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -353,7 +353,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Zones/SideScroller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -368,7 +368,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Zones/SideScroller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -383,7 +383,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Zones/SideScroller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -398,7 +398,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Zones/SideScroller;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -480,7 +480,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunClientGame|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="TimeSystem\Timeline.cpp" />
-    <ClCompile Include="Zones\SideScroller\SideScroller.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\CollisionSystem.h" />
@@ -507,7 +506,6 @@
     </ClInclude>
     <ClInclude Include="Physics\PhysicsSystem.h" />
     <ClInclude Include="TimeSystem\Timeline.h" />
-    <ClInclude Include="Zones\SideScroller\SideScroller.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
