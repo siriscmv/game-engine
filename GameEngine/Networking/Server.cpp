@@ -366,7 +366,7 @@ json entityToJson(const Entity& entity) {
     return jsonEntity;
 }
 
-constexpr bool useJSON = false;
+constexpr bool useJSON = true;
 
 // Broadcasts entity updates to all clients
 void Server::updateClientEntities() {

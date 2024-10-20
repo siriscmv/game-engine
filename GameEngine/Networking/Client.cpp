@@ -217,7 +217,7 @@ Entity* stringToEntity(const std::string& entityString) {
     return entity;
 }
 
-constexpr bool useJSON = false;
+constexpr bool useJSON = true;
 
 // Receives entity updates from the server
 void Client::receiveEntityUpdatesFromServer() {
@@ -237,23 +237,18 @@ void Client::receiveEntityUpdatesFromServer() {
             for (const auto& updatedJSONEntity : entityUpdates["entities"]) {
                 const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
 
-                for (Entity*& entity : _entities) {
-                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
-                        continue;
+               
+                for (Entity* entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
+
+                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
+                        *entity = *updatedEntity;
+                        break;
                     }
-
-                    for (Entity* entity : _entities) {
-                        if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
-                        if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
-
-                        if (entity->getEntityID() == updatedEntity->getEntityID()) {
-                            *entity = *updatedEntity;
-                            break;
-                        }
-                    }
-
-                    delete updatedEntity;
                 }
+
+                delete updatedEntity;
             }
         } else {
             auto parts = split(allEntityUpdates, "|||");
