@@ -32,7 +32,7 @@ public:
     int getEntityID();
     Position getViewOffset();
     void setGameState(GameState gameState);
-    std::vector<Entity*> getEntities() const;
+    std::vector<Entity*>& getEntities();
 
     void setRefreshRate(RefreshRate rate = RefreshRate::SIXTY_FPS);
     RefreshRate getRefreshRate() const;

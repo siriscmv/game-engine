@@ -17,7 +17,7 @@ using json = nlohmann::json;
 
 class Server {
 public:
-	Server(const std::vector<Entity*>& worldEntities, const std::vector<Entity*>& spawnPoints);
+	Server(const std::vector<Entity*>& entities);
 	~Server();
 
 	void initialize(int entityPubPort = 5555, int subPort = 5556, int reqPort = 5557, int hbSubPort = 5558, int pubPort = 5559);
@@ -36,9 +36,7 @@ public:
 	void setHeartBeatTimeout(int milliseconds);
 	
 
-private:
-	std::vector<Entity*> _worldEntities;
-	std::vector<Entity*> _spawnPoints;                                   // Spawn points of players	
+private:	
 	std::vector<Entity*> _allEntities;                                   // All entities
 	zmq::context_t _context;
 	zmq::socket_t _entityPublisher;

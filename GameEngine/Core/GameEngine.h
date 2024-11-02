@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SideScroller.h>
-
 #include "PeerServer.h"
 #include "Peer.h"
 #include "CollisionSystem.h"
@@ -26,7 +24,6 @@ public:
 	void shutdown();
 
 	InputManager * getInputManager();
-	SideScroller * getSideScroller();
 	GameState getGameState();
 	Client* getClient();
 
@@ -36,6 +33,8 @@ public:
 	// A callback function that is triggered after each render cycle
 	void setOnCycle(const std::function<void()> &);
 	PhysicsSystem* getPhysicsSystem();
+	CollisionSystem* getCollisionSystem();
+	Window* getWindow();
 
 	void toggleScalingMode();
 	void sendInputToServer(const std::string& buttonPress);
@@ -43,11 +42,17 @@ public:
 	void pauseGame();
 	void resumeGame();
 	void setGameSpeed(double speed);
+	void setClientMap(std::map<int, Entity*>& clientMap);
 	
 	int getServerRefreshRateMs() const;
 	void setServerRefreshRateMs(int rate);
 
 	std::vector<Entity*>& getEntities();
+
+	void initializeCamera(int width, int height);
+	void resizeCamera(float scaleX, float scaleY);
+	void moveCamera(int x, int y);
+	Camera& getCamera();
 
 private:
 	Window* _window;
@@ -56,7 +61,6 @@ private:
 	Mode _mode;
 	InputManager* _inputManager;
 	PhysicsSystem* _physicsSystem;
-	SideScroller* _sideScroller;
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
 	std::function<void()> _onCycle;
@@ -64,7 +68,7 @@ private:
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;
-	PeerServer* _peerServer = nullptr;
+	std::map<int, Entity*>* _clientMap;
 	
 	void handleServerMode(int64_t elapsedTime);	
 
@@ -73,5 +77,7 @@ private:
 	void handleSinglePlayerMode(int64_t elapsedTime);
 
 	int _serverRefreshRateMs;
+
+	Camera _camera;
 };
 

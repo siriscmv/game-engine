@@ -144,6 +144,8 @@ Entity* jsonToEntity(json jsonEntity) {
     float height = jsonEntity["height"];
     std::string typeStr = jsonEntity["type"];
     EntityType entityType = stringToEntityType(typeStr);
+    std::string zoneTypeStr = jsonEntity["zoneType"];
+    ZoneType zoneType = stringToZoneType(zoneTypeStr);
 
     float velocityX = jsonEntity["velocityX"];
     float velocityY = jsonEntity["velocityY"];
@@ -156,6 +158,7 @@ Entity* jsonToEntity(json jsonEntity) {
     Entity* entity = new Entity(Position(x, y), Size(width, height));
     entity->setEntityID(id);
     entity->setEntityType(entityType);
+    entity->setZoneType(zoneType);
     entity->setVelocityX(velocityX);
     entity->setVelocityY(velocityY);
     entity->setAccelerationX(accelerationX);
@@ -198,6 +201,7 @@ Entity* stringToEntity(const std::string& entityString) {
         else if (key == "width") entity->setSize(Size(std::stof(value), entity->getSize().height));
         else if (key == "height") entity->setSize(Size(entity->getSize().width, std::stof(value)));
         else if (key == "type") entity->setEntityType(stringToEntityType(value));
+        else if (key == "zoneType") entity->setZoneType(stringToZoneType(value));
         else if (key == "velocityX") entity->setVelocityX(std::stof(value));
         else if (key == "velocityY") entity->setVelocityY(std::stof(value));
         else if (key == "accelerationX") entity->setAccelerationX(std::stof(value));
@@ -213,7 +217,7 @@ Entity* stringToEntity(const std::string& entityString) {
     return entity;
 }
 
-constexpr bool useJSON = false;
+constexpr bool useJSON = true;
 
 // Receives entity updates from the server
 void Client::receiveEntityUpdatesFromServer() {
@@ -233,10 +237,10 @@ void Client::receiveEntityUpdatesFromServer() {
             for (const auto& updatedJSONEntity : entityUpdates["entities"]) {
                 const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
 
-                for (Entity*& entity : _entities) {
-                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
-                        continue;
-                    }
+               
+                for (Entity* entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
 
                     if (entity->getEntityID() == updatedEntity->getEntityID()) {
                         *entity = *updatedEntity;
@@ -260,6 +264,7 @@ void Client::receiveEntityUpdatesFromServer() {
                 const auto* updatedEntity = stringToEntity(entityString);
 
                 for (Entity*& entity : _entities) {
+                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
                     if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) {
                         continue;
                     }
@@ -328,7 +333,7 @@ Entity* Client::deserializeEntity(const std::string& jsonString) {
 // Setters and getters
 void Client::setClientID(int id) { _clientID = id; }
 void Client::setGameState(GameState gameState) { _gameState = gameState; }
-std::vector<Entity*> Client::getEntities() const { return _entities; }
+std::vector<Entity*>& Client::getEntities() { return _entities; }
 int Client::getClientID() { return _clientID; };
 int Client::getEntityID() { return _entityID; };
 
