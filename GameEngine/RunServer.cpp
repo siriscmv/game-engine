@@ -7,16 +7,16 @@ int main(int argc, char** argv) {
 
 	// Player spawn points
 	Entity spawnPointOne(Position(0, 100), Size(200, 200));
-	Entity spawnPointTwo(Position(1520, 100), Size(200, 200));
+	// Entity spawnPointTwo(Position(1520, 100), Size(200, 200));
 	spawnPointOne.setEntityType(EntityType::GHOST);
 	spawnPointOne.setZoneType(ZoneType::SPAWN);
-	spawnPointTwo.setEntityType(EntityType::GHOST);
-	spawnPointTwo.setZoneType(ZoneType::SPAWN);
+	// spawnPointTwo.setEntityType(EntityType::GHOST);
+	// spawnPointTwo.setZoneType(ZoneType::SPAWN);
 
 	// Death zone
-	Entity deathZoneOne(Position(500, 500), Size(100, 100));
-	deathZoneOne.setEntityType(EntityType::GHOST);
-	deathZoneOne.setZoneType(ZoneType::DEATH);
+	// Entity deathZoneOne(Position(500, 500), Size(100, 100));
+	// deathZoneOne.setEntityType(EntityType::GHOST);
+	// deathZoneOne.setZoneType(ZoneType::DEATH);
 
 	// Side boundaries
 	Entity leftBoundary(Position(0, 0), Size(50, 1080));
@@ -40,8 +40,8 @@ int main(int argc, char** argv) {
 
 	std::vector<Entity*> entities;
 	entities.push_back(&spawnPointOne);
-	entities.push_back(&spawnPointTwo);
-	entities.push_back(&deathZoneOne);
+	// entities.push_back(&spawnPointTwo);
+	// entities.push_back(&deathZoneOne);
 	entities.push_back(&leftBoundary);
 	entities.push_back(&rightBoundary);
 	entities.push_back(&topBoundary);

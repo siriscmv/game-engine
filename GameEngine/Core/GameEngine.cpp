@@ -21,8 +21,8 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
-
 	_timeline = new Timeline();
+	_eventManager = new EventManager(_timeline);
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -205,6 +205,10 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		_client->receiveMessagesFromServer();
 		});
 
+	std::thread eventLoop([this]() {
+		_eventManager->process();
+	});
+
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 	resizeCamera(scaleX, scaleY);
 
@@ -224,6 +228,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	callbackThread.join();
 	communicationThread.join();
 	heartbeatThread.join();
+	eventLoop.join();
 }
 
 // Handles the logic for peers in peer to peer mode
@@ -324,6 +329,7 @@ void GameEngine::toggleScalingMode() {
 
 // Getters
 InputManager* GameEngine::getInputManager() { return _inputManager; }
+EventManager* GameEngine::getEventManager() { return _eventManager; }
 GameState GameEngine::getGameState() { return _gameState; }
 PhysicsSystem* GameEngine::getPhysicsSystem() { return _physicsSystem; }
 CollisionSystem* GameEngine::getCollisionSystem() { return _collisionSystem; }
