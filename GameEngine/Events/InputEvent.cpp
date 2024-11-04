@@ -2,7 +2,7 @@
 // Created by Cyril Melvin Vincent on 11/2/24.
 //
 
-#include <SDL_scancode.h>
+#include <SDL/SDL.h>
 
 #include "Event.h"
 
