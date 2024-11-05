@@ -20,11 +20,20 @@ enum class EntityType {
     GHOST // Present in a different realm, is unaffected by and does not affect other entities
 };
 
-enum class DefaultSideScrollerZone {
-    TOP,
-    BOTTOM,
-    LEFT,
-    RIGHT
+// An enum class to differentiate between zone types. 
+enum class ZoneType {
+    NONE,                          // Not a Zone
+    SPAWN,                         // Spawn zones
+    DEATH,                         // Death zones
+    SIDESCROLL                     // Side boundaries
+};
+
+// An enum class that denotes the type of Event.
+enum class EventType {
+    Collision,
+    Death,
+    Spawn,
+    Input
 };
 
 // structure to hold position 
@@ -65,9 +74,9 @@ enum class RefreshRate {
     TWO_FORTY_FPS = 240
 };
 
-enum class ZoneType {
-    SPAWN,
-    DEATH
+// Camera object to track the area that needs to be rendered
+struct Camera {
+    int x, y;
+    Size size;
+    Size originalSize;    
 };
-
-
