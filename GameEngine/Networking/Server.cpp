@@ -1,4 +1,6 @@
 #include "Server.h"
+#include "TypedEventHandler.h"
+#include "InputEvent.cpp"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -21,6 +23,8 @@ Server::Server(const std::vector<Entity*>& entities) {
     _engine->setClientMap(_clientMap);
 
     setRefreshRate();
+    setUpKeyBindings();
+
 }
 
 Server::~Server() {
@@ -29,6 +33,36 @@ Server::~Server() {
     _heartbeatSubscriber.close();
     _publisher.close();
     _engine->shutdown();
+}
+
+// Sets up bindings to handle client input via the event system
+void Server::setUpKeyBindings() {
+    const EventHandler inputHandler = TypedEventHandler<InputEvent>([this](const InputEvent* event) {
+        const auto& binding = event->getBinding();
+        int clientID = event->getClientID();
+        Entity* playerEntity = _clientMap[clientID];
+        
+        if (binding == _moveLeft) {
+            playerEntity->setVelocityX(-50.0f);
+        }
+        else if (binding == _moveRight) {
+            playerEntity->setVelocityX(50.0f);
+        }
+        else if (binding == _moveUp) {
+            playerEntity->setVelocityY(-50.0f);
+        }
+        else if (binding == _moveDown) {
+            playerEntity->setVelocityY(50.0f);
+        }
+        
+    });
+
+    _engine->getEventManager()->registerHandler(EventType::Input, inputHandler);
+
+    _engine->getInputManager()->bind(_moveLeft);
+    _engine->getInputManager()->bind(_moveRight);
+    _engine->getInputManager()->bind(_moveUp);
+    _engine->getInputManager()->bind(_moveDown);
 }
 
 // Initializes the server. Binds ports into pub-sub and req-rep models.
@@ -282,23 +316,18 @@ void Server::listenToClientMessages() {
 
 // Processes keypress from client and updates corresponding player entity velocity
 void Server::processClientInput(int clientId, const std::string& buttonPress) {
-    if (_clientMap.find(clientId) != _clientMap.end()) {
-        Entity* playerEntity = _clientMap[clientId];
-        
-        if (buttonPress == "left") {
-            playerEntity->setVelocityX(-50.0f);
-        }
-        else if (buttonPress == "right") {
-            playerEntity->setVelocityX(50.0f);
-        }
-        else if (buttonPress == "up") {
-            playerEntity->setVelocityY(-50.0f);
-        }
-        else if (buttonPress == "down") {
-            playerEntity->setVelocityY(50.0f);
-        }
-    }
+    keyBinding binding;
+
+    if (buttonPress == "left") binding = _moveLeft;    
+    else if (buttonPress == "right") binding = _moveRight;    
+    else if (buttonPress == "up") binding = _moveUp;    
+    else if (buttonPress == "down") binding = _moveDown;    
+
+    // Raise an InputEvent with the binding
+    InputEvent* event = new InputEvent(binding, clientId);
+    _engine->getEventManager()->raiseEvent(event);
 }
+
 
 // Converts entity type into a string
 std::string entityTypeToString(EntityType type) {

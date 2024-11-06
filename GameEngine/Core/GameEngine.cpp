@@ -173,12 +173,23 @@ void GameEngine::run() {
 
 // Handles the server's game engine logic in server-client multiplayer
 void GameEngine::handleServerMode(int64_t elapsedTime) {
-	_onCycle();
+
+	std::thread eventLoop([this]() {
+		_eventManager->process();
+		});
+
+	std::thread callbackThread([this]() {
+		_onCycle();
+		});
+	
 	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
 	_collisionSystem->handleDeathZoneCollision(_entities, *_clientMap);                 // Death zone collision
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
- 	_physicsSystem->run(deltaTime, entitiesWithCollisions);
+ 	_physicsSystem->run(deltaTime, entitiesWithCollisions);	
+
+	eventLoop.join();
+	callbackThread.join();
 }
 
 // Handles the client's game engine logic in server-client multiplayer

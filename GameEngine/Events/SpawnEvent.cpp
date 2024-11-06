@@ -14,5 +14,5 @@ public:
 
 private:
     Entity* _entity;
-    Position _respawnPosition;
+    Position _position;
 };
