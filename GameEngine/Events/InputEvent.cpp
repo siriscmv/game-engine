@@ -3,18 +3,19 @@
 //
 
 #include <SDL_scancode.h>
+#include <set>
 
 #include "Event.h"
 
 class InputEvent final : public Event {
     public:
-    explicit InputEvent(const SDL_Scancode scancode)
-        : _scancode(scancode) {}
+    explicit InputEvent(const std::set<SDL_Scancode>& binding)
+        : _binding(binding) {}
 
     EventType getType() const override { return EventType::Input; }
 
-    SDL_Scancode getScancode() const { return _scancode; }
+    std::set<SDL_Scancode> getBinding() const { return _binding; }
 
     private:
-    SDL_Scancode _scancode;
+    std::set<SDL_Scancode> _binding;
 };
