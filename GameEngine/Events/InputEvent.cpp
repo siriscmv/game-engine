@@ -2,9 +2,14 @@
 // Created by Cyril Melvin Vincent on 11/2/24.
 //
 
-#include <SDL_scancode.h>
-#include <set>
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
+#include <SDL/SDL.h>
+#include <utility>
+#endif
 
+#include <set>
 #include "Event.h"
 
 class InputEvent final : public Event {
