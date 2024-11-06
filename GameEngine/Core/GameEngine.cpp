@@ -193,7 +193,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		});
 
 	std::thread inputThread([this]() {
-		_inputManager->process();
+		_inputManager->process(_eventManager);
 		});
 
 	std::thread callbackThread([this]() {
@@ -238,7 +238,7 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;
 
 	std::thread inputThread([this]() {
-		_inputManager->process();
+		_inputManager->process(_eventManager);
 		});
 
 	std::thread callbackThread([this]() {
@@ -276,7 +276,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;
 
 	std::thread inputThread([this]() {
-		_inputManager->process();
+		_inputManager->process(_eventManager);
 	});
 
 	std::thread callbackThread([this]() {
