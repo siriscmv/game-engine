@@ -171,19 +171,23 @@ void GameEngine::handleDeathZones() {
 					Entity* spawnPoint = spawnPoints[randomIndex];
 					Position spawnPos = spawnPoint->getOriginalPosition();
 					Size spawnSize = spawnPoint->getSize();
-					Position centerPosition(spawnPos.x + spawnSize.width / 2.0f, spawnPos.y + spawnSize.height / 2.0f);
+
+					// Generate a random position within the spawn point boundaries
+					float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
+					float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
+					Position newPosition(playerX, playerY);
 
 					// Remove the playerEntity from the _entities list and physics system
 					_entities.erase(std::remove(_entities.begin(), _entities.end(), playerEntity), _entities.end());
 					_physicsSystem->getEntities().erase(std::remove(_physicsSystem->getEntities().begin(), _physicsSystem->getEntities().end(), playerEntity), _physicsSystem->getEntities().end());
 
-					playerEntity->setOriginalPosition(centerPosition);
+					playerEntity->setOriginalPosition(newPosition);
 					playerEntity->setVelocityX(0);
 					playerEntity->setVelocityY(0);
 					playerEntity->setEntityType(EntityType::GHOST);
 
 					// Raise a death event with delay to respawn the player
-					_eventManager->raiseEventWithDelay(new DeathEvent(playerEntity, centerPosition), entity->getEventDelay());
+					_eventManager->raiseEventWithDelay(new DeathEvent(playerEntity, newPosition), entity->getEventDelay());
 				}
 			}
 		}

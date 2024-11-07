@@ -52,7 +52,7 @@ private:
 
 	GameEngine* _engine;
 
-	void setUpKeyBindings();
+	void setUpEventHandlers();
 	void handleClientHandeshake();
 	void listenToHeartbeatMessages();
 	void listenToClientMessages();

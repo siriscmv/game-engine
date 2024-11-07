@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "TypedEventHandler.h"
 #include "InputEvent.cpp"
+#include "SpawnEvent.cpp"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -23,7 +24,7 @@ Server::Server(const std::vector<Entity*>& entities) {
     _engine->setClientMap(_clientMap);
 
     setRefreshRate();
-    setUpKeyBindings();
+    setUpEventHandlers();
 
 }
 
@@ -35,8 +36,9 @@ Server::~Server() {
     _engine->shutdown();
 }
 
-// Sets up bindings to handle client input via the event system
-void Server::setUpKeyBindings() {
+// Sets up event handlers
+void Server::setUpEventHandlers() {
+    // Handler for input events
     const EventHandler inputHandler = TypedEventHandler<InputEvent>([this](const InputEvent* event) {
         const auto& binding = event->getBinding();
         int clientID = event->getClientID();
@@ -63,6 +65,14 @@ void Server::setUpKeyBindings() {
     _engine->getInputManager()->bind(_moveRight);
     _engine->getInputManager()->bind(_moveUp);
     _engine->getInputManager()->bind(_moveDown);
+
+    // Handler for spawn events    
+    const EventHandler spawnHandler = TypedEventHandler<SpawnEvent>([](const SpawnEvent* event) {
+        Entity* entity = event->getEntity();
+        Position position = event->getPosition();
+        entity->setOriginalPosition(position);  
+        });
+    _engine->getEventManager()->registerHandler(EventType::Spawn, spawnHandler);
 }
 
 // Initializes the server. Binds ports into pub-sub and req-rep models.
@@ -153,8 +163,8 @@ void Server::handleClientHandeshake() {
             float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
             float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
 
-            // Creating a player entity on that random position within the spawn point's boundaries
-            Entity* playerEntity = new Entity(Position(playerX, playerY), Size(50, 50));
+            // Creating a player entity 
+            Entity* playerEntity = new Entity(Position(-100, -100), Size(50, 50));
             playerEntity->setEntityID(_nextEntityID++);
             playerEntity->setAccelerationY(9.8f);
 
@@ -171,6 +181,9 @@ void Server::handleClientHandeshake() {
 
             printf("Client connected with ID: %d, created Player Entity ID: %d at Spawn Point (%f, %f)\n",
                 clientId, playerEntity->getEntityID(), spawnPos.x, spawnPos.y);
+
+            // Raise a SpawnEvent to position the player entity
+            _engine->getEventManager()->raiseEvent(new SpawnEvent(playerEntity, Position(playerX, playerY)));
 
             // Create response with client ID, assigned entity ID, and all entity data
             std::string response = std::to_string(clientId) + "|" + std::to_string(playerEntity->getEntityID()) + "|";
