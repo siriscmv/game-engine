@@ -65,7 +65,6 @@
 
 ## Building and running
 - Note: Pre-built binaries can be found at `./build`
-- 
 - To compile and run the game: `cmake -S . -B build && cmake --build build`
 - The `build` directory will now contain the binaries
 - Run the server executable first, then run 1 or more client executables
@@ -87,5 +86,8 @@ We used following resources for development:
 - SDL Game Development Tutorial Series: [YouTube Playlist](https://www.youtube.com/watch?v=FxCC9Ces1Yg&list=PLSPw4ASQYyymu3PfG9gxywSPghnSMiOAW&index=2)
 - SDL2 with CMake: [StackOverflow Post](https://stackoverflow.com/questions/28395833/using-sdl2-with-cmake)
 - Singleton Design Pattern: [StackOverflow Post](https://stackoverflow.com/questions/1008019/how-do-you-implement-the-singleton-design-pattern)
-- Json Library [nlohmann's JSON Library](https://github.com/nlohmann/json)
+- Json Library: [nlohmann's JSON Library](https://github.com/nlohmann/json)
+- Class templates (with explicit instantiation): [cppreference](https://en.cppreference.com/w/cpp/language/class_template)
+- Type Erasure: [Blog Post](https://davekilian.com/cpp-type-erasure.html), [cplusplus Article](https://cplusplus.com/articles/oz18T05o/)
+- Curiously Recurring Template Pattern (CRTP): [cppreference](https://en.cppreference.com/w/cpp/language/crtp)
 
