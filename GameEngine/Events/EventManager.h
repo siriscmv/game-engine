@@ -45,6 +45,7 @@ private:
                         std::vector<Event*>,
                         EventComparator> _eventQueue;
     std::unordered_map<EventType, std::vector<EventHandler>> _handlers;
+    std::mutex _eventQueueMutex;
 };
 
 #endif // EVENT_MANAGER_H

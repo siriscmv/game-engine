@@ -1,5 +1,7 @@
 #include "GameEngine.h"
-
+#include "TypedEventHandler.h"
+#include "CollisionEvent.cpp"
+#include "DeathEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -106,8 +108,88 @@ bool GameEngine::initialize(std::vector<Entity*>& entities) {
 		return false;
 	}
 	
+	setUpEventHandlers();
 	return true;
 }
+
+// Sets up event handlers 
+void GameEngine::setUpEventHandlers() {	
+	// Handker for collision events
+	const EventHandler collisionHandler = TypedEventHandler<CollisionEvent>([this](const CollisionEvent* event) {
+		Entity* entityA = event->getEntityA();
+		Entity* entityB = event->getEntityB();
+
+		_collisionSystem->handleCollision(entityA);
+		_collisionSystem->handleCollision(entityB);
+		
+		});
+
+	// Handler for death events 
+	const EventHandler deathHandler = TypedEventHandler<DeathEvent>([this](const DeathEvent* event) {
+		Entity* entity = event->getEntity();
+		Position respawnPosition = event->getRespawnPosition();
+
+		// Set the entity's type back to default
+		entity->setEntityType(EntityType::DEFAULT);		
+		
+		_entities.push_back(entity);
+		_physicsSystem->getEntities().push_back(entity);
+		
+		});
+
+	// Register the handler with the event manager
+	_eventManager->registerHandler(EventType::Collision, collisionHandler);
+	_eventManager->registerHandler(EventType::Death, deathHandler);
+
+
+
+}
+
+// Handles player entity collisions with death zones
+void GameEngine::handleDeathZones() {
+	for (Entity* entity : _entities) {
+		if (entity->getZoneType() == ZoneType::DEATH) {
+			// Loop through all players in the client map
+			for (const auto& [clientId, playerEntity] : *_clientMap) {
+				if (_collisionSystem->hasCollisionRaw(entity, playerEntity)) {
+
+					// Find all spawn points
+					std::vector<Entity*> spawnPoints;
+					for (Entity* spawnEntity : _entities) {
+						if (spawnEntity->getZoneType() == ZoneType::SPAWN) {
+							spawnPoints.push_back(spawnEntity);
+						}
+					}
+
+					// Error if no spawn points are found
+					if (spawnPoints.empty()) {
+						throw std::runtime_error("No spawn points found for teleportation!");
+					}
+
+					// Choose a random spawn point and calculate its center position
+					int randomIndex = rand() % spawnPoints.size();
+					Entity* spawnPoint = spawnPoints[randomIndex];
+					Position spawnPos = spawnPoint->getOriginalPosition();
+					Size spawnSize = spawnPoint->getSize();
+					Position centerPosition(spawnPos.x + spawnSize.width / 2.0f, spawnPos.y + spawnSize.height / 2.0f);
+
+					// Remove the playerEntity from the _entities list and physics system
+					_entities.erase(std::remove(_entities.begin(), _entities.end(), playerEntity), _entities.end());
+					_physicsSystem->getEntities().erase(std::remove(_physicsSystem->getEntities().begin(), _physicsSystem->getEntities().end(), playerEntity), _physicsSystem->getEntities().end());
+
+					playerEntity->setOriginalPosition(centerPosition);
+					playerEntity->setVelocityX(0);
+					playerEntity->setVelocityY(0);
+					playerEntity->setEntityType(EntityType::GHOST);
+
+					// Raise a death event with delay to respawn the player
+					_eventManager->raiseEventWithDelay(new DeathEvent(playerEntity, centerPosition), entity->getEventDelay());
+				}
+			}
+		}
+	}
+}
+
 
 // Initializes the camera. Sets position and size.
 void GameEngine::initializeCamera(int width, int height) {
@@ -174,22 +256,13 @@ void GameEngine::run() {
 // Handles the server's game engine logic in server-client multiplayer
 void GameEngine::handleServerMode(int64_t elapsedTime) {
 
-	std::thread eventLoop([this]() {
-		_eventManager->process();
-		});
-
-	std::thread callbackThread([this]() {
-		_onCycle();
-		});
-	
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
-	_collisionSystem->handleDeathZoneCollision(_entities, *_clientMap);                 // Death zone collision
+	_eventManager->process();
+	_onCycle();
+	handleDeathZones();                                                                                // Handling death zone collisions
+	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);        // Running the collision system	                                                                                
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
  	_physicsSystem->run(deltaTime, entitiesWithCollisions);	
-
-	eventLoop.join();
-	callbackThread.join();
 }
 
 // Handles the client's game engine logic in server-client multiplayer
@@ -260,7 +333,7 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 		_peer->receiveUpdates();
 		});
 
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);
+	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);
 	_physicsSystem->runForGivenEntities(deltaTime, entitiesWithCollisions, _peer->getEntitiesToProcess());
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
@@ -295,7 +368,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	});
 
 	std::thread physicsThread([this, deltaTime]() {
-		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities);        // Running the collision system
+		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);        // Running the collision system
 		_physicsSystem->run(deltaTime, entitiesWithCollisions);
 	});
 
