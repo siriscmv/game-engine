@@ -2,9 +2,13 @@
 // Created by Cyril Melvin Vincent on 11/2/24.//
 
 
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
-#include <set>
+#endif
 
+#include <set>
 #include "Event.h"
 
 class InputEvent final : public Event {
@@ -18,6 +22,7 @@ class InputEvent final : public Event {
     EventType getType() const override { return EventType::Input; }
 
     std::set<SDL_Scancode> getBinding() const { return _binding; }
+    
     int getClientID() const { return _clientID; }
 
     private:
