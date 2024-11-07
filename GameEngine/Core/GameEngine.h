@@ -1,11 +1,9 @@
 #pragma once
 
+#include <InputManager.h>
 #include <EventManager.h>
-
-#include "PeerServer.h"
 #include "Peer.h"
 #include "CollisionSystem.h"
-#include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
 #include "PhysicsSystem.h"
