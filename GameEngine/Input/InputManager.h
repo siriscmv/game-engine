@@ -13,16 +13,17 @@ using keyBinding = std::set<SDL_Scancode>;
 // This class handles Input (key presses) and provides methods to handle them.
 class InputManager {
 public:
-    InputManager();
+    explicit InputManager(bool considerPrevKeys = false);
     ~InputManager();
 
     // Process currently pressed keys and call the associated callback functions
     void process(EventManager* eventManager) const;
     // Register a keyBinding
     void bind(const keyBinding& keyBinding);
-    // unregister a keyBinding
+    // Unregister a keyBinding
     void unbind(const keyBinding& keyBinding);
 
 private:
     std::set<keyBinding> bindings;
+    bool _considerPrevKeys; // Whether to consider the previous key state to determine if a key is pressed or not
 };

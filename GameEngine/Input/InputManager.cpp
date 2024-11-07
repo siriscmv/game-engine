@@ -10,7 +10,7 @@
 #include "InputEvent.cpp"
 #include <stdexcept>
 
-InputManager::InputManager() = default;
+InputManager::InputManager(const bool considerPrevKeys) : _considerPrevKeys(considerPrevKeys) {}
 
 InputManager::~InputManager() = default;
 
@@ -82,6 +82,8 @@ void InputManager::process(EventManager* eventManager) const {
     }
 
     // Store the state of keys for comparison in the next render cycle
-    prevKeys = new Uint8[size];
-    std::memcpy(prevKeys, keys, size * sizeof(Uint8));
+    if (_considerPrevKeys) {
+        prevKeys = new Uint8[size];
+        std::memcpy(prevKeys, keys, size * sizeof(Uint8));
+    }
 }
