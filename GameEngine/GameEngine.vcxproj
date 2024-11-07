@@ -449,9 +449,12 @@
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
+    <ClCompile Include="Events\CollisionEvent.cpp" />
+    <ClCompile Include="Events\DeathEvent.cpp" />
     <ClCompile Include="Events\Event.cpp" />
     <ClCompile Include="Events\EventManager.cpp" />
     <ClCompile Include="Events\InputEvent.cpp" />
+    <ClCompile Include="Events\SpawnEvent.cpp" />
     <ClCompile Include="Events\TypedEventHandler.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="RunGameEngine.cpp">

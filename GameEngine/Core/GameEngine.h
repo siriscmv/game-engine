@@ -72,11 +72,13 @@ private:
 	Peer* _peer = nullptr;
 	std::map<int, Entity*>* _clientMap;
 	
-	void handleServerMode(int64_t elapsedTime);	
-
+	void handleServerMode(int64_t elapsedTime);
 	void handleClientMode(int64_t elapsedTime);
 	void handlePeerToPeerMode(int64_t elapsedTime);
 	void handleSinglePlayerMode(int64_t elapsedTime);
+
+	void setUpEventHandlers();
+	void handleDeathZones();
 
 	int _serverRefreshRateMs;
 

@@ -85,6 +85,7 @@ void Entity::setOriginalTriangleBaseLength(float baseLength) { _originalTriangle
 void Entity::setTriangleHeight(float height) { _triangleHeight = height; }
 void Entity::setOriginalTriangleHeight(float height) { _originalTriangleHeight = height; }
 void Entity::setColor(SDL_Color color) { _color = color; }
+void Entity::setEventDelay(int delay) { _eventDelay = delay; }
 
 // Getters
 int Entity::getEntityID() const { return _entityID; }
@@ -102,6 +103,7 @@ float Entity::getCircleRadius() const { return _circleRadius; }
 float Entity::getTriangleBaseLength() const { return _triangleBaseLength; }
 float Entity::getTriangleHeight() const { return _triangleHeight; }
 SDL_Color Entity::getColor() const { return _color; }
+int Entity::getEventDelay() const { return _eventDelay; }
 
 void Entity::drawRectangle(SDL_Renderer *renderer, Position position) {    
     SDL_Rect rect = { position.x, position.y, _size.width, _size.height};

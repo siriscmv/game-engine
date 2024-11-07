@@ -13,10 +13,10 @@ int main(int argc, char** argv) {
 	// spawnPointTwo.setEntityType(EntityType::GHOST);
 	// spawnPointTwo.setZoneType(ZoneType::SPAWN);
 
-	// Death zone
-	// Entity deathZoneOne(Position(500, 500), Size(100, 100));
-	// deathZoneOne.setEntityType(EntityType::GHOST);
-	// deathZoneOne.setZoneType(ZoneType::DEATH);
+	 // Death zone
+	 Entity deathZoneOne(Position(500, 500), Size(100, 100));
+	 deathZoneOne.setEntityType(EntityType::GHOST);
+	 deathZoneOne.setZoneType(ZoneType::DEATH);
 
 	// Side boundaries
 	Entity leftBoundary(Position(0, 0), Size(50, 1080));
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	std::vector<Entity*> entities;
 	entities.push_back(&spawnPointOne);
 	// entities.push_back(&spawnPointTwo);
-	// entities.push_back(&deathZoneOne);
+	entities.push_back(&deathZoneOne);
 	entities.push_back(&leftBoundary);
 	entities.push_back(&rightBoundary);
 	entities.push_back(&topBoundary);

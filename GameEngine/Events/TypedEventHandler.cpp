@@ -4,6 +4,9 @@
 
 #include "TypedEventHandler.h"
 #include "InputEvent.cpp"
+#include "CollisionEvent.cpp"
+#include "DeathEvent.cpp"
+#include "SpawnEvent.cpp"
 
 template<typename T>
 TypedEventHandler<T>::TypedEventHandler(HandlerFunc handler)
@@ -21,3 +24,6 @@ void TypedEventHandler<T>::operator()(const Event* e) const {
 }
 
 template class TypedEventHandler<InputEvent>;
+template class TypedEventHandler<CollisionEvent>;
+template class TypedEventHandler<DeathEvent>;
+template class TypedEventHandler<SpawnEvent>;
