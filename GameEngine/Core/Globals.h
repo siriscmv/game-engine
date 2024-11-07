@@ -28,6 +28,14 @@ enum class ZoneType {
     SIDESCROLL                     // Side boundaries
 };
 
+// An enum class that denotes the type of Event.
+enum class EventType {
+    Collision,
+    Death,
+    Spawn,
+    Input
+};
+
 // structure to hold position 
 struct Position {
     float x;

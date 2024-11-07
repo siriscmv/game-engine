@@ -5,9 +5,10 @@
 #else
 #include <SDL/SDL_scancode.h>
 #endif
-#include "unordered_map"
-#include <string>
-#include <functional>
+#include <set>
+
+class EventManager;
+using keyBinding = std::set<SDL_Scancode>;
 
 // This class handles Input (key presses) and provides methods to handle them.
 class InputManager {
@@ -16,12 +17,12 @@ public:
     ~InputManager();
 
     // Process currently pressed keys and call the associated callback functions
-    void process() const;
-    // Bind a <name, callback> pair to a key
-    void bind(SDL_Scancode scancode, const std::string& name, std::function<void()> callback);
-    // Unbind a callback by name for a specific key
-    void unbind(SDL_Scancode scancode, const std::string& name);
+    void process(EventManager* eventManager) const;
+    // Register a keyBinding
+    void bind(const keyBinding& keyBinding);
+    // unregister a keyBinding
+    void unbind(const keyBinding& keyBinding);
 
 private:
-    std::unordered_map<SDL_Scancode, std::unordered_map<std::string, std::function<void()>>> bindings;
+    std::set<keyBinding> bindings;
 };

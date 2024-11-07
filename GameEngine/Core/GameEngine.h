@@ -1,9 +1,9 @@
 #pragma once
 
-#include "PeerServer.h"
+#include <InputManager.h>
+#include <EventManager.h>
 #include "Peer.h"
 #include "CollisionSystem.h"
-#include "InputManager.h"
 #include "Window.h"
 #include "Renderer.h"
 #include "PhysicsSystem.h"
@@ -24,6 +24,7 @@ public:
 	void shutdown();
 
 	InputManager * getInputManager();
+	EventManager * getEventManager();
 	GameState getGameState();
 	Client* getClient();
 
@@ -65,6 +66,7 @@ private:
 	std::vector<Entity*> _entities;
 	std::function<void()> _onCycle;
 	Timeline* _timeline;
+	EventManager* _eventManager;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;
