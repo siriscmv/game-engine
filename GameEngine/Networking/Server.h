@@ -14,6 +14,7 @@
 #endif
 
 using json = nlohmann::json;
+using keyBinding = std::set<SDL_Scancode>;
 
 class Server {
 public:
@@ -51,6 +52,7 @@ private:
 
 	GameEngine* _engine;
 
+	void setUpEventHandlers();
 	void handleClientHandeshake();
 	void listenToHeartbeatMessages();
 	void listenToClientMessages();
@@ -65,5 +67,10 @@ private:
 	// A map to track the last heartbeat time for each client
 	std::unordered_map<int, std::chrono::time_point<std::chrono::steady_clock>> _lastHeartbeatMap; 
 	std::chrono::milliseconds _heartbeatTimeout = std::chrono::milliseconds(1000);                  // 1 sec default timeout
+
+	keyBinding _moveLeft = { SDL_SCANCODE_LEFT };
+	keyBinding _moveRight = { SDL_SCANCODE_RIGHT };
+	keyBinding _moveUp = { SDL_SCANCODE_UP };
+	keyBinding _moveDown = { SDL_SCANCODE_DOWN };
 
 };

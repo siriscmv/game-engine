@@ -41,6 +41,7 @@ public:
     void setTriangleHeight(float height);
     void setOriginalTriangleHeight(float height);
     void setColor(SDL_Color color);
+    void setEventDelay(int delay);
 
     // Getters
     int getEntityID() const;
@@ -58,6 +59,7 @@ public:
     float getTriangleBaseLength() const;
     float getTriangleHeight() const;
     SDL_Color getColor() const;
+    int getEventDelay() const;
 
     void generateEntityID();
     bool loadTexture(SDL_Renderer *renderer);                                   // Load texture into entity
@@ -97,6 +99,8 @@ private:
 
     int _entityID;                                       // Unique ID of the entity
     static int _nextID;                                  // Variable to track next available ID
+
+    int _eventDelay = 5;                                 // Optional variable to represent the delay for events this entity is involved in (Default is 5 seconds)
 };
 
 EntityType stringToEntityType(const std::string& str);

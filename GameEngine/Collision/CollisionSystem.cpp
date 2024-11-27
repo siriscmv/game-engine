@@ -1,4 +1,6 @@
 #include  "CollisionSystem.h"
+#include  "CollisionEvent.cpp"
+#include  "DeathEvent.cpp"
 
 #include <functional>
 #include <stdexcept>
@@ -64,23 +66,22 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
     return SDL_HasIntersection(to_rect(*entityA), to_rect(*entityB));
 }
 
-std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities) {
+std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities, EventManager* eventManager) {
     const auto n = entities.size();
-    std::set<Entity *> collisions;
+    std::set<Entity*> collisions;
 
     for (int i = 0; i < n; i++) {
-        for (int j = i+1; j < n; j++) {
-            Entity *entityA = entities[i];
+        for (int j = i + 1; j < n; j++) {
+            Entity* entityA = entities[i];
             Entity* entityB = entities[j];
 
             if (getInstance().hasCollision(entityA, entityB)) {
-                handleCollision(entityA);
-                handleCollision(entityB);
+                // Raising a collision event 
+                eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
 
                 collisions.insert(entityA);
                 collisions.insert(entityB);
             }
-
         }
     }
 
@@ -103,50 +104,4 @@ void CollisionSystem::handleCollision(Entity *entity) {
         default:
             break;
     }
-}
-
-// Handles player entity collisions with death zones
-void CollisionSystem::handleDeathZoneCollision(const std::vector<Entity*>& entities, std::map<int, Entity*>& clientMap) {
-    for (Entity* entity : entities) {
-        if (entity->getZoneType() == ZoneType::DEATH) {
-            // Check collision between this death zone and all player entities
-            for (const auto& [clientId, playerEntity] : clientMap) {
-                if (hasCollisionRaw(entity, playerEntity)) {                    
-                    teleportToSpawnPoint(playerEntity, entities);                    
-                }
-            }
-        }
-    }
-}
-
-// Teleports the entity to a random spawn point
-void CollisionSystem::teleportToSpawnPoint(Entity* entity, const std::vector<Entity*>& entities) {
-    std::vector<Entity*> spawnPoints;
-
-    for (Entity* spawnEntity : entities) {
-        if (spawnEntity->getZoneType() == ZoneType::SPAWN) {
-            spawnPoints.push_back(spawnEntity);
-        }
-    }
-
-    // If no spawn points found, throw error
-    if (spawnPoints.empty()) {
-        throw std::runtime_error("No spawn points found for teleportation!");
-    }
-
-    // Pick a random spawn point and teleport the entity
-    int randomIndex = rand() % spawnPoints.size();
-    Entity* spawnPoint = spawnPoints[randomIndex];
-    
-    // Get the spawn point's position and size
-    Position spawnPos = spawnPoint->getOriginalPosition();
-    Size spawnSize = spawnPoint->getSize();
-
-    // Generate a random position within the spawn point boundaries
-    float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
-    float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
-
-    entity->setOriginalPosition(Position(playerX, playerY));
-    entity->setVelocityX(0);
-    entity->setVelocityY(0);
 }
