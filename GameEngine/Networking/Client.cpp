@@ -8,6 +8,9 @@
 #include <ZMQ/zmq.hpp>
 #endif
 
+#include "EventManager.h"
+#include "EntityUpdateEvent.cpp"
+
 Client::Client() {    
 	_context = zmq::context_t(1);
 	_publisher = zmq::socket_t(_context, zmq::socket_type::pub);
@@ -220,7 +223,7 @@ Entity* stringToEntity(const std::string& entityString) {
 constexpr bool useJSON = true;
 
 // Receives entity updates from the server
-void Client::receiveEntityUpdatesFromServer() {
+void Client::receiveEntityUpdatesFromServer(EventManager* eventManager) {
     zmq::message_t update;
 
     if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
@@ -235,20 +238,9 @@ void Client::receiveEntityUpdatesFromServer() {
             }
 
             for (const auto& updatedJSONEntity : entityUpdates["entities"]) {
-                const auto* updatedEntity = jsonToEntity(updatedJSONEntity);
-
-               
-                for (Entity* entity : _entities) {
-                    if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
-                    if (_gameState == GameState::PAUSED && entity->getEntityID() == _entityID) continue;
-
-                    if (entity->getEntityID() == updatedEntity->getEntityID()) {
-                        *entity = *updatedEntity;
-                        break;
-                    }
-                }
-
-                delete updatedEntity;
+                Entity* updatedEntity = jsonToEntity(updatedJSONEntity);
+                Event* entityUpdateEvent = new EntityUpdateEvent(updatedEntity);
+                eventManager->raiseEvent(entityUpdateEvent);
             }
         } else {
             auto parts = split(allEntityUpdates, "|||");

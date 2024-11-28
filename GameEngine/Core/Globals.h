@@ -33,7 +33,8 @@ enum class EventType {
     Collision,
     Death,
     Spawn,
-    Input
+    Input,
+    EntityUpdate
 };
 
 // structure to hold position 

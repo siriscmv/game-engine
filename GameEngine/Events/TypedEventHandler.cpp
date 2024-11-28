@@ -7,6 +7,7 @@
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
 #include "SpawnEvent.cpp"
+#include "EntityUpdateEvent.cpp"
 
 template<typename T>
 TypedEventHandler<T>::TypedEventHandler(HandlerFunc handler)
@@ -27,3 +28,4 @@ template class TypedEventHandler<InputEvent>;
 template class TypedEventHandler<CollisionEvent>;
 template class TypedEventHandler<DeathEvent>;
 template class TypedEventHandler<SpawnEvent>;
+template class TypedEventHandler<EntityUpdateEvent>;

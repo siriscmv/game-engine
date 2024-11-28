@@ -1,12 +1,11 @@
 //
 // Created by Cyril Melvin Vincent on 11/28/24.
 //
+#pragma once
 
 #include "vector"
-#include "Event.h"
 
-#ifndef REPLAY_H
-#define REPLAY_H
+class Event;
 
 class Replay {
 public:
@@ -14,10 +13,8 @@ public:
   void stopRecording();
 
 private:
-  bool _isRecording;
+  bool _isRecording = false;
   std::vector<Event*> _events;
 };
 
 
-
-#endif //REPLAY_H

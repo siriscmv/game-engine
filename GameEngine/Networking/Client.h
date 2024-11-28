@@ -1,5 +1,7 @@
 #pragma once
 
+#include <EventManager.h>
+
 #include "Entity.h"
 #include "Globals.h"
 #include <vector>
@@ -22,7 +24,7 @@ public:
     bool handshakeWithServer();    
     void sendHeartbeatToServer();
     void sendInputToServer(const std::string& buttonPress);
-    void receiveEntityUpdatesFromServer();
+    void receiveEntityUpdatesFromServer(EventManager *eventManager);
     void receiveMessagesFromServer();
 
     static Entity* deserializeEntity(const std::string& json);

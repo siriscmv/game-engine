@@ -2,6 +2,7 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
+#include "EntityUpdateEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -137,12 +138,24 @@ void GameEngine::setUpEventHandlers() {
 		
 		});
 
+	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
+		Entity* updatedEntity = event->getEntity();
+
+		for (Entity* entity : _entities) {
+			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+			if (_gameState == GameState::PAUSED && entity->getEntityID() == _client->getEntityID()) continue;
+
+			if (entity->getEntityID() == updatedEntity->getEntityID()) {
+				*entity = *updatedEntity;
+				break;
+			}
+		}
+	});
+
 	// Register the handler with the event manager
 	_eventManager->registerHandler(EventType::Collision, collisionHandler);
 	_eventManager->registerHandler(EventType::Death, deathHandler);
-
-
-
+	_eventManager->registerHandler(EventType::EntityUpdate, entityUpdateHandler);
 }
 
 // Handles player entity collisions with death zones
@@ -289,7 +302,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		});
 
 	std::thread communicationThread([this]() {
-		_client->receiveEntityUpdatesFromServer();
+		_client->receiveEntityUpdatesFromServer(_eventManager);
 		_client->receiveMessagesFromServer();
 		});
 
