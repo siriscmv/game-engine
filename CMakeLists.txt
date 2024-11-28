@@ -22,6 +22,7 @@ include_directories(GameEngine/Physics)
 include_directories(GameEngine/Networking)
 include_directories(GameEngine/TimeSystem)
 include_directories(GameEngine/Events)
+include_directories(GameEngine/Replay)
 
 set(GAME_ENGINE_SOURCES
         GameEngine/Core/GameEngine.cpp
@@ -40,6 +41,7 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Events/Event.cpp
         GameEngine/Events/TypedEventHandler.cpp
         GameEngine/Events/InputEvent.cpp
+        GameEngine/Replay/Replay.cpp
 )
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})
