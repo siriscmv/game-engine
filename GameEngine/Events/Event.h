@@ -8,8 +8,6 @@
 
 class Event {
 public:
-    explicit Event(): _timestamp(0) {}
-
     virtual ~Event() = default;
 
     void setTimestamp(long long timestamp);

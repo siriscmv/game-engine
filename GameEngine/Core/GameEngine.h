@@ -10,6 +10,7 @@
 #include "Globals.h"
 #include "Client.h"
 #include "../TimeSystem/Timeline.h"
+#include "Replay.h"
 
 
 // Class, functions, variables signatures of the Game Engine class. This class delegates work to 
@@ -27,6 +28,7 @@ public:
 	EventManager * getEventManager();
 	GameState getGameState();
 	Client* getClient();
+	Replay* getReplay() const;
 
 	Peer *getPeer();
 
@@ -49,6 +51,7 @@ public:
 	void setServerRefreshRateMs(int rate);
 
 	std::vector<Entity*>& getEntities();
+	void setEntities(const std::vector<std::shared_ptr<Entity>> &entities);
 
 	void initializeCamera(int width, int height);
 	void resizeCamera(float scaleX, float scaleY);
@@ -64,9 +67,11 @@ private:
 	PhysicsSystem* _physicsSystem;
 	CollisionSystem* _collisionSystem;
 	std::vector<Entity*> _entities;
+	std::vector<std::shared_ptr<Entity>> _entityOwners;
 	std::function<void()> _onCycle;
 	Timeline* _timeline;
 	EventManager* _eventManager;
+	Replay* _replay;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;

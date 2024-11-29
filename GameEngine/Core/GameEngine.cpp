@@ -2,7 +2,6 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
-#include "EntityUpdateEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -26,6 +25,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 	_timeline = new Timeline();
 	_eventManager = new EventManager(_timeline);
+	_replay = new Replay();
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -140,6 +140,13 @@ void GameEngine::setUpEventHandlers() {
 
 	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
 		Entity* updatedEntity = event->getEntity();
+		if (_replay->isReplaying() && !event->isReplay()) {
+			// Drop events if replay is in progress
+		}
+
+		if (event->isReplay() && event->getTimestamp() != 0) {
+			printf("DEBUG\n");
+		}
 
 		for (Entity* entity : _entities) {
 			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
@@ -152,10 +159,15 @@ void GameEngine::setUpEventHandlers() {
 		}
 	});
 
+	const EventHandler replayHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent *event) {
+		_replay->handler(event);
+	});
+
 	// Register the handler with the event manager
 	_eventManager->registerHandler(EventType::Collision, collisionHandler);
 	_eventManager->registerHandler(EventType::Death, deathHandler);
 	_eventManager->registerHandler(EventType::EntityUpdate, entityUpdateHandler);
+	_eventManager->registerHandler(EventType::EntityUpdate, replayHandler);
 }
 
 // Handles player entity collisions with death zones
@@ -440,6 +452,7 @@ Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
 std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
 Camera& GameEngine::getCamera() { return _camera; }
+Replay* GameEngine::getReplay() const { return _replay; }
 
 
 // Setters
@@ -470,4 +483,17 @@ void GameEngine::setGameSpeed(double speed) {
 	_timeline->setSpeed(speed);
 }
 
+void GameEngine::setEntities(const std::vector<std::shared_ptr<Entity>> &entities)
+{
+	if (_mode != Mode::SINGLE_PLAYER) {
+		throw std::runtime_error("Cannot set entities in multiplayer mode");
+	}
 
+	_entities.clear();
+	_entityOwners = entities;
+	_entities.reserve(entities.size());
+
+	for (const auto &entity : entities) {
+		_entities.push_back(entity.get());
+	}
+}

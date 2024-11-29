@@ -217,7 +217,7 @@ void Server::monitorHeartbeats() {
     }
 
     for (int clientId : disconnectedClients) {
-        handleClientDisconnect(clientId);
+        // handleClientDisconnect(clientId);
     }    
 }
 
