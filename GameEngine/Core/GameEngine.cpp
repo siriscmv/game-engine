@@ -164,7 +164,7 @@ void GameEngine::setUpEventHandlers() {
 	const EventHandler replayHandler = TypedEventHandler<ReplayEvent>([this](const ReplayEvent *event) {
 		Entity* updatedEntity = event->getEntity();
 
-		if (event->isReplay()) {
+		if (event->isReplay()) {			
 			printf("DEBUG\n");
 		}
 
@@ -323,6 +323,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	std::thread inputThread([this]() {
 		_inputManager->process(_eventManager);
+		_eventManager->process();
 		});
 
 	std::thread callbackThread([this]() {
@@ -334,9 +335,9 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		_client->receiveMessagesFromServer();
 		});
 
-	std::thread eventLoop([this]() {
+	/*std::thread eventLoop([this]() {
 		_eventManager->process();
-	});
+	});*/
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 	resizeCamera(scaleX, scaleY);
@@ -357,7 +358,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 	callbackThread.join();
 	communicationThread.join();
 	heartbeatThread.join();
-	eventLoop.join();
+	//eventLoop.join();
 }
 
 // Handles the logic for peers in peer to peer mode
