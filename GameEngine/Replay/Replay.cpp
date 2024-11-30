@@ -15,12 +15,11 @@ void Replay::stopRecording(EventManager* eventManager) {
   _isReplaying = true;
   _isRecording = false;
 
-  for (const auto& entityUpdateEvent : _events) {
-    auto* event = new EntityUpdateEvent(entityUpdateEvent);
+  for (const auto& e : _events) {
+    auto* event = new ReplayEvent(e);
     event->setIsReplay(true);
-    event->setTimestamp(entityUpdateEvent.getTimestamp());
-    event->setEntity(entityUpdateEvent.getEntity());
-
+    event->setTimestamp(e.getTimestamp());
+    event->setEntity(e.getEntity());
     eventManager->raiseRawEvent(event);
   }
 
@@ -42,7 +41,7 @@ void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
   entity.setColor(entityUpdateEvent->getEntity()->getColor());
   entity.setEventDelay(entityUpdateEvent->getEntity()->getEventDelay());
 
-  EntityUpdateEvent copy(&entity);
+  ReplayEvent copy(&entity);
   copy.setEntity(&entity);
   copy.setIsReplay(true);
   copy.setTimestamp(entityUpdateEvent->getTimestamp());

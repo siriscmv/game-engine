@@ -7,6 +7,7 @@
 
 #include "vector"
 #include "EntityUpdateEvent.cpp"
+#include "ReplayEvent.cpp"
 
 class Event;
 
@@ -22,7 +23,7 @@ public:
 private:
   bool _isRecording = false;
   bool _isReplaying = false;
-  std::vector<const EntityUpdateEvent> _events;
+  std::vector<const ReplayEvent> _events;
 };
 
 
