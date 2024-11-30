@@ -2,6 +2,7 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
+#include "ReplayEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -140,11 +141,11 @@ void GameEngine::setUpEventHandlers() {
 
 	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
 		Entity* updatedEntity = event->getEntity();
-		if (_replay->isReplaying() && !event->isReplay()) {
-			// Drop events if replay is in progress
-		}
+		// if (_replay->isReplaying() && !event->isReplay()) {
+		// 	// Drop events if replay is in progress
+		// }
 
-		if (event->isReplay() && event->getTimestamp() != 0) {
+		if (event->isReplay()) {
 			printf("DEBUG\n");
 		}
 
@@ -157,17 +158,33 @@ void GameEngine::setUpEventHandlers() {
 				break;
 			}
 		}
+
+		if (_replay->isRecording()) {
+			if (event->getEntity()->getEntityID() == _client->getEntityID()) {
+				_replay->handler(event);
+			}
+		}
 	});
 
-	const EventHandler replayHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent *event) {
-		_replay->handler(event);
+	const EventHandler replayHandler = TypedEventHandler<ReplayEvent>([this](const ReplayEvent *event) {
+		Entity* updatedEntity = event->getEntity();
+
+		for (Entity* entity : _entities) {
+			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+			if (_gameState == GameState::PAUSED && entity->getEntityID() == _client->getEntityID()) continue;
+
+			if (entity->getEntityID() == updatedEntity->getEntityID()) {
+				*entity = *updatedEntity;
+				break;
+			}
+		}
 	});
 
 	// Register the handler with the event manager
 	_eventManager->registerHandler(EventType::Collision, collisionHandler);
 	_eventManager->registerHandler(EventType::Death, deathHandler);
 	_eventManager->registerHandler(EventType::EntityUpdate, entityUpdateHandler);
-	_eventManager->registerHandler(EventType::EntityUpdate, replayHandler);
+	_eventManager->registerHandler(EventType::Replay, replayHandler);
 }
 
 // Handles player entity collisions with death zones

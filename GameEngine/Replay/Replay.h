@@ -17,11 +17,12 @@ public:
   void handler(const EntityUpdateEvent *entityUpdateEvent);
 
   bool isReplaying() const;
+  bool isRecording() const;
 
 private:
   bool _isRecording = false;
   bool _isReplaying = false;
-  std::vector<const EntityUpdateEvent> _events = {};
+  std::vector<const EntityUpdateEvent> _events;
 };
 
 

@@ -8,6 +8,7 @@
 #include "DeathEvent.cpp"
 #include "SpawnEvent.cpp"
 #include "EntityUpdateEvent.cpp"
+#include "ReplayEvent.cpp"
 
 template<typename T>
 TypedEventHandler<T>::TypedEventHandler(HandlerFunc handler)
@@ -29,3 +30,4 @@ template class TypedEventHandler<CollisionEvent>;
 template class TypedEventHandler<DeathEvent>;
 template class TypedEventHandler<SpawnEvent>;
 template class TypedEventHandler<EntityUpdateEvent>;
+template class TypedEventHandler<ReplayEvent>;

@@ -29,10 +29,6 @@ void Replay::stopRecording(EventManager* eventManager) {
 }
 
 void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
-  if (!_isRecording) {
-    return;
-  }
-
   //FIXME: @cyril: Ugly hack
   Entity entity = Entity(Position(0, 0), Size(0, 0), SDL_Color{0, 0, 0, 0});
   entity.setPosition(Position(entityUpdateEvent->getEntity()->getPosition().x, entityUpdateEvent->getEntity()->getPosition().y));
@@ -55,4 +51,8 @@ void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
 
 bool Replay::isReplaying() const {
   return _isReplaying;
+}
+
+bool Replay::isRecording() const {
+  return _isRecording;
 }
