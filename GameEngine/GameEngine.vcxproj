@@ -452,7 +452,6 @@
     <ClCompile Include="Events\CollisionEvent.cpp" />
     <ClCompile Include="Events\DeathEvent.cpp" />
     <ClCompile Include="Events\EntityUpdateEvent.cpp" />
-    <ClCompile Include="Events\Event.cpp" />
     <ClCompile Include="Events\EventManager.cpp" />
     <ClCompile Include="Events\InputEvent.cpp" />
     <ClCompile Include="Events\ReplayEvent.cpp" />
