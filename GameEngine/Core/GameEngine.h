@@ -10,7 +10,7 @@
 #include "Globals.h"
 #include "Client.h"
 #include "../TimeSystem/Timeline.h"
-#include "Replay.h"
+#include "ReplaySystem.h"
 
 
 // Class, functions, variables signatures of the Game Engine class. This class delegates work to 
@@ -28,7 +28,7 @@ public:
 	EventManager * getEventManager();
 	GameState getGameState();
 	Client* getClient();
-	Replay* getReplay() const;
+	ReplaySystem* getReplaySystem() const;
 
 	Peer *getPeer();
 
@@ -71,7 +71,7 @@ private:
 	std::function<void()> _onCycle;
 	Timeline* _timeline;
 	EventManager* _eventManager;
-	Replay* _replay;
+	ReplaySystem* _replaySystem;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;

@@ -40,7 +40,7 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Events/EventManager.cpp
         GameEngine/Events/TypedEventHandler.cpp
         GameEngine/Events/InputEvent.cpp
-        GameEngine/Replay/Replay.cpp
+        GameEngine/Replay/ReplaySystem.cpp
 )
 
 add_library(GameEngineLib STATIC ${GAME_ENGINE_SOURCES})

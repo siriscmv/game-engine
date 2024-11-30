@@ -25,7 +25,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 	_timeline = new Timeline();
 	_eventManager = new EventManager(_timeline);
-	_replay = new Replay();
+	_replaySystem = new ReplaySystem();
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -140,7 +140,7 @@ void GameEngine::setUpEventHandlers() {
 
 	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
 		const Entity* updatedEntity = event->getEntity();
-		if (_replay->isReplaying() && !event->isReplay()) {
+		if (_replaySystem->isReplaying() && !event->isReplay()) {
 			// Drop non-replay events if replay is in progress
 			return;
 		}
@@ -155,9 +155,9 @@ void GameEngine::setUpEventHandlers() {
 			}
 		}
 
-		if (_replay->isRecording()) {
+		if (_replaySystem->isRecording()) {
 			if (event->getEntity()->getEntityID() == _client->getEntityID()) {
-				_replay->handler(event);
+				_replaySystem->handler(event);
 			}
 		}
 	});
@@ -466,7 +466,7 @@ Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
 std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
 Camera& GameEngine::getCamera() { return _camera; }
-Replay* GameEngine::getReplay() const { return _replay; }
+ReplaySystem* GameEngine::getReplaySystem() const { return _replaySystem; }
 
 
 // Setters

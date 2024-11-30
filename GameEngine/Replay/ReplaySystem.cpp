@@ -2,17 +2,17 @@
 // Created by Cyril Melvin Vincent on 11/28/24.
 //
 
-#include "Replay.h"
+#include "ReplaySystem.h"
 
 #include <thread>
 
 #include "EventManager.h"
 
-void Replay::startRecording() {
+void ReplaySystem::startRecording() {
   _isRecording = true;
 }
 
-void Replay::stopRecording(EventManager* eventManager) {
+void ReplaySystem::stopRecording(EventManager* eventManager) {
   if (!_isRecording) return;
 
   _isReplaying = true;
@@ -35,17 +35,17 @@ void Replay::stopRecording(EventManager* eventManager) {
   replayThread.detach();
 }
 
-void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
+void ReplaySystem::handler(const EntityUpdateEvent* entityUpdateEvent) {
   ReplayEvent copy(entityUpdateEvent);
   copy.setIsReplay(true);
 
   _events.push_back(copy);
 }
 
-bool Replay::isReplaying() const {
+bool ReplaySystem::isReplaying() const {
   return _isReplaying;
 }
 
-bool Replay::isRecording() const {
+bool ReplaySystem::isRecording() const {
   return _isRecording;
 }

@@ -11,7 +11,7 @@
 
 class Event;
 
-class Replay {
+class ReplaySystem {
 public:
   void startRecording();
   void stopRecording(EventManager *eventManager);
