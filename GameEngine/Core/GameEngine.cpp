@@ -139,10 +139,11 @@ void GameEngine::setUpEventHandlers() {
 		});
 
 	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
-		Entity* updatedEntity = event->getEntity();
-		// if (_replay->isReplaying() && !event->isReplay()) {
-		// 	// Drop events if replay is in progress
-		// }
+		const Entity* updatedEntity = event->getEntity();
+		if (_replay->isReplaying() && !event->isReplay()) {
+			// Drop non-replay events if replay is in progress
+			return;
+		}
 
 		for (Entity* entity : _entities) {
 			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
@@ -162,11 +163,7 @@ void GameEngine::setUpEventHandlers() {
 	});
 
 	const EventHandler replayHandler = TypedEventHandler<ReplayEvent>([this](const ReplayEvent *event) {
-		Entity* updatedEntity = event->getEntity();
-
-		if (event->isReplay()) {			
-			printf("DEBUG\n");
-		}
+		const Entity* updatedEntity = event->getEntity();
 
 		for (Entity* entity : _entities) {
 			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;

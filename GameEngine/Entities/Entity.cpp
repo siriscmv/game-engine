@@ -91,6 +91,7 @@ void Entity::setEventDelay(int delay) { _eventDelay = delay; }
 int Entity::getEntityID() const { return _entityID; }
 Position Entity::getPosition() const { return _position; }
 Position Entity::getOriginalPosition() const { return _originalPosition; }
+Size Entity::getOriginalSize() const { return _originalSize; }
 Size Entity::getSize() const { return _size; }
 EntityType Entity::getEntityType() const { return _entityType; }
 ZoneType Entity::getZoneType() const { return _zoneType; }

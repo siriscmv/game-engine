@@ -3,6 +3,9 @@
 //
 
 #include "Replay.h"
+
+#include <thread>
+
 #include "EventManager.h"
 
 void Replay::startRecording() {
@@ -15,37 +18,27 @@ void Replay::stopRecording(EventManager* eventManager) {
   _isReplaying = true;
   _isRecording = false;
 
-  for (const auto& e : _events) {
-    auto* event = new ReplayEvent(e);
-    event->setIsReplay(true);
-    event->setTimestamp(e.getTimestamp());
-    event->setEntity(e.getEntity());
-    eventManager->raiseRawEvent(event);
-  }
+  std::thread replayThread([this, eventManager]() {
+    for (const auto& e : _events) {
+      auto* event = new ReplayEvent(e);
+      eventManager->raiseRawEvent(event);
 
-  _events.clear();
-  _isReplaying = false;
+      int sleepDurationMs = 1000 / static_cast<int>(RefreshRate::SIXTY_FPS);
+      int64_t sleepDurationNs = sleepDurationMs * 1e6;
+      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepDurationNs));
+    }
+
+    _events.clear();
+    _isReplaying = false;
+  });
+
+  replayThread.detach();
 }
 
 void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
-  //FIXME: @cyril: Ugly hack
-  Entity entity = Entity(Position(0, 0), Size(0, 0), SDL_Color{0, 0, 0, 0});
-  entity.setEntityID(entityUpdateEvent->getEntity()->getEntityID());
-  entity.setPosition(Position(entityUpdateEvent->getEntity()->getPosition().x, entityUpdateEvent->getEntity()->getPosition().y));
-  entity.setSize(Size(entityUpdateEvent->getEntity()->getSize().width, entityUpdateEvent->getEntity()->getSize().height));
-  entity.setEntityType(entityUpdateEvent->getEntity()->getEntityType());
-  entity.setZoneType(entityUpdateEvent->getEntity()->getZoneType());
-  entity.setVelocityX(entityUpdateEvent->getEntity()->getVelocityX());
-  entity.setVelocityY(entityUpdateEvent->getEntity()->getVelocityY());
-  entity.setAccelerationX(entityUpdateEvent->getEntity()->getAccelerationX());
-  entity.setAccelerationY(entityUpdateEvent->getEntity()->getAccelerationY());
-  entity.setColor(entityUpdateEvent->getEntity()->getColor());
-  entity.setEventDelay(entityUpdateEvent->getEntity()->getEventDelay());
-
-  ReplayEvent copy(&entity);
-  copy.setEntity(&entity);
+  ReplayEvent copy(entityUpdateEvent);
   copy.setIsReplay(true);
-  copy.setTimestamp(entityUpdateEvent->getTimestamp());
+
   _events.push_back(copy);
 }
 

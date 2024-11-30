@@ -38,7 +38,6 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Networking/PeerServer.cpp
         GameEngine/TimeSystem/Timeline.cpp
         GameEngine/Events/EventManager.cpp
-        GameEngine/Events/Event.cpp
         GameEngine/Events/TypedEventHandler.cpp
         GameEngine/Events/InputEvent.cpp
         GameEngine/Replay/Replay.cpp
