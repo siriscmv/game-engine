@@ -23,7 +23,7 @@ public:
 private:
   bool _isRecording = false;
   bool _isReplaying = false;
-  std::vector<const ReplayEvent> _events;
+  std::vector<ReplayEvent> _events;
 };
 
 

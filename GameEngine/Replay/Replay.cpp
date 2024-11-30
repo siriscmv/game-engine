@@ -30,6 +30,7 @@ void Replay::stopRecording(EventManager* eventManager) {
 void Replay::handler(const EntityUpdateEvent* entityUpdateEvent) {
   //FIXME: @cyril: Ugly hack
   Entity entity = Entity(Position(0, 0), Size(0, 0), SDL_Color{0, 0, 0, 0});
+  entity.setEntityID(entityUpdateEvent->getEntity()->getEntityID());
   entity.setPosition(Position(entityUpdateEvent->getEntity()->getPosition().x, entityUpdateEvent->getEntity()->getPosition().y));
   entity.setSize(Size(entityUpdateEvent->getEntity()->getSize().width, entityUpdateEvent->getEntity()->getSize().height));
   entity.setEntityType(entityUpdateEvent->getEntity()->getEntityType());
