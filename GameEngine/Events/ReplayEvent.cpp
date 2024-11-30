@@ -7,7 +7,7 @@ public:
 
     ReplayEvent(const ReplayEvent& other) : _entity(new Entity(*other._entity)) {}
 
-    EventType getType() const override { return EventType::EntityUpdate; }
+    EventType getType() const override { return EventType::Replay; }
 
     Entity* getEntity() const { return _entity; }
     void setEntity(Entity* entity) { _entity = entity; }

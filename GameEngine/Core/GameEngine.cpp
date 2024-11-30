@@ -2,7 +2,6 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
-#include "ReplayEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -145,10 +144,6 @@ void GameEngine::setUpEventHandlers() {
 		// 	// Drop events if replay is in progress
 		// }
 
-		if (event->isReplay()) {
-			printf("DEBUG\n");
-		}
-
 		for (Entity* entity : _entities) {
 			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
 			if (_gameState == GameState::PAUSED && entity->getEntityID() == _client->getEntityID()) continue;
@@ -168,6 +163,10 @@ void GameEngine::setUpEventHandlers() {
 
 	const EventHandler replayHandler = TypedEventHandler<ReplayEvent>([this](const ReplayEvent *event) {
 		Entity* updatedEntity = event->getEntity();
+
+		if (event->isReplay()) {
+			printf("DEBUG\n");
+		}
 
 		for (Entity* entity : _entities) {
 			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
