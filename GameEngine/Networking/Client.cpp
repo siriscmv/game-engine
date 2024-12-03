@@ -226,6 +226,8 @@ constexpr bool useJSON = true;
 void Client::receiveEntityUpdatesFromServer(EventManager* eventManager) {
     zmq::message_t update;
 
+    if (_gameState == GameState::PAUSED) return;
+
     if (_entitySubscriber.recv(update, zmq::recv_flags::dontwait)) {
         std::string allEntityUpdates(static_cast<char*>(update.data()), update.size());
 
