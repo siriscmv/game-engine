@@ -1,51 +1,53 @@
-//
-// Created by Cyril Melvin Vincent on 11/28/24.
-//
-
 #include "ReplaySystem.h"
-
 #include <thread>
+#include <cmath>
 
-#include "EventManager.h"
+ReplaySystem::ReplaySystem(Timeline* timeline) : _timeline(timeline) {}
 
 void ReplaySystem::startRecording() {
-  _isRecording = true;
+    _isRecording = true;
 }
 
 void ReplaySystem::stopRecording(EventManager* eventManager) {
-  if (!_isRecording) return;
+    if (!_isRecording) return;
 
-  _isReplaying = true;
-  _isRecording = false;
+    _isReplaying = true;
+    _isRecording = false;
 
-  std::thread replayThread([this, eventManager]() {
-    for (const auto& e : _events) {
-      auto* event = new ReplayEvent(e);
-      eventManager->raiseRawEvent(event);
+    std::thread replayThread([this, eventManager]() {
+        for (const auto& [frame, events] : _eventsByFrame) {
+            // Get a frame time bucket and replay all events that occured during that frame
+            for (const auto& e : events) {
+                auto* event = new ReplayEvent(e);
+                eventManager->raiseRawEvent(event);
+            }
+            // Wait for the frame delay (60 FPS hardcoded for now)
+            int64_t sleepDurationNs = static_cast<int64_t>(1e9 / 60);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(sleepDurationNs));
+        }
 
-      int sleepDurationMs = 1000 / static_cast<int>(RefreshRate::SIXTY_FPS);
-      int64_t sleepDurationNs = sleepDurationMs * 1e6;
-      std::this_thread::sleep_for(std::chrono::nanoseconds(sleepDurationNs));
-    }
+        _eventsByFrame.clear();
+        _isReplaying = false;
+        });
 
-    _events.clear();
-    _isReplaying = false;
-  });
-
-  replayThread.detach();
+    replayThread.detach();
 }
 
 void ReplaySystem::handler(const EntityUpdateEvent* entityUpdateEvent) {
-  ReplayEvent copy(entityUpdateEvent);
-  copy.setIsReplay(true);
+    if (!_isRecording) return;
 
-  _events.push_back(copy);
+    // Get the current frame bucket 
+    int64_t currentFrame = _timeline->getTime() / (1e9 / 60); 
+    
+    ReplayEvent copy(entityUpdateEvent);
+    copy.setIsReplay(true);
+    _eventsByFrame[currentFrame].push_back(copy);
 }
 
 bool ReplaySystem::isReplaying() const {
-  return _isReplaying;
+    return _isReplaying;
 }
 
 bool ReplaySystem::isRecording() const {
-  return _isRecording;
+    return _isRecording;
 }

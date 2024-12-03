@@ -2,6 +2,7 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
+#include "EntityUpdateEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -25,7 +26,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 	_timeline = new Timeline();
 	_eventManager = new EventManager(_timeline);
-	_replaySystem = new ReplaySystem();
+	_replaySystem = new ReplaySystem(_timeline);
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -155,10 +156,9 @@ void GameEngine::setUpEventHandlers() {
 			}
 		}
 
-		if (_replaySystem->isRecording()) {
-			if (event->getEntity()->getEntityID() == _client->getEntityID()) {
-				_replaySystem->handler(event);
-			}
+		if (_replaySystem->isRecording()) {			
+			_replaySystem->handler(event);
+			
 		}
 	});
 
@@ -318,23 +318,16 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		_client->sendHeartbeatToServer();
 		});
 
-	std::thread inputThread([this]() {
-		_inputManager->process(_eventManager);
+	std::thread eventThread([this]() {
 		_eventManager->process();
+		_inputManager->process(_eventManager);		
+		_client->receiveEntityUpdatesFromServer(_eventManager);
+		_client->receiveMessagesFromServer();
 		});
 
 	std::thread callbackThread([this]() {
 		_onCycle();
 		});
-
-	std::thread communicationThread([this]() {
-		_client->receiveEntityUpdatesFromServer(_eventManager);
-		_client->receiveMessagesFromServer();
-		});
-
-	/*std::thread eventLoop([this]() {
-		_eventManager->process();
-	});*/
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 	resizeCamera(scaleX, scaleY);
@@ -351,11 +344,9 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	_renderer->present();
 
-	inputThread.join();
-	callbackThread.join();
-	communicationThread.join();
-	heartbeatThread.join();
-	//eventLoop.join();
+	eventThread.join();
+	callbackThread.join();	
+	heartbeatThread.join();	
 }
 
 // Handles the logic for peers in peer to peer mode
