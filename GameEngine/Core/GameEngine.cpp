@@ -383,6 +383,7 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 	
 // Handles the singleplayer game engine logic.
 void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
+	SDL_PumpEvents(); // Force an event queue update
 	_renderer->clear();
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;
