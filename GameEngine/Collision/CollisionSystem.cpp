@@ -69,8 +69,11 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
 std::set<Entity*> CollisionSystem::run(const std::vector<Entity*>& entities, EventManager* eventManager) {
     std::set<Entity*> collisions;
 
-    for (auto itA = entities.begin(); itA != entities.end(); ++itA) {
-        for (auto itB = std::next(itA); itB != entities.end(); ++itB) {
+    // Create a local copy of the entities vector
+    std::vector<Entity*> entitiesCopy = entities;
+
+    for (auto itA = entitiesCopy.begin(); itA != entitiesCopy.end(); ++itA) {
+        for (auto itB = std::next(itA); itB != entitiesCopy.end(); ++itB) {
             Entity* entityA = *itA;
             Entity* entityB = *itB;
 
@@ -86,7 +89,7 @@ std::set<Entity*> CollisionSystem::run(const std::vector<Entity*>& entities, Eve
             }
 
             // Check for collisions and raise a collision event
-            if (getInstance().hasCollision(entityA, entityB)) {               
+            if (getInstance().hasCollision(entityA, entityB)) {
                 eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
 
                 collisions.insert(entityA);
