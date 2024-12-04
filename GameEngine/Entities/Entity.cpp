@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include <string>
 #include <algorithm>
+#include "TextureCache.h"
 
 #include "Renderer.h"
 #ifdef __APPLE__
@@ -156,25 +157,11 @@ void Entity::drawTriangle(SDL_Renderer *renderer, Position position) {
 
 // Load the texture using the _texturePath variable
 bool Entity::loadTexture(SDL_Renderer* renderer) {
-    // Check if _texturePath is empty
     if (_texturePath.empty()) {
         throw std::runtime_error("Texture path is empty. Cannot load texture.");
     }
 
-    // Load the surface from the texture path
-    SDL_Surface* surface = SDL_LoadBMP(_texturePath.c_str());
-    if (!surface) {
-        throw std::runtime_error("Failed to load BMP: " + _texturePath + ". SDL Error: " + std::string(SDL_GetError()));
-    }
-
-    // Transform the surface into a texture
-    _texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface); 
-
-    if (!_texture) {
-        throw std::runtime_error("Failed to create texture from BMP: " + _texturePath + ". SDL Error: " + std::string(SDL_GetError()));
-    }
-
+    _texture = TextureCache::getTexture(renderer, _texturePath);
     return true;
 }
 
