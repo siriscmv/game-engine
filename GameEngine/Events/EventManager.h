@@ -33,6 +33,8 @@ public:
     // Raise an event by adding it to the event queue
     void raiseEvent(Event* event);
 
+    void raiseRawEvent(Event *event);
+
     // Raise an event with added delay
     void raiseEventWithDelay(Event* event, int delay);
 

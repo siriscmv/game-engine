@@ -338,7 +338,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;$(SolutionDir)GameEngine/Replay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -353,7 +353,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;$(SolutionDir)GameEngine/Replay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -368,7 +368,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;$(SolutionDir)GameEngine/Replay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -383,7 +383,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;$(SolutionDir)GameEngine/Replay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -398,7 +398,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)GameEngine/Core;$(SolutionDir)GameEngine/Entities;$(SolutionDir)GameEngine/Physics;$(SolutionDir)GameEngine/Input;$(SolutionDir)GameEngine/Collision;$(SolutionDir)GameEngine/Networking;$(SolutionDir)GameEngine/Events;$(SolutionDir)GameEngine/TimeSystem;$(SolutionDir)GameEngine/Replay;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -451,12 +451,14 @@
     <ClCompile Include="Entities\Entity.cpp" />
     <ClCompile Include="Events\CollisionEvent.cpp" />
     <ClCompile Include="Events\DeathEvent.cpp" />
-    <ClCompile Include="Events\Event.cpp" />
+    <ClCompile Include="Events\EntityUpdateEvent.cpp" />
     <ClCompile Include="Events\EventManager.cpp" />
     <ClCompile Include="Events\InputEvent.cpp" />
+    <ClCompile Include="Events\ReplayEvent.cpp" />
     <ClCompile Include="Events\SpawnEvent.cpp" />
     <ClCompile Include="Events\TypedEventHandler.cpp" />
     <ClCompile Include="Input\InputManager.cpp" />
+    <ClCompile Include="Replay\ReplaySystem.cpp" />
     <ClCompile Include="RunGameEngine.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunPeerServer|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunClientGame|x64'">true</ExcludedFromBuild>
@@ -515,6 +517,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RunPeerServer|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Physics\PhysicsSystem.h" />
+    <ClInclude Include="Replay\ReplaySystem.h" />
     <ClInclude Include="TimeSystem\Timeline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

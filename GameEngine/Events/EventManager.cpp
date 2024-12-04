@@ -19,6 +19,10 @@ void EventManager::raiseEvent(Event* event) {
     _eventQueue.push(event);
 }
 
+void EventManager::raiseRawEvent(Event* event) {
+    _eventQueue.push(event);
+}
+
 void EventManager::raiseEventWithDelay(Event* event, const int delay) {
     event->setTimestamp(_timeline->getTime() + static_cast<int64_t>(delay) * 1'000'000'000);
     _eventQueue.push(event);

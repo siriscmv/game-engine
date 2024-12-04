@@ -35,6 +35,8 @@ public:
 	int getRefreshRateMs() const;
 	void setSimulationSpeed(double speed);
 	void setHeartBeatTimeout(int milliseconds);
+
+	std::map<int, Entity*> _clientMap;                                  // A map between client ID and assigned player entity
 	
 
 private:	
@@ -48,7 +50,6 @@ private:
 
 	int _nextClientID;
 	int _nextEntityID;                                                  // To track the proper ID when creating player entities
-	std::map<int, Entity*> _clientMap;                                  // A map between client ID and assigned player entity
 
 	GameEngine* _engine;
 

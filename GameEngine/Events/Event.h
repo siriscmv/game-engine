@@ -8,14 +8,14 @@
 
 class Event {
 public:
-    explicit Event(): _timestamp(0) {}
+    Event() : _timestamp(0) {}
+    explicit Event(const long long timestamp) : _timestamp(timestamp) {}
 
     virtual ~Event() = default;
 
-    void setTimestamp(long long timestamp);
-    long long getTimestamp() const;
+    void setTimestamp(const long long timestamp) { _timestamp = timestamp; }
+    long long getTimestamp() const { return _timestamp; }
 
-    // Pure virtual function to get event type
     virtual EventType getType() const = 0;
 
 protected:

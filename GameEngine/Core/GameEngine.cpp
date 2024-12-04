@@ -2,6 +2,7 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
+#include "EntityUpdateEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -25,6 +26,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 	_timeline = new Timeline();
 	_eventManager = new EventManager(_timeline);
+	_replaySystem = new ReplaySystem(_timeline);
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -126,23 +128,56 @@ void GameEngine::setUpEventHandlers() {
 
 	// Handler for death events 
 	const EventHandler deathHandler = TypedEventHandler<DeathEvent>([this](const DeathEvent* event) {
-		Entity* entity = event->getEntity();
-		Position respawnPosition = event->getRespawnPosition();
+		Entity* entity = event->getEntity();		
 
 		// Set the entity's type back to default
-		entity->setEntityType(EntityType::DEFAULT);		
-		
-		_entities.push_back(entity);
-		_physicsSystem->getEntities().push_back(entity);
+		entity->setEntityType(EntityType::DEFAULT);
+		entity->setAccelerationY(9.8f);		
 		
 		});
+
+	const EventHandler entityUpdateHandler = TypedEventHandler<EntityUpdateEvent>([this](const EntityUpdateEvent* event) {
+		const Entity* updatedEntity = event->getEntity();
+		if (_replaySystem->isReplaying() && !event->isReplay()) {
+			// Drop non-replay events if replay is in progress
+			return;
+		}
+
+		for (Entity* entity : _entities) {
+			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+			if (_gameState == GameState::PAUSED && entity->getEntityID() == _client->getEntityID()) continue;
+
+			if (entity->getEntityID() == updatedEntity->getEntityID()) {
+				*entity = *updatedEntity;
+				break;
+			}
+		}
+
+		if (_replaySystem->isRecording()) {			
+			_replaySystem->handler(event);
+			
+		}
+	});
+
+	const EventHandler replayHandler = TypedEventHandler<ReplayEvent>([this](const ReplayEvent *event) {
+		const Entity* updatedEntity = event->getEntity();
+
+		for (Entity* entity : _entities) {
+			if (entity->getZoneType() == ZoneType::SIDESCROLL) continue;
+			if (_gameState == GameState::PAUSED && entity->getEntityID() == _client->getEntityID()) continue;
+
+			if (entity->getEntityID() == updatedEntity->getEntityID()) {
+				*entity = *updatedEntity;
+				break;
+			}
+		}
+	});
 
 	// Register the handler with the event manager
 	_eventManager->registerHandler(EventType::Collision, collisionHandler);
 	_eventManager->registerHandler(EventType::Death, deathHandler);
-
-
-
+	_eventManager->registerHandler(EventType::EntityUpdate, entityUpdateHandler);
+	_eventManager->registerHandler(EventType::Replay, replayHandler);
 }
 
 // Handles player entity collisions with death zones
@@ -175,15 +210,12 @@ void GameEngine::handleDeathZones() {
 					// Generate a random position within the spawn point boundaries
 					float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
 					float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
-					Position newPosition(playerX, playerY);
-
-					// Remove the playerEntity from the _entities list and physics system
-					_entities.erase(std::remove(_entities.begin(), _entities.end(), playerEntity), _entities.end());
-					_physicsSystem->getEntities().erase(std::remove(_physicsSystem->getEntities().begin(), _physicsSystem->getEntities().end(), playerEntity), _physicsSystem->getEntities().end());
+					Position newPosition(playerX, playerY);					
 
 					playerEntity->setOriginalPosition(newPosition);
 					playerEntity->setVelocityX(0);
 					playerEntity->setVelocityY(0);
+					playerEntity->setAccelerationY(0);
 					playerEntity->setEntityType(EntityType::GHOST);
 
 					// Raise a death event with delay to respawn the player
@@ -280,22 +312,16 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		_client->sendHeartbeatToServer();
 		});
 
-	std::thread inputThread([this]() {
-		_inputManager->process(_eventManager);
+	std::thread eventThread([this]() {
+		_eventManager->process();
+		_inputManager->process(_eventManager);		
+		_client->receiveEntityUpdatesFromServer(_eventManager);
+		_client->receiveMessagesFromServer();
 		});
 
 	std::thread callbackThread([this]() {
 		_onCycle();
 		});
-
-	std::thread communicationThread([this]() {
-		_client->receiveEntityUpdatesFromServer();
-		_client->receiveMessagesFromServer();
-		});
-
-	std::thread eventLoop([this]() {
-		_eventManager->process();
-	});
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 	resizeCamera(scaleX, scaleY);
@@ -312,11 +338,9 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	_renderer->present();
 
-	inputThread.join();
-	callbackThread.join();
-	communicationThread.join();
-	heartbeatThread.join();
-	eventLoop.join();
+	eventThread.join();
+	callbackThread.join();	
+	heartbeatThread.join();	
 }
 
 // Handles the logic for peers in peer to peer mode
@@ -427,6 +451,7 @@ Peer* GameEngine::getPeer() { return _peer; }
 int GameEngine::getServerRefreshRateMs() const { return _serverRefreshRateMs; }
 std::vector<Entity*>& GameEngine::getEntities() { return _entities; }
 Camera& GameEngine::getCamera() { return _camera; }
+ReplaySystem* GameEngine::getReplaySystem() const { return _replaySystem; }
 
 
 // Setters
@@ -457,4 +482,17 @@ void GameEngine::setGameSpeed(double speed) {
 	_timeline->setSpeed(speed);
 }
 
+void GameEngine::setEntities(const std::vector<std::shared_ptr<Entity>> &entities)
+{
+	if (_mode != Mode::SINGLE_PLAYER) {
+		throw std::runtime_error("Cannot set entities in multiplayer mode");
+	}
 
+	_entities.clear();
+	_entityOwners = entities;
+	_entities.reserve(entities.size());
+
+	for (const auto &entity : entities) {
+		_entities.push_back(entity.get());
+	}
+}

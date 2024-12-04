@@ -48,6 +48,7 @@ public:
     Size getSize() const;
     Position getPosition() const;
     Position getOriginalPosition() const;
+    Size getOriginalSize() const;
     EntityType getEntityType() const;
     ZoneType getZoneType() const;
     ShapeType getShapeType() const;
