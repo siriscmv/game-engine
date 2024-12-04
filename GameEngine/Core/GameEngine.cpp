@@ -403,6 +403,10 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 		_physicsSystem->run(deltaTime, entitiesWithCollisions);
 	});
 
+	std::thread eventThread([this]() {
+		_eventManager->process();
+		});
+
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 
 	// Rendering all entities
@@ -416,6 +420,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	inputThread.join();
 	callbackThread.join();
 	physicsThread.join();
+	eventThread.join();
 }
 
 // Sends the user input to server 
