@@ -295,7 +295,7 @@ void GameEngine::handleServerMode(int64_t elapsedTime) {
 	_eventManager->process();
 	_onCycle();
 	handleDeathZones();                                                                                // Handling death zone collisions
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);        // Running the collision system	                                                                                
+	std::set<Entity*> entitiesWithCollisions = _runCollisionSystem ? _collisionSystem->run(_entities, _eventManager): std::set<Entity*>{};
 
 	float deltaTime = static_cast<float>(elapsedTime) * 1e-8f;	
  	_physicsSystem->run(deltaTime, entitiesWithCollisions);	
@@ -361,7 +361,7 @@ void GameEngine::handlePeerToPeerMode(int64_t elapsedTime) {
 		_peer->receiveUpdates();
 		});
 
-	std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);
+	std::set<Entity*> entitiesWithCollisions = _runCollisionSystem ? _collisionSystem->run(_entities, _eventManager): std::set<Entity*>{};
 	_physicsSystem->runForGivenEntities(deltaTime, entitiesWithCollisions, _peer->getEntitiesToProcess());
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
@@ -397,9 +397,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	});
 
 	std::thread physicsThread([this, deltaTime]() {
-		if (!_runPhysics) return;
-
-		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);        // Running the collision system
+		std::set<Entity*> entitiesWithCollisions = _runCollisionSystem ? _collisionSystem->run(_entities, _eventManager): std::set<Entity*>{};
 		_physicsSystem->run(deltaTime, entitiesWithCollisions);
 	});
 
@@ -505,10 +503,10 @@ void GameEngine::setEntities(const std::vector<std::shared_ptr<Entity>> &entitie
 	}
 }
 
-void GameEngine::enablePhysics() {
-	_runPhysics = true;
+void GameEngine::enableCollisionHandling() {
+	_runCollisionSystem = true;
 }
 
-void GameEngine::disablePhysics() {
-	_runPhysics = false;
+void GameEngine::disableCollisionHandling() {
+	_runCollisionSystem = false;
 }
