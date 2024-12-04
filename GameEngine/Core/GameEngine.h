@@ -17,7 +17,7 @@
 // other subsystem classes and their functions. Responsible for managing the game loop.
 class GameEngine {
 public:
-	GameEngine(const char* windowTitle, int windowWidth = 1920, int windowHeight = 1080, Mode mode = Mode::SINGLE_PLAYER);
+	GameEngine(const char* windowTitle, int windowWidth = 1920, int windowHeight = 1080, Mode mode = Mode::SINGLE_PLAYER, bool considerPrevKeys = false);
 	~GameEngine();
 
 	bool initialize(std::vector<Entity*>& entities);

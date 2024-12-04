@@ -14,13 +14,13 @@
 #endif
 
 // Constructor. Creates subsytems objects with parameters passed in by the user.
-GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeight, Mode mode) {
+GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeight, Mode mode, bool considerPrevkeys) {
 	_mode = mode;
 	_window = new Window(windowTitle, windowWidth, windowHeight);
 	initializeCamera(windowWidth, windowHeight);
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
-	_inputManager = new InputManager(true);
+	_inputManager = new InputManager(considerPrevkeys);
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
