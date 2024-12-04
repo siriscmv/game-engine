@@ -1,29 +1,26 @@
-//
-// Created by Cyril Melvin Vincent on 11/28/24.
-//
 #pragma once
 
 #include <EventManager.h>
-
-#include "vector"
+#include <vector>
+#include <map>
 #include "EntityUpdateEvent.cpp"
 #include "ReplayEvent.cpp"
-
-class Event;
+#include "Timeline.h"
 
 class ReplaySystem {
 public:
-  void startRecording();
-  void stopRecording(EventManager *eventManager);
-  void handler(const EntityUpdateEvent *entityUpdateEvent);
+    explicit ReplaySystem(Timeline* timeline); 
 
-  bool isReplaying() const;
-  bool isRecording() const;
+    void startRecording();
+    void stopRecording(EventManager* eventManager);
+    void handler(const EntityUpdateEvent* entityUpdateEvent);
+
+    bool isReplaying() const;
+    bool isRecording() const;
 
 private:
-  bool _isRecording = false;
-  bool _isReplaying = false;
-  std::vector<ReplayEvent> _events;
+    bool _isRecording = false;
+    bool _isReplaying = false;
+    Timeline* _timeline; 
+    std::map<int64_t, std::vector<ReplayEvent>> _eventsByFrame;                           // Events grouped by frame time
 };
-
-

@@ -2,6 +2,7 @@
 #include "TypedEventHandler.h"
 #include "CollisionEvent.cpp"
 #include "DeathEvent.cpp"
+#include "EntityUpdateEvent.cpp"
 #include <iostream>
 #include <thread>
 #ifdef __APPLE__
@@ -25,7 +26,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	_onCycle = []() {};
 	_timeline = new Timeline();
 	_eventManager = new EventManager(_timeline);
-	_replaySystem = new ReplaySystem();
+	_replaySystem = new ReplaySystem(_timeline);
 
 	if (mode == Mode::CLIENT) _client = new Client();
 	if (mode == Mode::PEER) _peer = new Peer();	
@@ -127,14 +128,11 @@ void GameEngine::setUpEventHandlers() {
 
 	// Handler for death events 
 	const EventHandler deathHandler = TypedEventHandler<DeathEvent>([this](const DeathEvent* event) {
-		Entity* entity = event->getEntity();
-		Position respawnPosition = event->getRespawnPosition();
+		Entity* entity = event->getEntity();		
 
 		// Set the entity's type back to default
-		entity->setEntityType(EntityType::DEFAULT);		
-		
-		_entities.push_back(entity);
-		_physicsSystem->getEntities().push_back(entity);
+		entity->setEntityType(EntityType::DEFAULT);
+		entity->setAccelerationY(9.8f);		
 		
 		});
 
@@ -155,10 +153,9 @@ void GameEngine::setUpEventHandlers() {
 			}
 		}
 
-		if (_replaySystem->isRecording()) {
-			if (event->getEntity()->getEntityID() == _client->getEntityID()) {
-				_replaySystem->handler(event);
-			}
+		if (_replaySystem->isRecording()) {			
+			_replaySystem->handler(event);
+			
 		}
 	});
 
@@ -213,15 +210,12 @@ void GameEngine::handleDeathZones() {
 					// Generate a random position within the spawn point boundaries
 					float playerX = spawnPos.x + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.width - 50)));
 					float playerY = spawnPos.y + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (spawnSize.height - 50)));
-					Position newPosition(playerX, playerY);
-
-					// Remove the playerEntity from the _entities list and physics system
-					_entities.erase(std::remove(_entities.begin(), _entities.end(), playerEntity), _entities.end());
-					_physicsSystem->getEntities().erase(std::remove(_physicsSystem->getEntities().begin(), _physicsSystem->getEntities().end(), playerEntity), _physicsSystem->getEntities().end());
+					Position newPosition(playerX, playerY);					
 
 					playerEntity->setOriginalPosition(newPosition);
 					playerEntity->setVelocityX(0);
 					playerEntity->setVelocityY(0);
+					playerEntity->setAccelerationY(0);
 					playerEntity->setEntityType(EntityType::GHOST);
 
 					// Raise a death event with delay to respawn the player
@@ -318,23 +312,16 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 		_client->sendHeartbeatToServer();
 		});
 
-	std::thread inputThread([this]() {
-		_inputManager->process(_eventManager);
+	std::thread eventThread([this]() {
 		_eventManager->process();
+		_inputManager->process(_eventManager);		
+		_client->receiveEntityUpdatesFromServer(_eventManager);
+		_client->receiveMessagesFromServer();
 		});
 
 	std::thread callbackThread([this]() {
 		_onCycle();
 		});
-
-	std::thread communicationThread([this]() {
-		_client->receiveEntityUpdatesFromServer(_eventManager);
-		_client->receiveMessagesFromServer();
-		});
-
-	/*std::thread eventLoop([this]() {
-		_eventManager->process();
-	});*/
 
 	auto [scaleX, scaleY] = _window->getScaleFactors();
 	resizeCamera(scaleX, scaleY);
@@ -351,11 +338,9 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	_renderer->present();
 
-	inputThread.join();
-	callbackThread.join();
-	communicationThread.join();
-	heartbeatThread.join();
-	//eventLoop.join();
+	eventThread.join();
+	callbackThread.join();	
+	heartbeatThread.join();	
 }
 
 // Handles the logic for peers in peer to peer mode

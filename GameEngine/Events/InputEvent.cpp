@@ -1,6 +1,5 @@
 //
-// Created by Cyril Melvin Vincent on 11/2/24.//
-
+// Created by Cyril Melvin Vincent on 11/2/24.//=
 
 #ifdef __APPLE__
 #include <SDL2/SDL.h>

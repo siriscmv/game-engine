@@ -1,5 +1,6 @@
 #include "Event.h"
 #include "Entity.h"
+#include "EntityUpdateEvent.cpp"
 
 class ReplayEvent final : public Event {
 public:
