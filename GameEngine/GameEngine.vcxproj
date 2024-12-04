@@ -449,6 +449,7 @@
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Window.cpp" />
     <ClCompile Include="Entities\Entity.cpp" />
+    <ClCompile Include="Entities\TextureCache.cpp" />
     <ClCompile Include="Events\CollisionEvent.cpp" />
     <ClCompile Include="Events\DeathEvent.cpp" />
     <ClCompile Include="Events\EntityUpdateEvent.cpp" />
@@ -504,6 +505,7 @@
     <ClInclude Include="Core\Renderer.h" />
     <ClInclude Include="Core\Window.h" />
     <ClInclude Include="Entities\Entity.h" />
+    <ClInclude Include="Entities\TextureCache.h" />
     <ClInclude Include="Events\Event.h" />
     <ClInclude Include="Events\EventManager.h" />
     <ClInclude Include="Events\TypedEventHandler.h" />
