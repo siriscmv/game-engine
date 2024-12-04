@@ -69,31 +69,23 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
 std::set<Entity*> CollisionSystem::run(const std::vector<Entity*>& entities, EventManager* eventManager) {
     std::set<Entity*> collisions;
 
-    // Create a local copy of the entities vector
-    std::vector<Entity*> entitiesCopy = entities;
+    for (int i = 0; i < entities.size(); i++) {
+        for (int j = i + 1; j < entities.size(); j++) {
+            try {
+                Entity* entityA = entities.at(i); 
+                Entity* entityB = entities.at(j);
 
-    for (auto itA = entitiesCopy.begin(); itA != entitiesCopy.end(); ++itA) {
-        for (auto itB = std::next(itA); itB != entitiesCopy.end(); ++itB) {
-            Entity* entityA = *itA;
-            Entity* entityB = *itB;
+                if (getInstance().hasCollision(entityA, entityB)) {
+                    // Raising a collision event
+                    eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
 
-            // Check if pointers are still valid
-            if (!entityA || !entityB) {
-                continue;
+                    collisions.insert(entityA);
+                    collisions.insert(entityB);
+                }
             }
-
-            // Ensure both entities exist in the vector
-            if (std::find(entities.begin(), entities.end(), entityA) == entities.end() ||
-                std::find(entities.begin(), entities.end(), entityB) == entities.end()) {
-                continue;
-            }
-
-            // Check for collisions and raise a collision event
-            if (getInstance().hasCollision(entityA, entityB)) {
-                eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
-
-                collisions.insert(entityA);
-                collisions.insert(entityB);
+            // Skip iteration if indices are out of bounds. This can happen if a client disconnects
+            catch (const std::out_of_range&) {
+                continue; 
             }
         }
     }
