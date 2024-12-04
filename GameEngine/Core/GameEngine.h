@@ -72,6 +72,7 @@ private:
 	Timeline* _timeline;
 	EventManager* _eventManager;
 	ReplaySystem* _replaySystem;
+	bool _runPhysics = true;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;
@@ -81,6 +82,9 @@ private:
 	void handleClientMode(int64_t elapsedTime);
 	void handlePeerToPeerMode(int64_t elapsedTime);
 	void handleSinglePlayerMode(int64_t elapsedTime);
+
+	void enablePhysics();
+	void disablePhysics();
 
 	void setUpEventHandlers();
 	void handleDeathZones();

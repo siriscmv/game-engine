@@ -397,6 +397,8 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 	});
 
 	std::thread physicsThread([this, deltaTime]() {
+		if (!_runPhysics) return;
+
 		std::set<Entity*> entitiesWithCollisions = _collisionSystem->run(_entities, _eventManager);        // Running the collision system
 		_physicsSystem->run(deltaTime, entitiesWithCollisions);
 	});
@@ -413,7 +415,7 @@ void GameEngine::handleSinglePlayerMode(int64_t elapsedTime) {
 
 	inputThread.join();
 	callbackThread.join();
-	physicsThread.join();	
+	physicsThread.join();
 }
 
 // Sends the user input to server 
@@ -496,4 +498,12 @@ void GameEngine::setEntities(const std::vector<std::shared_ptr<Entity>> &entitie
 	for (const auto &entity : entities) {
 		_entities.push_back(entity.get());
 	}
+}
+
+void GameEngine::enablePhysics() {
+	_runPhysics = true;
+}
+
+void GameEngine::disablePhysics() {
+	_runPhysics = false;
 }
