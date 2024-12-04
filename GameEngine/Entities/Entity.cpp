@@ -106,12 +106,25 @@ float Entity::getTriangleHeight() const { return _triangleHeight; }
 SDL_Color Entity::getColor() const { return _color; }
 int Entity::getEventDelay() const { return _eventDelay; }
 
-void Entity::drawRectangle(SDL_Renderer *renderer, Position position) {    
-    SDL_Rect rect = { position.x, position.y, _size.width, _size.height};
-    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
-    SDL_RenderFillRect(renderer, &rect);
+// Draws a rectangle
+void Entity::drawRectangle(SDL_Renderer* renderer, Position position) {
+    if (_texture == nullptr) {
+        if (!_texturePath.empty()) {
+            // Try to load the texture from the path
+            loadTexture(renderer);
+        }
+        else {
+            // Generate a solid texture if no path is set
+            _texture = generateSolidTexture(renderer);
+        }
+    }
+
+    SDL_Rect dstRect = { position.x, position.y, _size.width, _size.height };
+    SDL_Point center = { _size.width / 2, _size.height / 2 };
+    SDL_RenderCopyEx(renderer, _texture, nullptr, &dstRect, _rotationAngle, &center, SDL_FLIP_NONE);
 }
 
+// Draws a circle
 void Entity::drawCircle(SDL_Renderer *renderer, Position position) {
 
     // using the SDL_SetRenderDrawColor function to set the color of the circle
@@ -128,6 +141,7 @@ void Entity::drawCircle(SDL_Renderer *renderer, Position position) {
     }
 }
 
+// Draws a triangle
 void Entity::drawTriangle(SDL_Renderer *renderer, Position position) {
     // using the SDL_SetRenderDrawColor function to set the color of the triangle
     SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
@@ -140,17 +154,50 @@ void Entity::drawTriangle(SDL_Renderer *renderer, Position position) {
     SDL_RenderDrawLines(renderer, points, 3);
 }
 
-// Loads a texture 
-bool Entity::loadTexture(SDL_Renderer *renderer) {
-    // load the surface from the texture path
-    SDL_Surface *surface = SDL_LoadBMP(_texturePath);
-    if (!surface) {
-        return false;
+// Load the texture using the _texturePath variable
+bool Entity::loadTexture(SDL_Renderer* renderer) {
+    // Check if _texturePath is empty
+    if (_texturePath.empty()) {
+        throw std::runtime_error("Texture path is empty. Cannot load texture.");
     }
-    // transform the surface into a texture, more efficient for rendering
+
+    // Load the surface from the texture path
+    SDL_Surface* surface = SDL_LoadBMP(_texturePath.c_str());
+    if (!surface) {
+        throw std::runtime_error("Failed to load BMP: " + _texturePath + ". SDL Error: " + std::string(SDL_GetError()));
+    }
+
+    // Transform the surface into a texture
     _texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    return _texture != nullptr;
+    SDL_FreeSurface(surface); 
+
+    if (!_texture) {
+        throw std::runtime_error("Failed to create texture from BMP: " + _texturePath + ". SDL Error: " + std::string(SDL_GetError()));
+    }
+
+    return true;
+}
+
+// Generates a texture
+SDL_Texture* Entity::generateSolidTexture(SDL_Renderer* renderer) {
+    // Create an empty texture
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _size.width, _size.height);
+    if (!texture) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create texture: %s", SDL_GetError());
+        return nullptr;
+    }
+
+    // Set the texture as the rendering target
+    SDL_SetRenderTarget(renderer, texture);
+
+    // Set the texture color and fill it
+    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
+    SDL_RenderClear(renderer);
+
+    // Reset rendering target to default
+    SDL_SetRenderTarget(renderer, nullptr);
+
+    return texture;
 }
 
 // Scales the entity based on the scale factors passed into the function
@@ -252,3 +299,8 @@ ZoneType stringToZoneType(const std::string& str) {
     else if (str == "SIDESCROLL") return ZoneType::SIDESCROLL;
     else return ZoneType::NONE;
 }
+
+void Entity::setRotationAngle(float angle) { _rotationAngle = angle; }
+float Entity::getRotationAngle() const { return _rotationAngle; }
+void Entity::setTexturePath(const std::string& texturePath) { _texturePath = texturePath; }
+const std::string& Entity::getTexturePath() const { return _texturePath; }

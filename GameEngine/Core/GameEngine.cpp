@@ -20,7 +20,7 @@ GameEngine::GameEngine(const char* windowTitle, int windowWidth, int windowHeigh
 	initializeCamera(windowWidth, windowHeight);
 	_renderer = new Renderer();
 	_gameState = GameState::PLAY;
-	_inputManager = new InputManager();
+	_inputManager = new InputManager(true);
 	_physicsSystem = &PhysicsSystem::getInstance();
 	_collisionSystem = &CollisionSystem::getInstance();
 	_onCycle = []() {};
@@ -328,7 +328,7 @@ void GameEngine::handleClientMode(int64_t elapsedTime) {
 
 	// Rendering all entities
 	for (Entity* entity : _entities) {
-		entity->applyScaling(scaleX, scaleY);
+		entity->applyScaling(scaleX, scaleY);		
 
 		// Only render if within the viewport and not ghost entities
 		if (entity->isWithinViewPort(_camera) && entity->getEntityType() != EntityType::GHOST) {

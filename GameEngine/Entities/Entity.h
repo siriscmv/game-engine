@@ -4,6 +4,7 @@
 #include "Globals.h"
 #include <utility>
 #include <string>
+#include <iostream>
 #ifdef __APPLE__
 #include <SDL2/SDL.h>
 #else
@@ -61,14 +62,21 @@ public:
     float getTriangleHeight() const;
     SDL_Color getColor() const;
     int getEventDelay() const;
+    float getRotationAngle() const;
+    const std::string& getTexturePath() const;
 
     void generateEntityID();
-    bool loadTexture(SDL_Renderer *renderer);                                   // Load texture into entity
-    void render(SDL_Renderer *renderer, const Camera& camera);                  // Render entity 
+    bool loadTexture(SDL_Renderer *renderer);                                                                   // Load texture into entity
+    SDL_Texture* generateSolidTexture(SDL_Renderer* renderer);                                                  // Generate a texture if no texture was loaded otherwise
+    void render(SDL_Renderer *renderer, const Camera& camera);                                                  // Render entity 
     void applyScaling(float scaleX, float scaleY);        
     bool isWithinViewPort(const Camera& camera) const;
     void teleportTo(const Position& position);
     void shutdown();
+
+    void setRotationAngle(float angle);
+    void setTexturePath(const std::string& texturePath);
+    
 
 private:
     Position _position = {};
@@ -91,7 +99,7 @@ private:
     float _originalTriangleBaseLength = 0.0f;  
     float _originalTriangleHeight = 0.0f;  
 
-    const char* _texturePath = nullptr;                  // Path of the texture file
+    std::string _texturePath;                            // Path of the texture file
     SDL_Texture* _texture = nullptr;                     // Texture of the entity
 
     void drawRectangle(SDL_Renderer* renderer, Position position);
@@ -102,6 +110,8 @@ private:
     static int _nextID;                                  // Variable to track next available ID
 
     int _eventDelay = 5;                                 // Optional variable to represent the delay for events this entity is involved in (Default is 5 seconds)
+
+    float _rotationAngle = 0.0f;
 };
 
 EntityType stringToEntityType(const std::string& str);

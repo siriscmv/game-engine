@@ -66,17 +66,27 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
     return SDL_HasIntersection(to_rect(*entityA), to_rect(*entityB));
 }
 
-std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities, EventManager* eventManager) {
-    const auto n = entities.size();
+std::set<Entity*> CollisionSystem::run(const std::vector<Entity*>& entities, EventManager* eventManager) {
     std::set<Entity*> collisions;
 
-    for (int i = 0; i < n; i++) {
-        for (int j = i + 1; j < n; j++) {
-            Entity* entityA = entities[i];
-            Entity* entityB = entities[j];
+    for (auto itA = entities.begin(); itA != entities.end(); ++itA) {
+        for (auto itB = std::next(itA); itB != entities.end(); ++itB) {
+            Entity* entityA = *itA;
+            Entity* entityB = *itB;
 
-            if (getInstance().hasCollision(entityA, entityB)) {
-                // Raising a collision event 
+            // Check if pointers are still valid
+            if (!entityA || !entityB) {
+                continue;
+            }
+
+            // Ensure both entities exist in the vector
+            if (std::find(entities.begin(), entities.end(), entityA) == entities.end() ||
+                std::find(entities.begin(), entities.end(), entityB) == entities.end()) {
+                continue;
+            }
+
+            // Check for collisions and raise a collision event
+            if (getInstance().hasCollision(entityA, entityB)) {               
                 eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
 
                 collisions.insert(entityA);

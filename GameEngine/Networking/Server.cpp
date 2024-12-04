@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <cmath>
 
 Server::Server(const std::vector<Entity*>& entities) {
     _context = zmq::context_t(1); 
@@ -43,7 +44,7 @@ void Server::setUpEventHandlers() {
         const auto& binding = event->getBinding();
         int clientID = event->getClientID();
         Entity* playerEntity = _clientMap[clientID];
-        
+
         if (binding == _moveLeft) {
             playerEntity->setVelocityX(-50.0f);
         }
@@ -56,8 +57,7 @@ void Server::setUpEventHandlers() {
         else if (binding == _moveDown) {
             playerEntity->setVelocityY(50.0f);
         }
-        
-    });
+        });
 
     _engine->getEventManager()->registerHandler(EventType::Input, inputHandler);
 
@@ -217,7 +217,7 @@ void Server::monitorHeartbeats() {
     }
 
     for (int clientId : disconnectedClients) {
-        // handleClientDisconnect(clientId);
+        handleClientDisconnect(clientId);
     }    
 }
 
@@ -378,6 +378,8 @@ std::string entityToString(const Entity& entity) {
         << "velocityY:" << entity.getVelocityY() << '|'
         << "accelerationX:" << entity.getAccelerationX() << '|'
         << "accelerationY:" << entity.getAccelerationY() << '|'
+        << "rotationAngle:" << entity.getRotationAngle() << '|'
+        << "texturePath:" << entity.getTexturePath() << '|'
         << "cr:" << static_cast<int>(entity.getColor().r) << '|'
         << "cg:" << static_cast<int>(entity.getColor().g) << '|'
         << "cb:" << static_cast<int>(entity.getColor().b) << '|'
@@ -399,6 +401,8 @@ json entityToJson(const Entity& entity) {
         {"velocityY", entity.getVelocityY()},
         {"accelerationX", entity.getAccelerationX()},
         {"accelerationY", entity.getAccelerationY()},
+        {"rotationAngle", entity.getRotationAngle()},
+        {"texturePath", entity.getTexturePath()},
         {"cr", static_cast<int>(entity.getColor().r)},
         {"cg", static_cast<int>(entity.getColor().g)},
         {"cb", static_cast<int>(entity.getColor().b)},
