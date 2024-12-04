@@ -58,6 +58,9 @@ public:
 	void moveCamera(int x, int y);
 	Camera& getCamera();
 
+	void enablePhysics();
+	void disablePhysics();
+
 private:
 	Window* _window;
 	Renderer* _renderer;	
@@ -82,9 +85,6 @@ private:
 	void handleClientMode(int64_t elapsedTime);
 	void handlePeerToPeerMode(int64_t elapsedTime);
 	void handleSinglePlayerMode(int64_t elapsedTime);
-
-	void enablePhysics();
-	void disablePhysics();
 
 	void setUpEventHandlers();
 	void handleDeathZones();
