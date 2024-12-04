@@ -66,21 +66,26 @@ bool CollisionSystem::hasCollision(const Entity *entityA, const Entity *entityB)
     return SDL_HasIntersection(to_rect(*entityA), to_rect(*entityB));
 }
 
-std::set<Entity *> CollisionSystem::run(const std::vector<Entity *>& entities, EventManager* eventManager) {
-    const auto n = entities.size();
+std::set<Entity*> CollisionSystem::run(const std::vector<Entity*>& entities, EventManager* eventManager) {
     std::set<Entity*> collisions;
 
-    for (int i = 0; i < n; i++) {
-        for (int j = i + 1; j < n; j++) {
-            Entity* entityA = entities[i];
-            Entity* entityB = entities[j];
+    for (int i = 0; i < entities.size(); i++) {
+        for (int j = i + 1; j < entities.size(); j++) {
+            try {
+                Entity* entityA = entities.at(i); 
+                Entity* entityB = entities.at(j);
 
-            if (getInstance().hasCollision(entityA, entityB)) {
-                // Raising a collision event 
-                eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
+                if (getInstance().hasCollision(entityA, entityB)) {
+                    // Raising a collision event
+                    eventManager->raiseEvent(new CollisionEvent(entityA, entityB));
 
-                collisions.insert(entityA);
-                collisions.insert(entityB);
+                    collisions.insert(entityA);
+                    collisions.insert(entityB);
+                }
+            }
+            // Skip iteration if indices are out of bounds. This can happen if a client disconnects
+            catch (const std::out_of_range&) {
+                continue; 
             }
         }
     }

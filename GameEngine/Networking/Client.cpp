@@ -154,6 +154,8 @@ Entity* jsonToEntity(json jsonEntity) {
     float velocityY = jsonEntity["velocityY"];
     float accelerationX = jsonEntity["accelerationX"];
     float accelerationY = jsonEntity["accelerationY"];
+    float rotationAngle = jsonEntity["rotationAngle"];
+    std::string texturePath = jsonEntity["texturePath"];
 
     auto color = SDL_Color{static_cast<uint8_t>(jsonEntity["cr"].get<int>()), static_cast<uint8_t>(jsonEntity["cg"].get<int>()), static_cast<uint8_t>(jsonEntity["cb"].get<int>()), static_cast<uint8_t>(jsonEntity["ca"].get<int>())};
 
@@ -167,6 +169,8 @@ Entity* jsonToEntity(json jsonEntity) {
     entity->setAccelerationX(accelerationX);
     entity->setAccelerationY(accelerationY);
     entity->setColor(color);
+    entity->setRotationAngle(rotationAngle);
+    entity->setTexturePath(texturePath);
 
     return entity;
 }
@@ -209,6 +213,8 @@ Entity* stringToEntity(const std::string& entityString) {
         else if (key == "velocityY") entity->setVelocityY(std::stof(value));
         else if (key == "accelerationX") entity->setAccelerationX(std::stof(value));
         else if (key == "accelerationY") entity->setAccelerationY(std::stof(value));
+        else if (key == "rotationAngle") entity->setRotationAngle(std::stof(value));
+        else if (key == "texturePath") entity->setTexturePath(value);
         else if (key == "cr") entity->setColor(SDL_Color{ static_cast<uint8_t>(std::stoi(value)), entity->getColor().g, entity->getColor().b, entity->getColor().a });
         else if (key == "cg") entity->setColor(SDL_Color{ entity->getColor().r, static_cast<uint8_t>(std::stoi(value)), entity->getColor().b, entity->getColor().a });
         else if (key == "cb") entity->setColor(SDL_Color{ entity->getColor().r, entity->getColor().g, static_cast<uint8_t>(std::stoi(value)), entity->getColor().a });
