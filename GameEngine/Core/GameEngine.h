@@ -58,6 +58,9 @@ public:
 	void moveCamera(int x, int y);
 	Camera& getCamera();
 
+	void enablePhysics();
+	void disablePhysics();
+
 private:
 	Window* _window;
 	Renderer* _renderer;	
@@ -72,6 +75,7 @@ private:
 	Timeline* _timeline;
 	EventManager* _eventManager;
 	ReplaySystem* _replaySystem;
+	bool _runPhysics = true;
 
 	Client* _client = nullptr;
 	Peer* _peer = nullptr;
