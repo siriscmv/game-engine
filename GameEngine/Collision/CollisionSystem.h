@@ -24,7 +24,7 @@ public:
     // NOTE: Currently handles only rectangle<->rectangle collisions
     bool hasCollision(const Entity* entityA, const Entity* entityB);
 
-    bool hasCollisionRaw(const Entity* entityA, const Entity* entityB);
+    static bool hasCollisionRaw(const Entity* entityA, const Entity* entityB);
 
     // Helper method to apply physics to 2 entities that are in collision
     void handleCollision(Entity* entity);
