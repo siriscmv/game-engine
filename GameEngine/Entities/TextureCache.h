@@ -1,8 +1,13 @@
 #pragma once
 
-#include <SDL/SDL.h>
 #include <string>
 #include <unordered_map>
+
+#ifdef __APPLE__
+#include <SDL2/SDL.h>
+#else
+#include <SDL/SDL.h>
+#endif
 
 class TextureCache {
 public:
