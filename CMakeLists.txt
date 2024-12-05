@@ -31,6 +31,7 @@ set(GAME_ENGINE_SOURCES
         GameEngine/Input/InputManager.cpp
         GameEngine/Physics/PhysicsSystem.cpp
         GameEngine/Entities/Entity.cpp
+        GameEngine/Entities/TextureCache.cpp
         GameEngine/Collision/CollisionSystem.cpp
         GameEngine/Networking/Client.cpp
         GameEngine/Networking/Server.cpp
