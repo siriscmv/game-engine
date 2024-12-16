@@ -1,6 +1,7 @@
 # GameEngine
 
 - This is a game engine developed using SDL2 in C++ for the course CSC581 - Game Engine Foundations at NC State in the Fall of 2024.
+- This project was developed in a team of 3: [siriscmv](https://github.com/siriscmv), [Arcane94](https://github.com/Arcane94), and [djkool757](https://github.com/djkool757).
 - This repository is an import of the [original repository](https://github.ncsu.edu/yrajapa/GameEngine) from NCSU's GitHub Enterprise.
 - Only the source for the game engine is included in this repository. Sample code for a singleplayer game (Snake) is included below in this file.
 
