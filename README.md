@@ -92,10 +92,10 @@
 
 ## Screenshots
 
-- Multiplayer ![Multiplayer](screenshots/multiplayer.png)
-- Zones ![Zones](screenshots/zones.png)
-- Snake ![Example Game - Snake](screenshots/snake.png)
-- Brick Breaker ![Example Game - Brick Breaker](screenshots/brickbreaker.png)
+- Multiplayer ![Multiplayer](Screenshots/multiplayer.png)
+- Zones ![Zones](Screenshots/zones.png)
+- Snake ![Example Game - Snake](Screenshots/snake.png)
+- Brick Breaker ![Example Game - Brick Breaker](Screenshots/brickbreaker.png)
 
 ## Common Keybindings
 
