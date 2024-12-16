@@ -1,6 +1,9 @@
 # GameEngine
 
-- GitHub repository - [GameEngine](https://github.ncsu.edu/yrajapa/GameEngine)
+- This is a game engine developed using SDL2 in C++ for the course CSC581 - Game Engine Foundations at NC State in the Fall of 2024.
+- This repository is an import of the [original repository](https://github.ncsu.edu/yrajapa/GameEngine) from NCSU's GitHub Enterprise.
+
+## Running the Game
 
 <details>
   <summary>Windows</summary>
@@ -71,9 +74,31 @@
 
 </details>
 
-## Keybindings
+## Game Engine Features
 
-- `s` - Toggle between Constant and Proportional scaling methods.
+- **Cross-platform**: The game engine is built using SDL2 and ZeroMQ and uses CMake for cross-platform compilation.
+- **Physics Engine**: The game engine has a simple physics engine that supports collision detection and movement using 2-Dimensional acceleration and velocity vectors.
+- **Networking**: The game engine supports both client-server and peer-to-peer networking models using ZeroMQ. JSON is used for serialization and deserialization of game entities and components.
+- **Entity Component System**: The game engine uses an Entity Component System (ECS) for managing game entities and their components.
+- **Event System**: The game engine is event-driven and supports event handling for various game events.
+- **Input Handling**: The game engine supports keyboard input, including input chords (multi-key presses), for controlling entities and performing other actions in the game.
+- **Rendering**: The game engine allows constant and proportional scaling of game objects and rendering game states with customizable frame rates. Additionally, individual clients can move the camera to focus on different parts of the game world.
+- **Timeline**: The game engine supports a timeline for managing game events with controllable speed and the ability to pause, resume the game.
+- **Multiplayer**: The game engine supports multiplayer gameplay with multiple clients (separate processes) interacting with the game world simultaneously.
+- **Multi-threading**: The game engine uses multi-threading to handle networking and rendering in separate threads.
+- **Replay System**: The game engine supports a replay system that records and replays a portion of the game client-side.
+- **Side-scrolling**: The game engine supports side-scrolling gameplay with a camera that follows the player character.
+- **Zones**: The game engine supports multiple spawn and death zones in the game world.
+
+## Screenshots
+
+- ![Multiplayer](screenshots/multiplayer.png)
+- ![Zones](screenshots/zones.png)
+- ![Example Game - Snake](screenshots/snake.png)
+- ![Example Game - Brick Breaker](screenshots/brickbreaker.png)
+
+## Common Keybindings
+
 - `Arrow keys` - Movement of controllable entities.
 - `esc` / `q` - Quit the game
 
@@ -90,4 +115,3 @@ We used following resources for development:
 - Class templates (with explicit instantiation): [cppreference](https://en.cppreference.com/w/cpp/language/class_template)
 - Type Erasure: [Blog Post](https://davekilian.com/cpp-type-erasure.html), [cplusplus Article](https://cplusplus.com/articles/oz18T05o/)
 - Curiously Recurring Template Pattern (CRTP): [cppreference](https://en.cppreference.com/w/cpp/language/crtp)
-
